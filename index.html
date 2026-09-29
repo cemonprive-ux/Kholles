@@ -249,12 +249,10 @@ const CONFIG = {
       // weekday : 1 = lundi … 5 = vendredi
       sessions: [
         { weekday: 3, start: "16:00", count: 5, examiner: "Mme Pénilleau", room: "C416" },
-        { weekday: 5, start: "12:00", count: 6, examiner: "M. Blanchet",   room: "C415" }
+        { weekday: 5, start: "13:00", count: 6, examiner: "M. Blanchet",   room: "C415" }
       ],
       // Exceptions : pour une date donnée, remplace les séances de ce jour-là ([] = annulé).
-      overrides: {
-        "2026-09-25": [{ start: "13:00", count: 6, examiner: "M. Blanchet", room: "C415" }]
-      },
+      overrides: {},
       students: [
         "BEAL Romain","BENEZET Maëlie","BRONGNIART Théo","CAILLAT Tayna","CLUZEL Séraphin",
         "DA SILVA Maëlys","DEBARD Marie-Sophie","DOSGILIBERT Malo","ERRACHIDI Marwa","GENEST Mathias",
@@ -346,7 +344,10 @@ function buildKholles(year){
   return groups.map((g, i) => {
     const n = (Y.firstNumber || 1) + i;
     const days = g.dates.map(d => ({ date: d, slots: slotsForDate(year, d, n, g.explicit) })).filter(x => x.slots.length);
-    days.forEach(x => x.slots.forEach(s => SLOT_INDEX[s.id] = s));
+    // Toute la khôlle ouvre en même temps : N mois avant sa première date (à minuit).
+    const first = days.length ? days[0].date : null;
+    const opensAt = first ? addMonths(first, -CONFIG.BOOKING_WINDOW_MONTHS) : null;
+    days.forEach(x => x.slots.forEach(s => { s.opensAt = opensAt; s.first = iso(first); SLOT_INDEX[s.id] = s; }));
     return { n, days, slots: days.flatMap(x => x.slots), provisional: !g.explicit };
   }).filter(q => q.slots.length);
 }
@@ -365,10 +366,10 @@ function fmtDates(dates){
 
 function slotStatus(s, now = new Date()){
   if (s.startsAt <= now) return "past";
-  if (s.startsAt > addMonths(now, CONFIG.BOOKING_WINDOW_MONTHS)) return "notyet";
+  if (now < s.opensAt) return "notyet";
   return "open";
 }
-const openingDate = (s) => addMonths(s.startsAt, -CONFIG.BOOKING_WINDOW_MONTHS);
+const openingDate = (s) => s.opensAt;
 const dayFrozen = (d, now = new Date()) => now >= addDays(d, 1);
 function describeSlot(id){ const s = SLOT_INDEX[id]; return s ? `${fmtDay(s.date).toLowerCase()}, ${s.label} (${s.examiner}, salle ${s.room})` : id; }
 
@@ -559,7 +560,7 @@ function renderQuinzaine(year, n){
   let html = demoBanner();
   html += allFrozen
     ? `<div class="alert info">${ICON.lock}<span><b>Khôlle terminée.</b> Le planning est figé : consultation uniquement.</span></div>`
-    : `<div class="rule">${ICON.info}<span><b>Une seule inscription par étudiant</b> pour la Khôlle ${n}, sur l'une des ${q.days.length} dates ci-dessous. Réservation possible jusqu'à 1 mois à l'avance.</span></div>`;
+    : `<div class="rule">${ICON.info}<span><b>Une seule inscription par étudiant</b> pour la Khôlle ${n}, sur l'une des ${q.days.length} dates ci-dessous. Les réservations de toute la khôlle ouvrent 1 mois avant sa première date.</span></div>`;
   q.days.forEach(day => {
     html += `<div class="weekhead"><h3>${fmtDay(day.date)}</h3>${statusPill(day.slots, b, now)}</div>`;
     const groups = {};
@@ -623,7 +624,7 @@ async function submit(btn, busyLabel, payload, okMsg){
   else { $("#msg").innerHTML = errBox(esc(r.error || "Opération refusée.")); btn.disabled = false; btn.textContent = label; }
   await refreshCurrent();
 }
-const payloadOf = (s, extra) => Object.assign({ year:s.year, q:s.q, week:s.week, slotId:s.id, date:s.dateISO, time:s.label, examiner:s.examiner, room:s.room }, extra);
+const payloadOf = (s, extra) => Object.assign({ year:s.year, q:s.q, week:s.week, slotId:s.id, first:s.first, date:s.dateISO, time:s.label, examiner:s.examiner, room:s.room }, extra);
 
 function openBook(s){
   const Y = CONFIG.YEARS[s.year];
