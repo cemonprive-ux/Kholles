@@ -236,7 +236,8 @@ const CONFIG = {
       start: "2026-09-14",
       firstNumber: 1,
       khollesDays: 4,  // 4 dates de séances par khôlle
-      // Dates de chaque khôlle (planning HEC 1). Au-delà de la dernière, prolongation automatique.
+      autoExtend: false, // false = uniquement les dates listées ci-dessous ; true = prolonger jusqu'à END_DATE
+      // Dates de chaque khôlle (planning HEC 1). Ajoutez une ligne par nouvelle khôlle.
       kholles: [
         ["2026-09-16", "2026-09-18", "2026-09-23", "2026-09-25"],
         ["2026-09-30", "2026-10-02", "2026-10-07", "2026-10-09"],
@@ -339,7 +340,7 @@ function buildKholles(year){
   const groups = (Y.kholles || []).map(list => ({ dates: list.map(parseISO), explicit: true }));
   const lastExplicit = groups.length ? iso(groups[groups.length-1].dates.slice(-1)[0]) : "";
   const rest = [];
-  for (let d = parseISO(Y.start); iso(d) <= CONFIG.END_DATE; d = addDays(d, 1))
+  if (Y.autoExtend !== false) for (let d = parseISO(Y.start); iso(d) <= CONFIG.END_DATE; d = addDays(d, 1))
     if (iso(d) > lastExplicit && sessionsFor(year, d).length) rest.push(new Date(d));
   for (let i = 0; i < rest.length; i += per) groups.push({ dates: rest.slice(i, i + per), explicit: false });
   return groups.map((g, i) => {
