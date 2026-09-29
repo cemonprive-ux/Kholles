@@ -16,72 +16,85 @@
 :root{
   --bg:#EDF3FA; --surface:#FFFFFF; --surface-2:#F4F8FD; --ink:#12233D; --ink-2:#3F4F66; --muted:#5F6B7D;
   --line:#D9E3F0; --y1:#1461E0; --y1-soft:#E2ECFF; --y2:#0B7490; --y2-soft:#D9F1F7;
+  --ok:#23703F; --ok-soft:#E0F2E6; --err:#B42318; --err-soft:#FDECEA; --warn:#8A5A00; --warn-soft:#FFF4D6; --warn-line:#EBD48F;
   --brand:linear-gradient(180deg,#05B8F5 0%,#1668F2 100%);
-  --ok:#2F6B45; --ok-soft:#E1EFE5; --shadow:0 1px 2px rgba(27,42,58,.06),0 4px 16px rgba(27,42,58,.06);
+  --shadow:0 1px 2px rgba(18,35,61,.06),0 4px 16px rgba(18,35,61,.06);
   --accent:var(--y1); --accent-soft:var(--y1-soft);
 }
 @media (prefers-color-scheme: dark){
   :root{
-    --bg:#11161D; --surface:#1A212B; --surface-2:#212A36; --ink:#EEF1F4; --ink-2:#C2C9D2; --muted:#9AA4B0;
-    --line:#2C3644; --y1:#6FA4FF; --y1-soft:#1B2B4A; --y2:#5CCBE6; --y2-soft:#16333D;
+    --bg:#10161F; --surface:#18212C; --surface-2:#202B38; --ink:#EEF2F7; --ink-2:#C3CCD8; --muted:#9AA6B5;
+    --line:#2C3847; --y1:#6FA4FF; --y1-soft:#1B2B4A; --y2:#5CCBE6; --y2-soft:#16333D;
+    --ok:#7BC795; --ok-soft:#1B3325; --err:#FF8A80; --err-soft:#3A1F1D; --warn:#F1D98B; --warn-soft:#3A3016; --warn-line:#5A4A1E;
     --brand:linear-gradient(180deg,#0A7FC0 0%,#1450C8 100%);
-    --ok:#7BC795; --ok-soft:#1D3326; --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
   }
 }
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0;height:100%}
-body{background:var(--bg);color:var(--ink);font-family:"Quicksand",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.45;-webkit-font-smoothing:antialiased}
-button,select{font:inherit;color:inherit}
+body{background:var(--bg);color:var(--ink);font-family:"Quicksand",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.45;font-weight:500;-webkit-font-smoothing:antialiased}
+button,select,input{font:inherit;color:inherit}
 .app{max-width:480px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;background:var(--bg);position:relative}
 @media (min-width:560px){
   body{padding:24px 0}
-  .app{min-height:calc(100vh - 48px);border-radius:28px;box-shadow:0 20px 60px rgba(27,42,58,.18);overflow:hidden;border:1px solid var(--line)}
+  .app{min-height:calc(100vh - 48px);border-radius:28px;box-shadow:0 20px 60px rgba(18,35,61,.18);overflow:hidden;border:1px solid var(--line)}
 }
-/* Barre d'application */
+/* Barre */
 .bar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;padding:calc(env(safe-area-inset-top) + 10px) 12px 10px;background:var(--brand);color:#fff}
-.bar h1{flex:1;margin:0;text-align:center;font-family:"Quicksand",system-ui,sans-serif;font-size:20px;font-weight:700;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bar .sub{display:block;font-family:"Quicksand",sans-serif;font-size:12.5px;font-weight:600;opacity:.9;letter-spacing:.3px}
+.bar h1{flex:1;margin:0;text-align:center;font-size:20px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar .sub{display:block;font-size:12.5px;font-weight:600;opacity:.92}
 .iconbtn{width:44px;height:44px;border:0;border-radius:12px;background:transparent;color:#fff;display:grid;place-items:center;cursor:pointer;flex:none}
-.iconbtn:hover{background:rgba(255,255,255,.1)}
-.iconbtn:focus-visible,.card:focus-visible,.slot:focus-visible,.btn:focus-visible,.week:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.iconbtn:hover{background:rgba(255,255,255,.14)}
 .iconbtn svg{width:22px;height:22px}
-.bar .spacer{width:44px;flex:none}
+.spacer{width:44px;flex:none}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 main{flex:1;padding:16px 16px calc(env(safe-area-inset-bottom) + 28px)}
 /* Accueil */
 .hero{padding:24px 8px 18px;text-align:center}
 .logo{display:block;width:120px;height:120px;margin:0 auto 16px;border-radius:27px;box-shadow:0 10px 28px rgba(22,104,242,.28)}
-.hero h2{margin:0;font-family:"Quicksand",system-ui,sans-serif;font-size:38px;font-weight:700;line-height:1.1}
+.hero h2{margin:0;font-size:38px;font-weight:700;line-height:1.1}
 .hero .tag1{margin:10px 0 0;font-size:19px;font-weight:700;color:var(--y1)}
 .hero .tag2{margin:4px 0 0;color:var(--ink-2);font-weight:600;font-size:15px}
 .choices{display:grid;gap:14px;margin-top:18px}
 .card{display:flex;align-items:center;gap:16px;width:100%;padding:18px;border:1px solid var(--line);border-radius:20px;background:var(--surface);box-shadow:var(--shadow);text-align:left;cursor:pointer;text-decoration:none;color:inherit;transition:transform .12s ease}
 .card:active{transform:scale(.985)}
-.card .num{width:58px;height:58px;border-radius:16px;display:grid;place-items:center;font-family:"Quicksand",system-ui,sans-serif;font-size:30px;font-weight:700;flex:none}
+.card .num{width:58px;height:58px;border-radius:16px;display:grid;place-items:center;font-size:30px;font-weight:700;flex:none}
 .card.y1 .num{background:var(--y1-soft);color:var(--y1)}
 .card.y2 .num{background:var(--y2-soft);color:var(--y2)}
 .card .t{font-weight:700;font-size:19px}
 .card .d{color:var(--muted);font-size:14px}
-.card .chev{margin-left:auto;color:var(--muted)}
-.foot{margin-top:28px;text-align:center;color:var(--muted);font-size:13px}
-/* Titres de section */
+.chev{margin-left:auto;color:var(--muted);flex:none}
+.foot{margin-top:26px;text-align:center}
+.linkbtn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 14px;border-radius:12px;color:var(--ink-2);text-decoration:none;font-weight:600;font-size:14.5px}
+.linkbtn:hover{background:var(--surface)}
+.linkbtn svg{width:18px;height:18px}
 .kicker{margin:6px 4px 10px;font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
-/* Semaines */
-.weeks{display:grid;gap:10px}
-.week{display:flex;align-items:center;gap:14px;width:100%;padding:14px 16px;border:1px solid var(--line);border-radius:16px;background:var(--surface);text-decoration:none;color:inherit;cursor:pointer;min-height:64px}
-.week .wk{font-weight:700}
-.week .wd{font-size:14px;color:var(--muted)}
-.week .pill{margin-left:auto;flex:none}
-.week.current{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+/* Liste des khôlles */
+.list{display:grid;gap:10px}
+.qcard{display:flex;align-items:center;gap:14px;width:100%;padding:14px 16px;border:1px solid var(--line);border-radius:16px;background:var(--surface);text-decoration:none;color:inherit;min-height:68px}
+.qcard.current{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.qcard.past{background:var(--surface-2)}
+.qnum{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-weight:700;font-size:20px;background:var(--accent-soft);color:var(--accent);flex:none}
+.qcard.past .qnum{background:var(--line);color:var(--muted)}
+.qt{font-weight:700;font-size:17px}
+.qd{font-size:13.5px;color:var(--muted)}
+.qbody{display:block;flex:1;min-width:0}
+.qpills{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
 .pill{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12.5px;font-weight:700;white-space:nowrap}
 .pill.free{background:var(--ok-soft);color:var(--ok)}
-.pill.full{background:var(--surface-2);color:var(--muted)}
-.pill.now{background:var(--accent);color:#fff;margin-left:8px;vertical-align:1px}
-.toggle{display:block;margin:16px auto 0;border:0;background:none;color:var(--accent);font-weight:600;cursor:pointer;padding:10px;min-height:44px}
-/* Créneaux */
-.day{margin-bottom:22px}
-.dayhead{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:0 4px 8px}
-.dayhead h3{margin:0;font-family:"Quicksand",system-ui,sans-serif;font-size:21px}
+.pill.full,.pill.done{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.pill.soon{background:var(--warn-soft);color:var(--warn)}
+.pill.now{background:var(--accent);color:#fff}
+.toggle{display:block;margin:4px auto 12px;border:0;background:none;color:var(--accent);font-weight:700;cursor:pointer;padding:10px;min-height:44px}
+/* Quinzaine */
+.rule{display:flex;gap:10px;align-items:flex-start;margin:0 0 16px;padding:12px 14px;border-radius:14px;background:var(--surface);border:1px solid var(--line);font-size:14px;color:var(--ink-2)}
+.rule svg{width:20px;height:20px;flex:none;color:var(--accent);margin-top:1px}
+.weekhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:22px 4px 10px}
+.weekhead:first-of-type{margin-top:4px}
+.weekhead h3{margin:0;font-size:19px;font-weight:700}
+.weekhead h3 small{display:block;font-size:13.5px;color:var(--muted);font-weight:600}
+.dayname{margin:14px 4px 8px;font-weight:700;font-size:15px;color:var(--ink-2)}
 .group{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:12px}
 .ghead{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--surface-2);border-bottom:1px solid var(--line)}
 .ghead .who{font-weight:700}
@@ -95,46 +108,72 @@ main{flex:1;padding:16px 16px calc(env(safe-area-inset-bottom) + 28px)}
 .slot.free .dot{background:var(--ok)}
 .slot.free .state{color:var(--ok);font-weight:700}
 .slot.taken .dot{background:var(--accent)}
-.slot.taken .state{color:var(--ink);font-weight:600}
-.slot.past{cursor:default}
-.slot.past .time,.slot.past .state{color:var(--muted);font-weight:500}
-.slot.past .dot{background:var(--line)}
-.slot.past:hover{background:transparent}
+.slot.taken .state{font-weight:700}
+.slot.locked{cursor:default}
+.slot.locked:hover{background:transparent}
+.slot.locked .time{color:var(--muted);font-weight:600}
+.slot.locked .state{color:var(--muted);font-weight:600}
+.slot.locked .dot{background:var(--line)}
+.slot.locked.taken .state{color:var(--ink-2)}
+.slot svg.lock{width:15px;height:15px;flex:none}
+.alert{display:flex;gap:10px;align-items:flex-start;margin:0 0 14px;padding:12px 14px;border-radius:12px;font-size:14px;line-height:1.45}
+.alert svg{width:20px;height:20px;flex:none;margin-top:1px}
+.alert.warn{background:var(--warn-soft);color:var(--warn);border:1px solid var(--warn-line)}
+.alert.err{background:var(--err-soft);color:var(--err);border:1px solid var(--err)}
+.alert.info{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
+.alert b{font-weight:700}
 .empty{padding:28px 16px;text-align:center;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:16px}
-.banner{margin:0 0 14px;padding:10px 14px;border-radius:12px;font-size:13.5px;background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
-.banner.warn{background:#FFF4D6;color:#6B4E00;border-color:#EBD48F}
-@media (prefers-color-scheme: dark){.banner.warn{background:#3A3016;color:#F1D98B;border-color:#5A4A1E}}
 .loading{display:flex;align-items:center;justify-content:center;gap:10px;padding:40px;color:var(--muted)}
 .spin{width:20px;height:20px;border-radius:50%;border:2.5px solid var(--line);border-top-color:var(--accent);animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-/* Feuille (bottom sheet) */
+/* Feuille */
 .scrim{position:fixed;inset:0;background:rgba(10,15,22,.45);opacity:0;pointer-events:none;transition:opacity .2s;z-index:20}
 .scrim.open{opacity:1;pointer-events:auto}
-.sheet{position:fixed;left:50%;bottom:0;width:100%;max-width:480px;transform:translate(-50%,105%);transition:transform .25s cubic-bezier(.2,.8,.2,1),visibility 0s linear .25s;visibility:hidden;z-index:21;background:var(--surface);border-radius:24px 24px 0 0;padding:10px 20px calc(env(safe-area-inset-bottom) + 22px);box-shadow:0 -10px 40px rgba(0,0,0,.2)}
+.sheet{position:fixed;left:50%;bottom:0;width:100%;max-width:480px;max-height:92vh;overflow:auto;transform:translate(-50%,105%);visibility:hidden;transition:transform .25s cubic-bezier(.2,.8,.2,1),visibility 0s linear .25s;z-index:21;background:var(--surface);border-radius:24px 24px 0 0;padding:10px 20px calc(env(safe-area-inset-bottom) + 22px);box-shadow:0 -10px 40px rgba(0,0,0,.2)}
 .sheet.open{transform:translate(-50%,0);visibility:visible;transition:transform .25s cubic-bezier(.2,.8,.2,1)}
 .grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 14px}
-.sheet h4{margin:0;font-family:"Quicksand",system-ui,sans-serif;font-size:23px}
-.meta{margin:6px 0 18px;color:var(--ink-2);font-size:15px}
+.sheet h4{margin:0;font-size:22px;font-weight:700}
+.meta{margin:6px 0 16px;color:var(--ink-2);font-size:15px}
 .meta b{color:var(--ink)}
 label.lbl{display:block;font-weight:700;font-size:14px;margin-bottom:6px}
 .selectwrap{position:relative}
-select{width:100%;min-height:52px;padding:12px 44px 12px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface-2);font-size:17px;appearance:none;-webkit-appearance:none;cursor:pointer}
-select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+select,input.field{width:100%;min-height:52px;padding:12px 44px 12px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface-2);font-size:17px;font-weight:600;appearance:none;-webkit-appearance:none}
+input.field{padding-right:14px}
+select{cursor:pointer}
+select:focus,input.field:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
 .selectwrap svg{position:absolute;right:14px;top:50%;width:20px;height:20px;transform:translateY(-50%);pointer-events:none;color:var(--muted)}
-.hint{font-size:13px;color:var(--muted);margin-top:8px}
-.actions{display:grid;gap:10px;margin-top:20px}
+.hint{font-size:13px;color:var(--muted);margin:8px 0 0}
+.msg{margin-top:12px}
+.actions{display:grid;gap:10px;margin-top:18px}
 .btn{min-height:52px;border-radius:14px;border:0;font-weight:700;font-size:16px;cursor:pointer;padding:0 18px}
 .btn.primary{background:var(--accent);color:#fff}
-.btn.primary:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary:disabled,.btn.outline:disabled{opacity:.45;cursor:not-allowed}
 .btn.ghost{background:transparent;color:var(--ink-2)}
-.btn.danger{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}
-.check{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:12px;background:var(--surface-2);font-size:14.5px;cursor:pointer}
+.btn.outline{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}
+.btn.warnbtn{background:#B45309;color:#fff}
+.btn.warnbtn:disabled{opacity:.45;cursor:not-allowed}
+.check{display:flex;gap:10px;align-items:flex-start;padding:12px;border-radius:12px;background:var(--surface-2);font-size:14.5px;cursor:pointer;margin-bottom:14px}
 .check input{width:20px;height:20px;margin:1px 0 0;accent-color:var(--accent);flex:none}
-/* Notification */
-.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 22px);transform:translate(-50%,140%);background:var(--ink);color:#fff;padding:12px 18px;border-radius:14px;font-weight:600;font-size:15px;z-index:30;transition:transform .25s,visibility 0s linear .25s;visibility:hidden;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
+.divider{height:1px;background:var(--line);margin:18px 0}
+/* Journal */
+.filters{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.filters .full{grid-column:1 / -1}
+.filters select,.filters input.field{min-height:46px;font-size:15px;border-radius:12px}
+.entry{padding:12px 14px;border-bottom:1px solid var(--line)}
+.entry:last-child{border-bottom:0}
+.entry .top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.entry .when{font-size:13px;color:var(--muted);margin-left:auto;font-variant-numeric:tabular-nums}
+.entry .who{font-weight:700;margin-top:4px}
+.entry .what{font-size:13.5px;color:var(--ink-2)}
+.entry .dev{font-size:12px;color:var(--muted)}
+.badge{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px}
+.badge.b-book{background:var(--ok-soft);color:var(--ok)}
+.badge.b-cancel{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.badge.b-replace{background:var(--warn-soft);color:var(--warn)}
+.count{font-size:13px;color:var(--muted);margin:0 4px 8px}
+/* Toast */
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 22px);transform:translate(-50%,140%);visibility:hidden;background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;font-weight:700;font-size:15px;z-index:30;transition:transform .25s,visibility 0s linear .25s;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
 .toast.show{transform:translate(-50%,0);visibility:visible;transition:transform .25s}
-@media (prefers-color-scheme: dark){.toast{background:#EEF1F4;color:#11161D}}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 </style>
 </head>
 <body>
@@ -166,14 +205,19 @@ select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--
    ===================================================================== */
 const CONFIG = {
   // URL de l'application Web Google Apps Script (voir le guide).
-  // Laisser vide = mode démonstration (inscriptions visibles sur cet appareil uniquement).
+  // Vide = mode démonstration (inscriptions enregistrées sur cet appareil uniquement).
   API_URL: "",
 
-  SLOT_MINUTES: 40,   // durée d'un créneau
-  STEP_MINUTES: 20,   // décalage entre deux créneaux
-  END_DATE: "2027-05-28", // dernière date d'interrogation de l'année
+  SLOT_MINUTES: 40,          // durée d'un créneau
+  STEP_MINUTES: 20,          // décalage entre deux créneaux
+  BOOKING_WINDOW_MONTHS: 1,  // réservation ouverte au plus 1 mois avant le créneau
 
-  // Périodes sans khôlles (vacances zone A 2026-2027, jours fériés, ponts). Dates incluses.
+  // Calendrier des quinzaines : Khôlle 1 commence la semaine de cette date (un lundi).
+  // Les semaines de vacances sont sautées : chaque khôlle = 2 semaines de cours consécutives.
+  FIRST_MONDAY: "2026-09-14",
+  END_DATE: "2027-05-28",    // vendredi de la dernière semaine de mai 2027
+
+  // Vacances scolaires zone A (académie de Clermont-Ferrand) 2026-2027, jours fériés, pont. Dates incluses.
   CLOSED: [
     ["2026-10-17", "2026-11-01", "Vacances de la Toussaint"],
     ["2026-11-11", "2026-11-11", "Armistice"],
@@ -189,13 +233,13 @@ const CONFIG = {
     "1": {
       label: "Première année",
       short: "1re année",
-      start: "2026-09-14", // lundi de la première semaine
+      start: "2026-09-14",
       // weekday : 1 = lundi … 5 = vendredi
       sessions: [
         { weekday: 3, start: "16:00", count: 5, examiner: "Mme Pénilleau", room: "C416" },
         { weekday: 5, start: "12:00", count: 6, examiner: "M. Blanchet",   room: "C415" }
       ],
-      // Exceptions : pour une date donnée, remplace les séances prévues ce jour-là ([] = annulé).
+      // Exceptions : pour une date donnée, remplace les séances de ce jour-là ([] = annulé).
       overrides: {
         "2026-09-25": [{ start: "13:00", count: 6, examiner: "M. Blanchet", room: "C415" }]
       },
@@ -228,31 +272,62 @@ const CONFIG = {
 
 const JOURS = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
 const MOIS = ["janvier","février","mars","avril","mai","juin","juillet","août","septembre","octobre","novembre","décembre"];
+const MOIS_C = ["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
 const $ = (s) => document.querySelector(s);
-const esc = (s) => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+const ICON = {
+  lock: '<svg class="lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+  info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/></svg>',
+  warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17v.5"/></svg>',
+  chev: '<svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>',
+  down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>'
+};
 
 /* ---------- Dates ---------- */
 function parseISO(s){ const [y,m,d] = s.split("-").map(Number); return new Date(y, m-1, d); }
 function iso(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 function addDays(d,n){ const x = new Date(d); x.setDate(x.getDate()+n); return x; }
-function mondayOf(d){ const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); const w = (x.getDay()+6)%7; return addDays(x,-w); }
+function addMonths(d,n){ const x = new Date(d); x.setMonth(x.getMonth()+n); return x; }
+function mondayOf(d){ const x = new Date(d.getFullYear(), d.getMonth(), d.getDate()); return addDays(x, -((x.getDay()+6)%7)); }
 function fmtTime(min){ const h = Math.floor(min/60), m = min%60; return h+"h"+(m ? String(m).padStart(2,"0") : ""); }
 function toMin(hhmm){ const [h,m] = hhmm.split(":").map(Number); return h*60+m; }
-function fmtDay(d){ return cap(JOURS[d.getDay()])+" "+d.getDate()+(d.getDate()===1?"er":"")+" "+MOIS[d.getMonth()]; }
-function fmtShort(d){ return d.getDate()+(d.getDate()===1?"er":"")+" "+MOIS[d.getMonth()]; }
+const dnum = (d) => d.getDate()===1 ? "1er" : String(d.getDate());
+function fmtDay(d){ return cap(JOURS[d.getDay()])+" "+dnum(d)+" "+MOIS[d.getMonth()]; }
+function fmtDate(d){ return dnum(d)+" "+MOIS[d.getMonth()]; }
+function fmtWeek(mon){ const fri = addDays(mon,4);
+  return mon.getMonth()===fri.getMonth() ? dnum(mon)+" – "+dnum(fri)+" "+MOIS_C[fri.getMonth()] : dnum(mon)+" "+MOIS_C[mon.getMonth()]+" – "+dnum(fri)+" "+MOIS_C[fri.getMonth()]; }
 function closedReason(dISO){ for (const [a,b,r] of CONFIG.CLOSED) if (dISO >= a && dISO <= b) return r; return null; }
 
-/* ---------- Construction du calendrier ---------- */
+/* ---------- Calendrier : semaines de cours et quinzaines ---------- */
+const QUINZAINES = (() => {
+  const weeks = [];
+  let m = parseISO(CONFIG.FIRST_MONDAY);
+  while (iso(m) <= CONFIG.END_DATE){
+    let teaching = false;
+    for (let i = 0; i < 5; i++){ const k = iso(addDays(m,i)); if (k <= CONFIG.END_DATE && !closedReason(k)) teaching = true; }
+    if (teaching) weeks.push(new Date(m));
+    m = addDays(m, 7);
+  }
+  const qs = [];
+  weeks.forEach((w, i) => {
+    const n = Math.floor(i/2) + 1;
+    (qs[n-1] ||= { n, weeks: [] }).weeks.push(w);
+  });
+  return qs;
+})();
+const WEEK_INFO = {};  // lundi ISO -> { q, half }
+QUINZAINES.forEach(q => q.weeks.forEach((w, i) => WEEK_INFO[iso(w)] = { q: q.n, half: i+1 }));
+
 function sessionsFor(year, date){
   const Y = CONFIG.YEARS[year], k = iso(date);
   if (closedReason(k)) return [];
   if (Y.overrides && Object.prototype.hasOwnProperty.call(Y.overrides, k)) return Y.overrides[k];
-  const wd = date.getDay();
-  return Y.sessions.filter(s => s.weekday === wd);
+  return Y.sessions.filter(s => s.weekday === date.getDay());
 }
 function slotsForWeek(year, monday){
-  const out = [];
+  const out = [], wk = iso(monday), info = WEEK_INFO[wk];
+  if (!info) return out;
   for (let i = 0; i < 7; i++){
     const d = addDays(monday, i), dISO = iso(d);
     if (dISO < CONFIG.YEARS[year].start || dISO > CONFIG.END_DATE) continue;
@@ -261,9 +336,8 @@ function slotsForWeek(year, monday){
         const st = toMin(s.start) + n*CONFIG.STEP_MINUTES, en = st + CONFIG.SLOT_MINUTES;
         out.push({
           id: year+"|"+dISO+"|"+String(st).padStart(4,"0")+"|"+s.room,
-          year, date: d, dateISO: dISO, week: iso(monday),
-          start: st, label: fmtTime(st)+" – "+fmtTime(en),
-          examiner: s.examiner, room: s.room,
+          year, q: info.q, half: info.half, week: wk, date: d, dateISO: dISO,
+          start: st, label: fmtTime(st)+" – "+fmtTime(en), examiner: s.examiner, room: s.room,
           startsAt: new Date(d.getFullYear(), d.getMonth(), d.getDate(), Math.floor(st/60), st%60)
         });
       }
@@ -271,55 +345,94 @@ function slotsForWeek(year, monday){
   }
   return out;
 }
-function weeksFor(year){
-  const res = [];
-  let m = mondayOf(parseISO(CONFIG.YEARS[year].start));
-  const end = parseISO(CONFIG.END_DATE);
-  while (m <= end){
-    const slots = slotsForWeek(year, m);
-    if (slots.length) res.push({ monday: m, key: iso(m), slots });
-    m = addDays(m, 7);
-  }
-  return res;
+const SLOT_INDEX = {};
+function quinzainesFor(year){
+  return QUINZAINES.map(q => {
+    const weeks = q.weeks.map(w => ({ monday: w, slots: slotsForWeek(year, w) }));
+    weeks.forEach(w => w.slots.forEach(s => SLOT_INDEX[s.id] = s));
+    return { n: q.n, weeks, slots: weeks.flatMap(w => w.slots) };
+  }).filter(q => q.slots.length);
 }
+Object.keys(CONFIG.YEARS).forEach(quinzainesFor); // remplit SLOT_INDEX
 
-/* ---------- Stockage (Google Sheets ou démo locale) ---------- */
+function slotStatus(s, now = new Date()){
+  if (s.startsAt <= now) return "past";
+  if (s.startsAt > addMonths(now, CONFIG.BOOKING_WINDOW_MONTHS)) return "notyet";
+  return "open";
+}
+const openingDate = (s) => addMonths(s.startsAt, -CONFIG.BOOKING_WINDOW_MONTHS);
+const weekFrozen = (monday, now = new Date()) => now >= addDays(monday, 7);
+function describeSlot(id){ const s = SLOT_INDEX[id]; return s ? `${fmtDay(s.date).toLowerCase()}, ${s.label} (${s.examiner}, salle ${s.room})` : id; }
+
+/* ---------- Identifiant d'appareil (pour le journal) ---------- */
+const DEVICE = (() => {
+  let id = null;
+  try { id = localStorage.getItem("khollapp-device"); } catch(e){}
+  if (!id){ id = Math.random().toString(36).slice(2, 8).toUpperCase(); try { localStorage.setItem("khollapp-device", id); } catch(e){} }
+  return id;
+})();
+
+/* ---------- Stockage : Google Sheets, ou démonstration locale ---------- */
 const DEMO = !CONFIG.API_URL;
-const LS_KEY = "khollapp-demo";
-function demoRead(){ try { return JSON.parse(localStorage.getItem(LS_KEY) || "[]"); } catch(e){ return []; } }
-function demoWrite(a){ try { localStorage.setItem(LS_KEY, JSON.stringify(a)); } catch(e){} }
+function demoGet(k){ try { return JSON.parse(localStorage.getItem(k) || "[]"); } catch(e){ return []; } }
+function demoSet(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch(e){} }
+function ruleCheck(all, p, ignoreSlot){
+  const s = SLOT_INDEX[p.slotId];
+  if (!s) return "Créneau inconnu.";
+  const st = slotStatus(s);
+  if (st === "past") return "Ce créneau est passé : il n'est plus modifiable.";
+  if (st === "notyet") return "Les réservations pour ce créneau ouvrent le " + fmtDate(openingDate(s)) + ".";
+  const other = all.find(b => b.year === p.year && Number(b.q) === Number(p.q) && b.student === p.student && b.slotId !== ignoreSlot);
+  if (other) return `${p.student} est déjà inscrit(e) à la Khôlle ${p.q} : ${describeSlot(other.slotId)}.`;
+  return null;
+}
 
 const API = {
   async list(year){
-    if (DEMO) return demoRead().filter(b => b.year === year);
+    if (DEMO) return demoGet("khollapp-demo").filter(b => b.year === year);
     const r = await fetch(CONFIG.API_URL + "?action=list&year=" + encodeURIComponent(year), { cache: "no-store" });
     const j = await r.json();
     if (!j.ok) throw new Error(j.error || "Erreur serveur");
     return j.bookings;
   },
-  async post(payload){
-    if (DEMO){
-      const all = demoRead();
-      if (payload.action === "book"){
-        if (all.some(b => b.slotId === payload.slotId)) return { ok:false, error:"Ce créneau vient d'être réservé." };
-        if (all.some(b => b.year === payload.year && b.week === payload.week && b.student === payload.student))
-          return { ok:false, error:"Vous êtes déjà inscrit(e) cette semaine." };
-        all.push({ slotId: payload.slotId, year: payload.year, week: payload.week, student: payload.student });
-      } else if (payload.action === "cancel"){
-        const i = all.findIndex(b => b.slotId === payload.slotId && b.student === payload.student);
-        if (i < 0) return { ok:false, error:"Inscription introuvable." };
-        all.splice(i,1);
-      }
-      demoWrite(all); return { ok:true };
+  async post(p){
+    p.device = DEVICE;
+    if (!DEMO){
+      // corps en text/plain : pas de requête préalable CORS, accepté par Apps Script
+      const r = await fetch(CONFIG.API_URL, { method: "POST", body: JSON.stringify(p) });
+      return r.json();
     }
-    // text/plain : évite la requête préalable CORS, accepté par Apps Script
-    const r = await fetch(CONFIG.API_URL, { method:"POST", body: JSON.stringify(payload) });
+    const all = demoGet("khollapp-demo");
+    const i = all.findIndex(b => b.slotId === p.slotId);
+    if (p.action === "book"){
+      if (i >= 0) return { ok:false, error:"Ce créneau vient d'être réservé par quelqu'un d'autre." };
+      const e = ruleCheck(all, p); if (e) return { ok:false, error:e };
+      all.push({ slotId:p.slotId, year:p.year, q:p.q, week:p.week, student:p.student });
+    } else if (p.action === "cancel"){
+      if (i < 0 || all[i].student !== p.student) return { ok:false, error:"Inscription introuvable." };
+      if (slotStatus(SLOT_INDEX[p.slotId]) === "past") return { ok:false, error:"Ce créneau est passé : il n'est plus modifiable." };
+      all.splice(i, 1);
+    } else if (p.action === "replace"){
+      if (i < 0 || all[i].student !== p.from) return { ok:false, error:"Ce créneau a changé entre-temps. Actualisez la page." };
+      const e = ruleCheck(all, p, p.slotId); if (e) return { ok:false, error:e };
+      all[i].student = p.student;
+    }
+    demoSet("khollapp-demo", all);
+    const log = demoGet("khollapp-demo-log");
+    log.push({ at: new Date().toISOString(), action: {book:"Inscription",cancel:"Désinscription",replace:"Remplacement"}[p.action],
+      year:p.year, q:p.q, date:p.date, time:p.time, room:p.room, student:p.student, from:p.from || "", device:p.device });
+    demoSet("khollapp-demo-log", log);
+    return { ok:true };
+  },
+  async journal(code){
+    if (DEMO) return { ok:true, log: demoGet("khollapp-demo-log") };
+    const r = await fetch(CONFIG.API_URL + "?action=journal&code=" + encodeURIComponent(code), { cache: "no-store" });
     return r.json();
   }
 };
 
-/* ---------- État et navigation ---------- */
-const state = { bookings: {}, loaded: {}, showPast: false, poll: null };
+/* ---------- État, barre et navigation ---------- */
+const state = { bookings: {}, loaded: {}, showPast: false, poll: null, journal: null, jYear: "", jSearch: "" };
 
 function setBar({ title, sub, back, refresh }){
   $("#title").innerHTML = esc(title) + (sub ? '<span class="sub">'+esc(sub)+'</span>' : "");
@@ -332,12 +445,10 @@ function setAccent(year){
   r.setProperty("--accent", year === "2" ? "var(--y2)" : "var(--y1)");
   r.setProperty("--accent-soft", year === "2" ? "var(--y2-soft)" : "var(--y1-soft)");
 }
-function go(hash){ location.hash = hash; }
-$("#back").addEventListener("click", () => {
-  const p = location.hash.replace(/^#\/?/,"").split("/").filter(Boolean);
-  go(p.length > 1 ? "#/"+p[0] : "#/");
-});
+const parts = () => location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
+$("#back").addEventListener("click", () => { const p = parts(); location.hash = (p[0] === "journal" || p.length < 2) ? "#/" : "#/" + p[0]; });
 $("#refresh").addEventListener("click", () => route(true));
+window.addEventListener("hashchange", () => { closeSheet(); route(); });
 
 async function loadBookings(year, force){
   if (!force && state.loaded[year] && Date.now() - state.loaded[year] < 15000) return;
@@ -348,27 +459,28 @@ async function loadBookings(year, force){
 
 async function route(force){
   clearInterval(state.poll);
-  const p = location.hash.replace(/^#\/?/,"").split("/").filter(Boolean);
-  const year = p[0], week = p[1];
+  const [year, sub, n] = parts();
+  if (year === "journal") return renderJournal(force);
   if (!year || !CONFIG.YEARS[year]) return renderHome();
   setAccent(year);
-  try { localStorage.setItem("khollapp-year", year); } catch(e){}
   const view = $("#view");
   if (!state.bookings[year]) view.innerHTML = '<div class="loading"><span class="spin"></span>Chargement…</div>';
   try { await loadBookings(year, force); }
-  catch(e){ view.innerHTML = '<div class="banner warn">Impossible de joindre le serveur des inscriptions. Vérifiez votre connexion puis actualisez.</div>'; setBar({ title: CONFIG.YEARS[year].label, back:true, refresh:true }); return; }
-  if (week) renderWeek(year, week); else renderWeeks(year);
+  catch(e){
+    setBar({ title: CONFIG.YEARS[year].label, back: true, refresh: true });
+    view.innerHTML = `<div class="alert err">${ICON.warn}<span>Impossible de joindre le serveur des inscriptions. Vérifiez votre connexion puis actualisez.</span></div>`;
+    return;
+  }
+  const draw = () => (sub === "k" && n) ? renderQuinzaine(year, Number(n)) : renderList(year);
+  draw();
   state.poll = setInterval(async () => {
     if (document.hidden || $("#sheet").classList.contains("open")) return;
-    try { await loadBookings(year, true); week ? renderWeek(year, week) : renderWeeks(year); } catch(e){}
+    try { await loadBookings(year, true); draw(); } catch(e){}
   }, 30000);
 }
-window.addEventListener("hashchange", () => { closeSheet(); route(); });
 
 /* ---------- Écrans ---------- */
-function demoBanner(){
-  return DEMO ? '<div class="banner warn"><b>Mode démonstration.</b> Les inscriptions ne sont enregistrées que sur cet appareil. Renseignez API_URL pour les partager.</div>' : "";
-}
+const demoBanner = () => DEMO ? `<div class="alert warn">${ICON.warn}<span><b>Mode démonstration.</b> Les inscriptions ne sont enregistrées que sur cet appareil.</span></div>` : "";
 
 function renderHome(){
   setAccent("1");
@@ -383,83 +495,100 @@ function renderHome(){
     ${demoBanner()}
     <p class="kicker">Choisissez votre promotion</p>
     <div class="choices">
-      ${["1","2"].map(y => `
+      ${Object.keys(CONFIG.YEARS).map(y => `
         <a class="card y${y}" href="#/${y}">
           <span class="num">${y}</span>
           <span><span class="t">${esc(CONFIG.YEARS[y].label)}</span><br>
           <span class="d">${CONFIG.YEARS[y].students.length} étudiants</span></span>
-          <svg class="chev" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>
+          ${ICON.chev}
         </a>`).join("")}
     </div>
-    <p class="foot">Clermont-Ferrand</p>`;
+    <div class="foot">
+      <a class="linkbtn" href="#/journal">${ICON.lock} Journal des inscriptions (enseignants)</a>
+    </div>`;
 }
 
-function renderWeeks(year){
-  const Y = CONFIG.YEARS[year];
-  setBar({ title: Y.label, sub: "Choisir une semaine", back: true, refresh: true });
-  const b = state.bookings[year] || {};
-  const nowMon = iso(mondayOf(new Date()));
-  const weeks = weeksFor(year);
-  const past = weeks.filter(w => w.key < nowMon), next = weeks.filter(w => w.key >= nowMon);
-  const shown = state.showPast ? weeks : next;
-  const card = (w) => {
-    const now = new Date();
-    const open = w.slots.filter(s => s.startsAt > now);
-    const free = open.filter(s => !b[s.id]).length;
-    const pill = !open.length ? '<span class="pill full">Terminée</span>'
-      : free ? `<span class="pill free">${free} libre${free>1?"s":""}</span>` : '<span class="pill full">Complet</span>';
-    const days = [...new Set(w.slots.map(s => s.dateISO))].map(d => fmtDay(parseISO(d))).join(" · ");
-    return `<a class="week${w.key===nowMon?" current":""}" href="#/${year}/${w.key}">
-      <span><span class="wk">Semaine du ${fmtShort(w.monday)}${w.key===nowMon?'<span class="pill now">Cette semaine</span>':""}</span><br>
-      <span class="wd">${esc(days)}</span></span>${pill}</a>`;
+function qPill(q, b, now){
+  const nowMon = iso(mondayOf(now));
+  if (q.weeks.every(w => weekFrozen(w.monday, now))) return '<span class="pill done">Terminée</span>';
+  const open = q.slots.filter(s => slotStatus(s, now) === "open");
+  const notyet = q.slots.filter(s => slotStatus(s, now) === "notyet");
+  if (!open.length && notyet.length) return `<span class="pill soon">Ouverture le ${fmtDate(openingDate(notyet[0]))}</span>`;
+  const free = open.filter(s => !b[s.id]).length;
+  return free ? `<span class="pill free">${free} libre${free>1?"s":""}</span>` : '<span class="pill full">Complet</span>';
+}
+
+function renderList(year){
+  const Y = CONFIG.YEARS[year], b = state.bookings[year] || {}, now = new Date();
+  setBar({ title: Y.label, sub: "Choisir une khôlle", back: true, refresh: true });
+  const nowMon = iso(mondayOf(now));
+  const qs = quinzainesFor(year);
+  const isPast = (q) => q.weeks.every(w => weekFrozen(w.monday, now));
+  const past = qs.filter(isPast), next = qs.filter(q => !isPast(q));
+  const card = (q) => {
+    const cur = q.weeks.some(w => iso(w.monday) === nowMon);
+    const half = cur ? q.weeks.findIndex(w => iso(w.monday) === nowMon) + 1 : 0;
+    return `<a class="qcard${cur ? " current" : ""}${isPast(q) ? " past" : ""}" href="#/${year}/k/${q.n}">
+      <span class="qnum">${q.n}</span>
+      <span class="qbody"><span class="qt">Khôlle ${q.n}</span><br><span class="qd">${q.weeks.map(w => fmtWeek(w.monday)).join(" · ")}</span>
+      <span class="qpills">${cur ? `<span class="pill now">En cours · semaine ${half}</span>` : ""}${qPill(q, b, now)}</span></span>
+      ${ICON.chev}
+    </a>`;
   };
-  $("#view").innerHTML = demoBanner() + `<p class="kicker">Semaines d'interrogation</p>` +
-    (shown.length ? `<div class="weeks">${shown.map(card).join("")}</div>` : '<div class="empty">Aucune semaine à venir.</div>') +
-    (past.length ? `<button class="toggle" id="togglePast">${state.showPast ? "Masquer les semaines passées" : "Afficher les semaines passées ("+past.length+")"}</button>` : "");
-  const t = $("#togglePast"); if (t) t.onclick = () => { state.showPast = !state.showPast; renderWeeks(year); };
+  $("#view").innerHTML = demoBanner() +
+    (past.length ? `<button class="toggle" id="togglePast">${state.showPast ? "Masquer les khôlles terminées" : "Afficher les khôlles terminées (" + past.length + ")"}</button>` : "") +
+    (state.showPast && past.length ? `<p class="kicker">Terminées · consultation seule</p><div class="list">${past.map(card).join("")}</div><div style="height:18px"></div>` : "") +
+    `<p class="kicker">Khôlles à venir</p>` +
+    (next.length ? `<div class="list">${next.map(card).join("")}</div>` : '<div class="empty">Aucune khôlle à venir.</div>');
+  const t = $("#togglePast"); if (t) t.onclick = () => { state.showPast = !state.showPast; renderList(year); };
 }
 
-function renderWeek(year, weekKey){
-  const Y = CONFIG.YEARS[year];
-  const monday = parseISO(weekKey);
-  setBar({ title: "Semaine du " + fmtShort(monday), sub: Y.short, back: true, refresh: true });
-  const slots = slotsForWeek(year, monday);
-  const b = state.bookings[year] || {};
-  const now = new Date();
-  if (!slots.length){ $("#view").innerHTML = '<div class="empty">Pas de khôlle cette semaine.</div>'; return; }
-  // Regroupement jour → examinateur/salle
-  const days = {};
-  slots.forEach(s => {
-    (days[s.dateISO] ||= {});
-    const g = s.examiner+"|"+s.room;
-    (days[s.dateISO][g] ||= []).push(s);
-  });
+function renderQuinzaine(year, n){
+  const Y = CONFIG.YEARS[year], b = state.bookings[year] || {}, now = new Date();
+  const q = quinzainesFor(year).find(x => x.n === n);
+  if (!q){ setBar({ title: "Khôlle " + n, back: true }); $("#view").innerHTML = '<div class="empty">Pas de khôlle pour cette quinzaine.</div>'; return; }
+  const first = q.weeks[0].monday, last = addDays(q.weeks[q.weeks.length-1].monday, 4);
+  setBar({ title: "Khôlle " + n, sub: Y.short + " · " + dnum(first) + " " + MOIS_C[first.getMonth()] + " – " + dnum(last) + " " + MOIS_C[last.getMonth()], back: true, refresh: true });
+  const allFrozen = q.weeks.every(w => weekFrozen(w.monday, now));
   let html = demoBanner();
-  Object.keys(days).sort().forEach(d => {
-    const all = Object.values(days[d]).flat();
-    const free = all.filter(s => s.startsAt > now && !b[s.id]).length;
-    html += `<section class="day"><div class="dayhead"><h3>${fmtDay(parseISO(d))}</h3>
-      ${all.every(s => s.startsAt <= now) ? '<span class="pill full">Passé</span>' : free ? `<span class="pill free">${free} libre${free>1?"s":""}</span>` : '<span class="pill full">Complet</span>'}</div>`;
-    Object.entries(days[d]).forEach(([g, list]) => {
-      const [ex, room] = g.split("|");
-      html += `<div class="group"><div class="ghead"><span class="who">${esc(ex)}</span><span class="room">${esc(room)}</span></div>`;
-      list.forEach(s => {
-        const bk = b[s.id], past = s.startsAt <= now;
-        const cls = past ? "past" : bk ? "taken" : "free";
-        const txt = bk ? esc(bk.student) : past ? "—" : "Libre";
-        html += `<button class="slot ${cls}" data-id="${esc(s.id)}" ${past && !bk ? 'aria-disabled="true"' : ""}>
-          <span class="time">${s.label}</span><span class="state">${txt}<span class="dot" aria-hidden="true"></span></span></button>`;
+  html += allFrozen
+    ? `<div class="alert info">${ICON.lock}<span><b>Khôlle terminée.</b> Le planning est figé : consultation uniquement.</span></div>`
+    : `<div class="rule">${ICON.info}<span><b>Une seule inscription par étudiant</b> pour la Khôlle ${n}, en semaine 1 ou en semaine 2. Réservation possible jusqu'à 1 mois à l'avance.</span></div>`;
+  q.weeks.forEach((w, wi) => {
+    const frozen = weekFrozen(w.monday, now);
+    const free = w.slots.filter(s => slotStatus(s, now) === "open" && !b[s.id]).length;
+    const pill = frozen ? '<span class="pill done">Terminée</span>'
+      : w.slots.every(s => slotStatus(s, now) === "notyet") ? `<span class="pill soon">Ouverture le ${fmtDate(openingDate(w.slots[0]))}</span>`
+      : free ? `<span class="pill free">${free} libre${free>1?"s":""}</span>` : '<span class="pill full">Complet</span>';
+    html += `<div class="weekhead"><h3>Semaine ${wi+1}<small>${fmtWeek(w.monday)}</small></h3>${pill}</div>`;
+    if (frozen && !allFrozen) html += `<div class="alert info">${ICON.lock}<span>Semaine terminée : consultation uniquement.</span></div>`;
+    if (!w.slots.length){ html += '<div class="empty">Pas de khôlle cette semaine.</div>'; return; }
+    const days = {};
+    w.slots.forEach(s => { ((days[s.dateISO] ||= {})[s.examiner + "|" + s.room] ||= []).push(s); });
+    Object.keys(days).sort().forEach(d => {
+      html += `<p class="dayname">${fmtDay(parseISO(d))}</p>`;
+      Object.entries(days[d]).forEach(([g, list]) => {
+        const [ex, room] = g.split("|");
+        html += `<div class="group"><div class="ghead"><span class="who">${esc(ex)}</span><span class="room">${esc(room)}</span></div>`;
+        list.forEach(s => {
+          const bk = b[s.id], st = slotStatus(s, now);
+          const locked = st !== "open";
+          const cls = (locked ? "locked " : "") + (bk ? "taken" : "free");
+          const txt = bk ? esc(bk.student) : st === "past" ? "—" : st === "notyet" ? "Ouverture le " + fmtDate(openingDate(s)) : "Libre";
+          html += `<button class="slot ${cls}" data-id="${esc(s.id)}"><span class="time">${s.label}</span><span class="state">${txt}${locked ? ICON.lock : '<span class="dot" aria-hidden="true"></span>'}</span></button>`;
+        });
+        html += `</div>`;
       });
-      html += `</div>`;
     });
-    html += `</section>`;
   });
   $("#view").innerHTML = html;
-  const byId = Object.fromEntries(slots.map(s => [s.id, s]));
   document.querySelectorAll(".slot").forEach(el => el.addEventListener("click", () => {
-    const s = byId[el.dataset.id]; if (!s) return;
-    if (s.startsAt <= new Date()) return toast("Ce créneau est passé.");
-    b[s.id] ? openCancel(s, b[s.id]) : openBook(s);
+    const s = SLOT_INDEX[el.dataset.id]; if (!s) return;
+    const st = slotStatus(s);
+    if (st === "past") return toast("Créneau passé : consultation uniquement.");
+    if (st === "notyet") return toast("Réservations ouvertes à partir du " + fmtDate(openingDate(s)) + ".");
+    const bk = (state.bookings[year] || {})[s.id];
+    bk ? openTaken(s, bk) : openBook(s);
   }));
 }
 
@@ -468,93 +597,155 @@ let lastFocus = null;
 function openSheet(html){
   lastFocus = document.activeElement;
   $("#sheetBody").innerHTML = html;
-  $("#scrim").classList.add("open"); $("#sheet").classList.add("open"); $("#sheet").setAttribute("aria-hidden","false");
+  $("#scrim").classList.add("open"); $("#sheet").classList.add("open"); $("#sheet").setAttribute("aria-hidden", "false");
   setTimeout(() => { const f = $("#sheet select, #sheet input, #sheet .btn"); f && f.focus(); }, 260);
 }
 function closeSheet(){
-  $("#scrim").classList.remove("open"); $("#sheet").classList.remove("open"); $("#sheet").setAttribute("aria-hidden","true");
+  $("#scrim").classList.remove("open"); $("#sheet").classList.remove("open"); $("#sheet").setAttribute("aria-hidden", "true");
   if (lastFocus && document.body.contains(lastFocus)) lastFocus.focus();
 }
 $("#scrim").addEventListener("click", closeSheet);
 $("#sheet").addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
 
-function slotMeta(s){
-  return `<p class="meta"><b>${fmtDay(s.date)}</b> · ${s.label}<br>${esc(s.examiner)} · salle <b>${esc(s.room)}</b></p>`;
+const slotMeta = (s) => `<p class="meta"><b>Khôlle ${s.q} · semaine ${s.half}</b><br>${fmtDay(s.date)} · ${s.label}<br>${esc(s.examiner)} · salle <b>${esc(s.room)}</b></p>`;
+const errBox = (m) => `<div class="alert err">${ICON.warn}<span>${m}</span></div>`;
+const nameSelect = (list, placeholder) => `<div class="selectwrap"><select id="who"><option value="">${placeholder}</option>${list.map(x => `<option>${esc(x)}</option>`).join("")}</select>${ICON.down}</div>`;
+function quinzaineConflict(s, student, ignoreSlot){
+  const b = state.bookings[s.year] || {};
+  const other = Object.values(b).find(x => Number(x.q) === s.q && x.student === student && x.slotId !== ignoreSlot);
+  if (!other) return null;
+  const o = SLOT_INDEX[other.slotId];
+  const where = o && o.week !== s.week ? "l'autre semaine de cette quinzaine" : "cette semaine";
+  return `<b>Inscription impossible.</b> ${esc(student)} est déjà inscrit(e) à la Khôlle ${s.q}, ${where} : ${esc(describeSlot(other.slotId))}.<br>Une seule khôlle par quinzaine. Pour changer de créneau, libérez d'abord celui-ci.`;
 }
+async function submit(btn, busyLabel, payload, okMsg){
+  const label = btn.textContent;
+  btn.disabled = true; btn.textContent = busyLabel;
+  let r;
+  try { r = await API.post(payload); } catch(e){ r = { ok:false, error:"Connexion impossible. Réessayez." }; }
+  if (r.ok){ closeSheet(); toast(okMsg); }
+  else { $("#msg").innerHTML = errBox(esc(r.error || "Opération refusée.")); btn.disabled = false; btn.textContent = label; }
+  await refreshCurrent();
+}
+const payloadOf = (s, extra) => Object.assign({ year:s.year, q:s.q, week:s.week, slotId:s.id, date:s.dateISO, time:s.label, examiner:s.examiner, room:s.room }, extra);
 
 function openBook(s){
-  const Y = CONFIG.YEARS[s.year], b = state.bookings[s.year] || {};
-  const already = new Set(Object.values(b).filter(x => x.week === s.week).map(x => x.student));
-  const avail = Y.students.filter(n => !already.has(n));
+  const Y = CONFIG.YEARS[s.year];
   openSheet(`
     <h4 id="sheetTitle">Réserver ce créneau</h4>
     ${slotMeta(s)}
-    ${avail.length ? `
-      <label class="lbl" for="who">Votre nom</label>
-      <div class="selectwrap">
-        <select id="who">
-          <option value="">Sélectionnez votre nom…</option>
-          ${avail.map(n => `<option>${esc(n)}</option>`).join("")}
-        </select>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
-      </div>
-      <p class="hint">Un seul créneau par étudiant et par semaine. Les noms déjà inscrits cette semaine n'apparaissent pas.</p>
-      <div class="actions">
-        <button class="btn primary" id="confirm" disabled>Confirmer l'inscription</button>
-        <button class="btn ghost" id="cancelSheet">Annuler</button>
-      </div>` : `
-      <div class="empty">Tous les étudiants sont déjà inscrits cette semaine.</div>
-      <div class="actions"><button class="btn ghost" id="cancelSheet">Fermer</button></div>`}`);
-  $("#cancelSheet").onclick = closeSheet;
+    <label class="lbl" for="who">Votre nom</label>
+    ${nameSelect(Y.students, "Sélectionnez votre nom…")}
+    <p class="hint">Une seule inscription par quinzaine (semaine 1 ou semaine 2).</p>
+    <div class="msg" id="msg"></div>
+    <div class="actions">
+      <button class="btn primary" id="confirm" disabled>Confirmer l'inscription</button>
+      <button class="btn ghost" id="close">Annuler</button>
+    </div>`);
+  $("#close").onclick = closeSheet;
   const sel = $("#who"), btn = $("#confirm");
-  if (!sel) return;
-  sel.onchange = () => { btn.disabled = !sel.value; };
-  btn.onclick = async () => {
-    btn.disabled = true; btn.textContent = "Enregistrement…";
-    try {
-      const r = await API.post({ action:"book", year:s.year, week:s.week, slotId:s.id, student:sel.value,
-        date:s.dateISO, time:s.label, examiner:s.examiner, room:s.room });
-      closeSheet();
-      toast(r.ok ? "Inscription enregistrée." : r.error || "Échec de l'inscription.");
-    } catch(e){ closeSheet(); toast("Connexion impossible. Réessayez."); }
-    await refreshCurrent();
+  sel.onchange = () => {
+    const c = sel.value ? quinzaineConflict(s, sel.value) : null;
+    $("#msg").innerHTML = c ? errBox(c) : "";
+    btn.disabled = !sel.value || !!c;
   };
+  btn.onclick = () => submit(btn, "Enregistrement…", payloadOf(s, { action:"book", student: sel.value }), "Inscription enregistrée.");
 }
 
-function openCancel(s, bk){
+function openTaken(s, bk){
+  const Y = CONFIG.YEARS[s.year], cur = esc(bk.student);
   openSheet(`
-    <h4 id="sheetTitle">Créneau réservé</h4>
+    <h4 id="sheetTitle">Créneau déjà pris</h4>
     ${slotMeta(s)}
-    <p style="margin:0 0 14px">Inscrit(e) : <b>${esc(bk.student)}</b></p>
-    <label class="check"><input type="checkbox" id="me"> <span>Je suis ${esc(bk.student)} et je souhaite libérer ce créneau.</span></label>
+    <div class="alert warn">${ICON.warn}<span>Ce créneau est attribué à <b>${cur}</b>.<br>Un remplacement ne peut se faire <b>qu'avec l'accord de ${cur}</b>. Chaque modification est enregistrée dans le journal consulté par les enseignants.</span></div>
+    <label class="check"><input type="checkbox" id="agree"> <span>J'ai obtenu l'accord de ${cur} pour prendre sa place.</span></label>
+    <label class="lbl" for="who">Nouvel inscrit</label>
+    ${nameSelect(Y.students.filter(x => x !== bk.student), "Sélectionnez votre nom…")}
+    <div class="msg" id="msg"></div>
     <div class="actions">
-      <button class="btn danger" id="doCancel" disabled>Libérer le créneau</button>
-      <button class="btn ghost" id="cancelSheet">Fermer</button>
+      <button class="btn warnbtn" id="replace" disabled>Remplacer ${cur}</button>
+    </div>
+    <div class="divider"></div>
+    <label class="check"><input type="checkbox" id="me"> <span>Je suis ${cur} et je libère ce créneau.</span></label>
+    <div class="actions">
+      <button class="btn outline" id="free" disabled>Libérer le créneau</button>
+      <button class="btn ghost" id="close">Fermer</button>
     </div>`);
-  $("#cancelSheet").onclick = closeSheet;
-  const me = $("#me"), btn = $("#doCancel");
-  me.onchange = () => { btn.disabled = !me.checked; };
-  btn.onclick = async () => {
-    btn.disabled = true; btn.textContent = "Libération…";
-    try {
-      const r = await API.post({ action:"cancel", year:s.year, slotId:s.id, student:bk.student, date:s.dateISO, time:s.label, room:s.room });
-      closeSheet(); toast(r.ok ? "Créneau libéré." : r.error || "Échec.");
-    } catch(e){ closeSheet(); toast("Connexion impossible. Réessayez."); }
-    await refreshCurrent();
+  $("#close").onclick = closeSheet;
+  const agree = $("#agree"), sel = $("#who"), rep = $("#replace"), me = $("#me"), free = $("#free");
+  const upd = () => {
+    const c = sel.value ? quinzaineConflict(s, sel.value, s.id) : null;
+    $("#msg").innerHTML = c ? errBox(c) : "";
+    rep.disabled = !(agree.checked && sel.value) || !!c;
   };
+  agree.onchange = upd; sel.onchange = upd;
+  me.onchange = () => { free.disabled = !me.checked; };
+  rep.onclick = () => submit(rep, "Remplacement…", payloadOf(s, { action:"replace", from: bk.student, student: sel.value }), "Remplacement enregistré.");
+  free.onclick = () => submit(free, "Libération…", payloadOf(s, { action:"cancel", student: bk.student }), "Créneau libéré.");
 }
 
 async function refreshCurrent(){
-  const p = location.hash.replace(/^#\/?/,"").split("/").filter(Boolean);
-  if (!p[0]) return;
-  try { await loadBookings(p[0], true); } catch(e){}
-  p[1] ? renderWeek(p[0], p[1]) : renderWeeks(p[0]);
+  const [year] = parts();
+  if (!CONFIG.YEARS[year]) return;
+  try { await loadBookings(year, true); } catch(e){}
+  route();
+}
+
+/* ---------- Journal (enseignants) ---------- */
+function getCode(){ try { return sessionStorage.getItem("khollapp-code") || ""; } catch(e){ return ""; } }
+function setCode(c){ try { sessionStorage.setItem("khollapp-code", c); } catch(e){} }
+
+async function renderJournal(force){
+  setAccent("1");
+  setBar({ title: "Journal", sub: "Historique des inscriptions", back: true, refresh: true });
+  const view = $("#view");
+  const code = getCode();
+  if (!DEMO && !code){
+    view.innerHTML = `
+      <div class="alert info">${ICON.lock}<span>Accès réservé aux enseignants.</span></div>
+      <form id="codeForm">
+        <label class="lbl" for="code">Code d'accès</label>
+        <input class="field" id="code" type="password" autocomplete="current-password" required>
+        <div class="msg" id="msg"></div>
+        <div class="actions"><button class="btn primary" type="submit">Ouvrir le journal</button></div>
+      </form>`;
+    $("#codeForm").onsubmit = (e) => { e.preventDefault(); setCode($("#code").value.trim()); state.journal = null; renderJournal(true); };
+    return;
+  }
+  if (force || !state.journal){
+    view.innerHTML = '<div class="loading"><span class="spin"></span>Chargement…</div>';
+    let r;
+    try { r = await API.journal(code); } catch(e){ r = { ok:false, error:"Connexion impossible." }; }
+    if (!r.ok){ setCode(""); view.innerHTML = errBox(esc(r.error || "Accès refusé.")) + '<div class="actions"><a class="btn outline" style="display:grid;place-items:center;text-decoration:none" href="#/journal">Réessayer</a></div>'; if (r.error === "Code incorrect.") setTimeout(() => renderJournal(), 1600); return; }
+    state.journal = r.log.slice().reverse();
+  }
+  const rows = state.journal.filter(e =>
+    (!state.jYear || String(e.year) === state.jYear) &&
+    (!state.jSearch || (e.student + " " + (e.from || "")).toLowerCase().includes(state.jSearch.toLowerCase())));
+  const badge = (a) => `<span class="badge ${a === "Inscription" ? "b-book" : a === "Remplacement" ? "b-replace" : "b-cancel"}">${esc(a)}</span>`;
+  const when = (t) => { const d = new Date(t); return isNaN(d) ? esc(t) : d.toLocaleDateString("fr-FR", { day:"2-digit", month:"2-digit" }) + " " + d.toLocaleTimeString("fr-FR", { hour:"2-digit", minute:"2-digit" }); };
+  view.innerHTML = demoBanner() + `
+    <div class="filters">
+      <select id="jYear" aria-label="Promotion"><option value="">Toutes</option>${Object.keys(CONFIG.YEARS).map(y => `<option value="${y}" ${state.jYear===y?"selected":""}>${esc(CONFIG.YEARS[y].short)}</option>`).join("")}</select>
+      <input class="field" id="jSearch" type="search" placeholder="Nom…" aria-label="Rechercher un nom" value="${esc(state.jSearch)}">
+    </div>
+    <p class="count">${rows.length} opération${rows.length>1?"s":""} · la plus récente en premier</p>
+    ${rows.length ? `<div class="group">${rows.map(e => `
+      <div class="entry">
+        <div class="top">${badge(e.action)}<span class="when">${when(e.at)}</span></div>
+        <div class="who">${e.action === "Remplacement" ? `${esc(e.student)} <span style="font-weight:600;color:var(--muted)">remplace</span> ${esc(e.from)}` : esc(e.student)}</div>
+        <div class="what">${esc(CONFIG.YEARS[e.year] ? CONFIG.YEARS[e.year].short : e.year)} · Khôlle ${esc(e.q)} · ${e.date ? esc(fmtDay(parseISO(String(e.date)))) : ""} · ${esc(e.time)} · ${esc(e.room)}</div>
+        <div class="dev">Appareil ${esc(e.device || "—")}</div>
+      </div>`).join("")}</div>` : '<div class="empty">Aucune opération.</div>'}`;
+  $("#jYear").onchange = (e) => { state.jYear = e.target.value; renderJournal(); };
+  const js = $("#jSearch");
+  js.oninput = (e) => { state.jSearch = e.target.value; clearTimeout(js._t); js._t = setTimeout(() => { renderJournal(); const n = $("#jSearch"); n.focus(); n.setSelectionRange(n.value.length, n.value.length); }, 250); };
 }
 
 let toastT;
 function toast(msg){
   const t = $("#toast"); t.textContent = msg; t.classList.add("show");
-  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 3200);
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 3400);
 }
 
 route();
