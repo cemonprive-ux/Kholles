@@ -212,9 +212,9 @@ const CONFIG = {
   STEP_MINUTES: 20,          // décalage entre deux créneaux
   BOOKING_WINDOW_MONTHS: 1,  // réservation ouverte au plus 1 mois avant le créneau
 
-  // Calendrier des quinzaines : Khôlle 1 commence la semaine de cette date (un lundi).
-  // Les semaines de vacances sont sautées : chaque khôlle = 2 semaines de cours consécutives.
-  FIRST_MONDAY: "2026-09-14",
+  // Une khôlle = un groupe de N dates de séances (khollesDays par promotion).
+  // Les dates listées dans "kholles" font foi ; au-delà, le calendrier est prolongé automatiquement
+  // avec les jours de séance suivants (vacances, jours fériés et ponts exclus).
   END_DATE: "2027-05-28",    // vendredi de la dernière semaine de mai 2027
 
   // Vacances scolaires zone A (académie de Clermont-Ferrand) 2026-2027, jours fériés, pont. Dates incluses.
@@ -234,6 +234,17 @@ const CONFIG = {
       label: "Première année",
       short: "1re année",
       start: "2026-09-14",
+      firstNumber: 1,
+      khollesDays: 4,  // 4 dates de séances par khôlle
+      // Dates de chaque khôlle (planning HEC 1). Au-delà de la dernière, prolongation automatique.
+      kholles: [
+        ["2026-09-16", "2026-09-18", "2026-09-23", "2026-09-25"],
+        ["2026-09-30", "2026-10-02", "2026-10-07", "2026-10-09"],
+        ["2026-10-14", "2026-10-16", "2026-11-04", "2026-11-06"],
+        ["2026-11-13", "2026-11-18", "2026-11-20", "2026-11-25"],
+        ["2026-11-27", "2026-12-02", "2026-12-04", "2026-12-09"],
+        ["2026-12-16", "2027-01-06", "2027-01-08", "2027-01-13"]
+      ],
       // weekday : 1 = lundi … 5 = vendredi
       sessions: [
         { weekday: 3, start: "16:00", count: 5, examiner: "Mme Pénilleau", room: "C416" },
@@ -254,6 +265,9 @@ const CONFIG = {
       label: "Deuxième année",
       short: "2e année",
       start: "2026-09-28",
+      firstNumber: 2,  // la Khôlle 2 est la première dans l'application
+      khollesDays: 2,  // 2 lundis par khôlle
+      kholles: [],
       sessions: [
         { weekday: 1, start: "12:00", count: 5, examiner: "M. Blanchet",      room: "C415" },
         { weekday: 1, start: "16:00", count: 5, examiner: "Mme Bedestroffer", room: "C416" }
@@ -299,61 +313,54 @@ function fmtWeek(mon){ const fri = addDays(mon,4);
   return mon.getMonth()===fri.getMonth() ? dnum(mon)+" – "+dnum(fri)+" "+MOIS_C[fri.getMonth()] : dnum(mon)+" "+MOIS_C[mon.getMonth()]+" – "+dnum(fri)+" "+MOIS_C[fri.getMonth()]; }
 function closedReason(dISO){ for (const [a,b,r] of CONFIG.CLOSED) if (dISO >= a && dISO <= b) return r; return null; }
 
-/* ---------- Calendrier : semaines de cours et quinzaines ---------- */
-const QUINZAINES = (() => {
-  const weeks = [];
-  let m = parseISO(CONFIG.FIRST_MONDAY);
-  while (iso(m) <= CONFIG.END_DATE){
-    let teaching = false;
-    for (let i = 0; i < 5; i++){ const k = iso(addDays(m,i)); if (k <= CONFIG.END_DATE && !closedReason(k)) teaching = true; }
-    if (teaching) weeks.push(new Date(m));
-    m = addDays(m, 7);
-  }
-  const qs = [];
-  weeks.forEach((w, i) => {
-    const n = Math.floor(i/2) + 1;
-    (qs[n-1] ||= { n, weeks: [] }).weeks.push(w);
-  });
-  return qs;
-})();
-const WEEK_INFO = {};  // lundi ISO -> { q, half }
-QUINZAINES.forEach(q => q.weeks.forEach((w, i) => WEEK_INFO[iso(w)] = { q: q.n, half: i+1 }));
-
-function sessionsFor(year, date){
+/* ---------- Calendrier : khôlles (groupes de dates de séances) ---------- */
+function sessionsFor(year, date, explicit){
   const Y = CONFIG.YEARS[year], k = iso(date);
-  if (closedReason(k)) return [];
   if (Y.overrides && Object.prototype.hasOwnProperty.call(Y.overrides, k)) return Y.overrides[k];
+  if (!explicit && closedReason(k)) return [];
   return Y.sessions.filter(s => s.weekday === date.getDay());
 }
-function slotsForWeek(year, monday){
-  const out = [], wk = iso(monday), info = WEEK_INFO[wk];
-  if (!info) return out;
-  for (let i = 0; i < 7; i++){
-    const d = addDays(monday, i), dISO = iso(d);
-    if (dISO < CONFIG.YEARS[year].start || dISO > CONFIG.END_DATE) continue;
-    sessionsFor(year, d).forEach(s => {
-      for (let n = 0; n < s.count; n++){
-        const st = toMin(s.start) + n*CONFIG.STEP_MINUTES, en = st + CONFIG.SLOT_MINUTES;
-        out.push({
-          id: year+"|"+dISO+"|"+String(st).padStart(4,"0")+"|"+s.room,
-          year, q: info.q, half: info.half, week: wk, date: d, dateISO: dISO,
-          start: st, label: fmtTime(st)+" – "+fmtTime(en), examiner: s.examiner, room: s.room,
-          startsAt: new Date(d.getFullYear(), d.getMonth(), d.getDate(), Math.floor(st/60), st%60)
-        });
-      }
-    });
-  }
-  return out;
+function slotsForDate(year, d, q, explicit){
+  const dISO = iso(d), wk = iso(mondayOf(d));
+  return sessionsFor(year, d, explicit).flatMap(s => Array.from({ length: s.count }, (_, n) => {
+    const st = toMin(s.start) + n*CONFIG.STEP_MINUTES, en = st + CONFIG.SLOT_MINUTES;
+    return {
+      id: year+"|"+dISO+"|"+String(st).padStart(4,"0")+"|"+s.room,
+      year, q, week: wk, date: d, dateISO: dISO,
+      start: st, label: fmtTime(st)+" – "+fmtTime(en), examiner: s.examiner, room: s.room,
+      startsAt: new Date(d.getFullYear(), d.getMonth(), d.getDate(), Math.floor(st/60), st%60)
+    };
+  }));
 }
 const SLOT_INDEX = {};
-function quinzainesFor(year){
-  return QUINZAINES.map(q => {
-    const weeks = q.weeks.map(w => ({ monday: w, slots: slotsForWeek(year, w) }));
-    weeks.forEach(w => w.slots.forEach(s => SLOT_INDEX[s.id] = s));
-    return { n: q.n, weeks, slots: weeks.flatMap(w => w.slots) };
+const KHOLLES = {};
+function buildKholles(year){
+  const Y = CONFIG.YEARS[year], per = Y.khollesDays || 2;
+  const groups = (Y.kholles || []).map(list => ({ dates: list.map(parseISO), explicit: true }));
+  const lastExplicit = groups.length ? iso(groups[groups.length-1].dates.slice(-1)[0]) : "";
+  const rest = [];
+  for (let d = parseISO(Y.start); iso(d) <= CONFIG.END_DATE; d = addDays(d, 1))
+    if (iso(d) > lastExplicit && sessionsFor(year, d).length) rest.push(new Date(d));
+  for (let i = 0; i < rest.length; i += per) groups.push({ dates: rest.slice(i, i + per), explicit: false });
+  return groups.map((g, i) => {
+    const n = (Y.firstNumber || 1) + i;
+    const days = g.dates.map(d => ({ date: d, slots: slotsForDate(year, d, n, g.explicit) })).filter(x => x.slots.length);
+    days.forEach(x => x.slots.forEach(s => SLOT_INDEX[s.id] = s));
+    return { n, days, slots: days.flatMap(x => x.slots), provisional: !g.explicit };
   }).filter(q => q.slots.length);
 }
-Object.keys(CONFIG.YEARS).forEach(quinzainesFor); // remplit SLOT_INDEX
+Object.keys(CONFIG.YEARS).forEach(y => KHOLLES[y] = buildKholles(y));
+const khollesFor = (year) => KHOLLES[year];
+
+// "16, 18, 23, 25 sept." / "27 nov., 2, 4, 9 déc."
+function fmtDates(dates){
+  const out = [];
+  dates.forEach((d, i) => {
+    const nx = dates[i+1];
+    out.push(dnum(d) + (!nx || nx.getMonth() !== d.getMonth() ? " " + MOIS_C[d.getMonth()] : ""));
+  });
+  return out.join(", ");
+}
 
 function slotStatus(s, now = new Date()){
   if (s.startsAt <= now) return "past";
@@ -361,7 +368,7 @@ function slotStatus(s, now = new Date()){
   return "open";
 }
 const openingDate = (s) => addMonths(s.startsAt, -CONFIG.BOOKING_WINDOW_MONTHS);
-const weekFrozen = (monday, now = new Date()) => now >= addDays(monday, 7);
+const dayFrozen = (d, now = new Date()) => now >= addDays(d, 1);
 function describeSlot(id){ const s = SLOT_INDEX[id]; return s ? `${fmtDay(s.date).toLowerCase()}, ${s.label} (${s.examiner}, salle ${s.room})` : id; }
 
 /* ---------- Identifiant d'appareil (pour le journal) ---------- */
@@ -508,30 +515,28 @@ function renderHome(){
     </div>`;
 }
 
-function qPill(q, b, now){
-  const nowMon = iso(mondayOf(now));
-  if (q.weeks.every(w => weekFrozen(w.monday, now))) return '<span class="pill done">Terminée</span>';
-  const open = q.slots.filter(s => slotStatus(s, now) === "open");
-  const notyet = q.slots.filter(s => slotStatus(s, now) === "notyet");
+function statusPill(slots, b, now){
+  if (slots.every(s => slotStatus(s, now) === "past")) return '<span class="pill done">Terminée</span>';
+  const open = slots.filter(s => slotStatus(s, now) === "open");
+  const notyet = slots.filter(s => slotStatus(s, now) === "notyet");
   if (!open.length && notyet.length) return `<span class="pill soon">Ouverture le ${fmtDate(openingDate(notyet[0]))}</span>`;
   const free = open.filter(s => !b[s.id]).length;
   return free ? `<span class="pill free">${free} libre${free>1?"s":""}</span>` : '<span class="pill full">Complet</span>';
 }
+const khollePast = (q, now) => q.days.every(x => dayFrozen(x.date, now));
 
 function renderList(year){
   const Y = CONFIG.YEARS[year], b = state.bookings[year] || {}, now = new Date();
   setBar({ title: Y.label, sub: "Choisir une khôlle", back: true, refresh: true });
-  const nowMon = iso(mondayOf(now));
-  const qs = quinzainesFor(year);
-  const isPast = (q) => q.weeks.every(w => weekFrozen(w.monday, now));
-  const past = qs.filter(isPast), next = qs.filter(q => !isPast(q));
+  const qs = khollesFor(year);
+  const past = qs.filter(q => khollePast(q, now)), next = qs.filter(q => !khollePast(q, now));
+  const curN = next.length ? next[0].n : null;
   const card = (q) => {
-    const cur = q.weeks.some(w => iso(w.monday) === nowMon);
-    const half = cur ? q.weeks.findIndex(w => iso(w.monday) === nowMon) + 1 : 0;
-    return `<a class="qcard${cur ? " current" : ""}${isPast(q) ? " past" : ""}" href="#/${year}/k/${q.n}">
+    const cur = q.n === curN, isPast = khollePast(q, now);
+    return `<a class="qcard${cur ? " current" : ""}${isPast ? " past" : ""}" href="#/${year}/k/${q.n}">
       <span class="qnum">${q.n}</span>
-      <span class="qbody"><span class="qt">Khôlle ${q.n}</span><br><span class="qd">${q.weeks.map(w => fmtWeek(w.monday)).join(" · ")}</span>
-      <span class="qpills">${cur ? `<span class="pill now">En cours · semaine ${half}</span>` : ""}${qPill(q, b, now)}</span></span>
+      <span class="qbody"><span class="qt">Khôlle ${q.n}</span><br><span class="qd">${fmtDates(q.days.map(x => x.date))}</span>
+      <span class="qpills">${cur ? '<span class="pill now">En cours</span>' : ""}${statusPill(q.slots, b, now)}</span></span>
       ${ICON.chev}
     </a>`;
   };
@@ -545,40 +550,30 @@ function renderList(year){
 
 function renderQuinzaine(year, n){
   const Y = CONFIG.YEARS[year], b = state.bookings[year] || {}, now = new Date();
-  const q = quinzainesFor(year).find(x => x.n === n);
-  if (!q){ setBar({ title: "Khôlle " + n, back: true }); $("#view").innerHTML = '<div class="empty">Pas de khôlle pour cette quinzaine.</div>'; return; }
-  const first = q.weeks[0].monday, last = addDays(q.weeks[q.weeks.length-1].monday, 4);
+  const q = khollesFor(year).find(x => x.n === n);
+  if (!q){ setBar({ title: "Khôlle " + n, back: true }); $("#view").innerHTML = '<div class="empty">Pas de khôlle pour ce numéro.</div>'; return; }
+  const first = q.days[0].date, last = q.days[q.days.length-1].date;
   setBar({ title: "Khôlle " + n, sub: Y.short + " · " + dnum(first) + " " + MOIS_C[first.getMonth()] + " – " + dnum(last) + " " + MOIS_C[last.getMonth()], back: true, refresh: true });
-  const allFrozen = q.weeks.every(w => weekFrozen(w.monday, now));
+  const allFrozen = khollePast(q, now);
   let html = demoBanner();
   html += allFrozen
     ? `<div class="alert info">${ICON.lock}<span><b>Khôlle terminée.</b> Le planning est figé : consultation uniquement.</span></div>`
-    : `<div class="rule">${ICON.info}<span><b>Une seule inscription par étudiant</b> pour la Khôlle ${n}, en semaine 1 ou en semaine 2. Réservation possible jusqu'à 1 mois à l'avance.</span></div>`;
-  q.weeks.forEach((w, wi) => {
-    const frozen = weekFrozen(w.monday, now);
-    const free = w.slots.filter(s => slotStatus(s, now) === "open" && !b[s.id]).length;
-    const pill = frozen ? '<span class="pill done">Terminée</span>'
-      : w.slots.every(s => slotStatus(s, now) === "notyet") ? `<span class="pill soon">Ouverture le ${fmtDate(openingDate(w.slots[0]))}</span>`
-      : free ? `<span class="pill free">${free} libre${free>1?"s":""}</span>` : '<span class="pill full">Complet</span>';
-    html += `<div class="weekhead"><h3>Semaine ${wi+1}<small>${fmtWeek(w.monday)}</small></h3>${pill}</div>`;
-    if (frozen && !allFrozen) html += `<div class="alert info">${ICON.lock}<span>Semaine terminée : consultation uniquement.</span></div>`;
-    if (!w.slots.length){ html += '<div class="empty">Pas de khôlle cette semaine.</div>'; return; }
-    const days = {};
-    w.slots.forEach(s => { ((days[s.dateISO] ||= {})[s.examiner + "|" + s.room] ||= []).push(s); });
-    Object.keys(days).sort().forEach(d => {
-      html += `<p class="dayname">${fmtDay(parseISO(d))}</p>`;
-      Object.entries(days[d]).forEach(([g, list]) => {
-        const [ex, room] = g.split("|");
-        html += `<div class="group"><div class="ghead"><span class="who">${esc(ex)}</span><span class="room">${esc(room)}</span></div>`;
-        list.forEach(s => {
-          const bk = b[s.id], st = slotStatus(s, now);
-          const locked = st !== "open";
-          const cls = (locked ? "locked " : "") + (bk ? "taken" : "free");
-          const txt = bk ? esc(bk.student) : st === "past" ? "—" : st === "notyet" ? "Ouverture le " + fmtDate(openingDate(s)) : "Libre";
-          html += `<button class="slot ${cls}" data-id="${esc(s.id)}"><span class="time">${s.label}</span><span class="state">${txt}${locked ? ICON.lock : '<span class="dot" aria-hidden="true"></span>'}</span></button>`;
-        });
-        html += `</div>`;
+    : `<div class="rule">${ICON.info}<span><b>Une seule inscription par étudiant</b> pour la Khôlle ${n}, sur l'une des ${q.days.length} dates ci-dessous. Réservation possible jusqu'à 1 mois à l'avance.</span></div>`;
+  q.days.forEach(day => {
+    html += `<div class="weekhead"><h3>${fmtDay(day.date)}</h3>${statusPill(day.slots, b, now)}</div>`;
+    const groups = {};
+    day.slots.forEach(s => { (groups[s.examiner + "|" + s.room] ||= []).push(s); });
+    Object.entries(groups).forEach(([g, list]) => {
+      const [ex, room] = g.split("|");
+      html += `<div class="group"><div class="ghead"><span class="who">${esc(ex)}</span><span class="room">${esc(room)}</span></div>`;
+      list.forEach(s => {
+        const bk = b[s.id], st = slotStatus(s, now);
+        const locked = st !== "open";
+        const cls = (locked ? "locked " : "") + (bk ? "taken" : "free");
+        const txt = bk ? esc(bk.student) : st === "past" ? "—" : st === "notyet" ? "Ouverture le " + fmtDate(openingDate(s)) : "Libre";
+        html += `<button class="slot ${cls}" data-id="${esc(s.id)}"><span class="time">${s.label}</span><span class="state">${txt}${locked ? ICON.lock : '<span class="dot" aria-hidden="true"></span>'}</span></button>`;
       });
+      html += `</div>`;
     });
   });
   $("#view").innerHTML = html;
@@ -607,7 +602,7 @@ function closeSheet(){
 $("#scrim").addEventListener("click", closeSheet);
 $("#sheet").addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
 
-const slotMeta = (s) => `<p class="meta"><b>Khôlle ${s.q} · semaine ${s.half}</b><br>${fmtDay(s.date)} · ${s.label}<br>${esc(s.examiner)} · salle <b>${esc(s.room)}</b></p>`;
+const slotMeta = (s) => `<p class="meta"><b>Khôlle ${s.q}</b><br>${fmtDay(s.date)} · ${s.label}<br>${esc(s.examiner)} · salle <b>${esc(s.room)}</b></p>`;
 const errBox = (m) => `<div class="alert err">${ICON.warn}<span>${m}</span></div>`;
 const nameSelect = (list, placeholder) => `<div class="selectwrap"><select id="who"><option value="">${placeholder}</option>${list.map(x => `<option>${esc(x)}</option>`).join("")}</select>${ICON.down}</div>`;
 function quinzaineConflict(s, student, ignoreSlot){
@@ -615,8 +610,8 @@ function quinzaineConflict(s, student, ignoreSlot){
   const other = Object.values(b).find(x => Number(x.q) === s.q && x.student === student && x.slotId !== ignoreSlot);
   if (!other) return null;
   const o = SLOT_INDEX[other.slotId];
-  const where = o && o.week !== s.week ? "l'autre semaine de cette quinzaine" : "cette semaine";
-  return `<b>Inscription impossible.</b> ${esc(student)} est déjà inscrit(e) à la Khôlle ${s.q}, ${where} : ${esc(describeSlot(other.slotId))}.<br>Une seule khôlle par quinzaine. Pour changer de créneau, libérez d'abord celui-ci.`;
+  const where = o && o.dateISO !== s.dateISO ? "à une autre date de cette khôlle" : "le même jour";
+  return `<b>Inscription impossible.</b> ${esc(student)} est déjà inscrit(e) à la Khôlle ${s.q} ${where} : ${esc(describeSlot(other.slotId))}.<br>Une seule inscription par khôlle. Pour changer de créneau, libérez d'abord celui-ci.`;
 }
 async function submit(btn, busyLabel, payload, okMsg){
   const label = btn.textContent;
@@ -636,7 +631,7 @@ function openBook(s){
     ${slotMeta(s)}
     <label class="lbl" for="who">Votre nom</label>
     ${nameSelect(Y.students, "Sélectionnez votre nom…")}
-    <p class="hint">Une seule inscription par quinzaine (semaine 1 ou semaine 2).</p>
+    <p class="hint">Une seule inscription par khôlle, toutes dates confondues.</p>
     <div class="msg" id="msg"></div>
     <div class="actions">
       <button class="btn primary" id="confirm" disabled>Confirmer l'inscription</button>
