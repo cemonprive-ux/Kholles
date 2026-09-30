@@ -174,6 +174,12 @@ select:focus,input.field:focus{outline:none;border-color:var(--accent);box-shado
 .badge.b-cancel{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
 .badge.b-replace{background:var(--warn-soft);color:var(--warn)}
 .count{font-size:13px;color:var(--muted);margin:0 4px 8px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;margin-bottom:14px;border-radius:14px;background:var(--surface);border:1px solid var(--line)}
+.tab{min-height:44px;border:0;border-radius:10px;background:transparent;font-weight:700;color:var(--ink-2);cursor:pointer}
+.tab.on{background:var(--accent);color:#fff}
+.btn.outline.danger{color:var(--err);border-color:var(--err)}
+.btn.danger-fill{background:#B42318;color:#fff}
+.btn.danger-fill:disabled{opacity:.45;cursor:not-allowed}
 /* Toast */
 .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 22px);transform:translate(-50%,140%);visibility:hidden;background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;font-weight:700;font-size:15px;z-index:30;transition:transform .25s,visibility 0s linear .25s;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
 .toast.show{transform:translate(-50%,0);visibility:visible;transition:transform .25s}
@@ -453,14 +459,32 @@ const API = {
     return { ok:true };
   },
   async journal(code){
-    if (DEMO) return { ok:true, log: demoGet("khollapp-demo-log") };
+    const keyed = (e) => Object.assign(e, { key: [e.at, e.action, e.student, e.date, e.time].join("|") });
+    if (DEMO) return { ok:true, log: demoGet("khollapp-demo-log").map(keyed), archive: demoGet("khollapp-demo-archive").map(keyed) };
     const r = await fetch(CONFIG.API_URL + "?action=journal&code=" + encodeURIComponent(code), { cache: "no-store" });
     return r.json();
+  },
+  async admin(p){
+    if (!DEMO){
+      const r = await fetch(CONFIG.API_URL, { method: "POST", body: JSON.stringify(p) });
+      return r.json();
+    }
+    const key = (e) => [e.at, e.action, e.student, e.date, e.time].join("|");
+    if (p.action === "archive"){
+      const want = new Set(p.keys), log = demoGet("khollapp-demo-log"), arch = demoGet("khollapp-demo-archive"), now = new Date().toISOString();
+      const moved = log.filter(e => want.has(key(e))).map(e => Object.assign({}, e, { archivedAt: now }));
+      demoSet("khollapp-demo-log", log.filter(e => !want.has(key(e))));
+      demoSet("khollapp-demo-archive", arch.concat(moved));
+      return { ok:true, moved: moved.length };
+    }
+    const n = demoGet("khollapp-demo-archive").length;
+    demoSet("khollapp-demo-archive", []);
+    return { ok:true, removed: n };
   }
 };
 
 /* ---------- État, barre et navigation ---------- */
-const state = { bookings: {}, loaded: {}, showPast: false, poll: null, journal: null, jYear: "", jSearch: "" };
+const state = { bookings: {}, loaded: {}, showPast: false, poll: null, journal: null, archive: null, jTab: "journal", jYear: "", jSearch: "" };
 
 function setBar({ title, sub, back, refresh }){
   $("#title").innerHTML = esc(title) + (sub ? '<span class="sub">'+esc(sub)+'</span>' : "");
@@ -736,28 +760,79 @@ async function renderJournal(force){
     try { r = await API.journal(code); } catch(e){ r = { ok:false, error:"Connexion impossible." }; }
     if (!r.ok){ setCode(""); view.innerHTML = errBox(esc(r.error || "Accès refusé.")) + '<div class="actions"><a class="btn outline" style="display:grid;place-items:center;text-decoration:none" href="#/journal">Réessayer</a></div>'; if (r.error === "Code incorrect.") setTimeout(() => renderJournal(), 1600); return; }
     state.journal = r.log.slice().reverse();
+    state.archive = (r.archive || []).slice().reverse();
   }
-  const rows = state.journal.filter(e =>
+  const isArch = state.jTab === "archive";
+  const source = isArch ? state.archive : state.journal;
+  const rows = source.filter(e =>
     (!state.jYear || String(e.year) === state.jYear) &&
     (!state.jSearch || (e.student + " " + (e.from || "")).toLowerCase().includes(state.jSearch.toLowerCase())));
   const badge = (a) => `<span class="badge ${a === "Inscription" ? "b-book" : a === "Remplacement" ? "b-replace" : "b-cancel"}">${esc(a)}</span>`;
   const when = (t) => { const d = new Date(t); return isNaN(d) ? esc(t) : d.toLocaleDateString("fr-FR", { day:"2-digit", month:"2-digit" }) + " " + d.toLocaleTimeString("fr-FR", { hour:"2-digit", minute:"2-digit" }); };
+  const filtered = state.jYear || state.jSearch;
+  const actionBtn = isArch
+    ? (state.archive.length ? `<button class="btn outline danger" id="purge">Vider les archives (${state.archive.length})</button>` : "")
+    : (rows.length ? `<button class="btn outline" id="archive">Archiver ${filtered ? (rows.length > 1 ? "les " + rows.length + " opérations affichées" : "l'opération affichée") : "tout le journal (" + rows.length + ")"}</button>` : "");
   view.innerHTML = demoBanner() + `
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="${!isArch}" class="tab${!isArch ? " on" : ""}" data-tab="journal">Journal (${state.journal.length})</button>
+      <button role="tab" aria-selected="${isArch}" class="tab${isArch ? " on" : ""}" data-tab="archive">Archives (${state.archive.length})</button>
+    </div>
     <div class="filters">
       <select id="jYear" aria-label="Promotion"><option value="">Toutes</option>${Object.keys(CONFIG.YEARS).map(y => `<option value="${y}" ${state.jYear===y?"selected":""}>${esc(CONFIG.YEARS[y].short)}</option>`).join("")}</select>
       <input class="field" id="jSearch" type="search" placeholder="Nom…" aria-label="Rechercher un nom" value="${esc(state.jSearch)}">
     </div>
-    <p class="count">${rows.length} opération${rows.length>1?"s":""} · la plus récente en premier</p>
+    <p class="count">${rows.length} opération${rows.length>1?"s":""} ${isArch ? "archivée" + (rows.length>1?"s":"") : ""} · la plus récente en premier</p>
     ${rows.length ? `<div class="group">${rows.map(e => `
       <div class="entry">
         <div class="top">${badge(e.action)}<span class="when">${when(e.at)}</span></div>
         <div class="who">${e.action === "Remplacement" ? `${esc(e.student)} <span style="font-weight:600;color:var(--muted)">remplace</span> ${esc(e.from)}` : esc(e.student)}</div>
         <div class="what">${esc(CONFIG.YEARS[e.year] ? CONFIG.YEARS[e.year].short : e.year)} · Khôlle ${esc(e.q)} · ${e.date ? esc(fmtDay(parseISO(String(e.date)))) : ""} · ${esc(e.time)} · ${esc(e.room)}</div>
-        <div class="dev">Appareil ${esc(e.device || "—")}</div>
-      </div>`).join("")}</div>` : '<div class="empty">Aucune opération.</div>'}`;
+        <div class="dev">Appareil ${esc(e.device || "—")}${e.archivedAt ? " · archivé le " + when(e.archivedAt) : ""}</div>
+      </div>`).join("")}</div>` : `<div class="empty">${isArch ? "Aucune opération archivée." : "Aucune opération."}</div>`}
+    <div class="actions">${actionBtn}</div>`;
+  document.querySelectorAll(".tab").forEach(t => t.onclick = () => { state.jTab = t.dataset.tab; renderJournal(); });
+  const ab = $("#archive");
+  if (ab) ab.onclick = () => confirmAdmin({
+    title: "Archiver le journal",
+    text: `${rows.length} opération${rows.length>1?"s":""} ${rows.length>1?"seront déplacées":"sera déplacée"} vers les archives. Elles restent consultables dans l'onglet « Archives » et dans le Google Sheet.`,
+    label: "Archiver", cls: "primary",
+    payload: { action: "archive", keys: rows.map(e => e.key) },
+    done: (r) => `${r.moved} opération${r.moved>1?"s":""} archivée${r.moved>1?"s":""}.`
+  });
+  const pb = $("#purge");
+  if (pb) pb.onclick = () => confirmAdmin({
+    title: "Vider les archives",
+    text: `<b>Suppression définitive</b> ${state.archive.length > 1 ? "des " + state.archive.length + " opérations archivées" : "de l'opération archivée"}, y compris dans le Google Sheet. Cette action est irréversible.`,
+    label: "Vider définitivement", cls: "danger-fill", warn: true,
+    payload: { action: "purgeArchive" },
+    done: (r) => `Archives vidées (${r.removed} opération${r.removed>1?"s":""} supprimée${r.removed>1?"s":""}).`
+  });
   $("#jYear").onchange = (e) => { state.jYear = e.target.value; renderJournal(); };
   const js = $("#jSearch");
   js.oninput = (e) => { state.jSearch = e.target.value; clearTimeout(js._t); js._t = setTimeout(() => { renderJournal(); const n = $("#jSearch"); n.focus(); n.setSelectionRange(n.value.length, n.value.length); }, 250); };
+}
+
+function confirmAdmin(o){
+  openSheet(`
+    <h4 id="sheetTitle">${o.title}</h4>
+    <div class="alert ${o.warn ? "err" : "info"}" style="margin-top:14px">${o.warn ? ICON.warn : ICON.info}<span>${o.text}</span></div>
+    ${o.warn ? `<label class="check"><input type="checkbox" id="sure"> <span>Je confirme la suppression définitive.</span></label>` : ""}
+    <div class="msg" id="msg"></div>
+    <div class="actions">
+      <button class="btn ${o.cls}" id="go" ${o.warn ? "disabled" : ""}>${o.label}</button>
+      <button class="btn ghost" id="close">Annuler</button>
+    </div>`);
+  $("#close").onclick = closeSheet;
+  const go = $("#go"), sure = $("#sure");
+  if (sure) sure.onchange = () => { go.disabled = !sure.checked; };
+  go.onclick = async () => {
+    go.disabled = true; const label = go.textContent; go.textContent = "Traitement…";
+    let r;
+    try { r = await API.admin(Object.assign({ code: getCode() }, o.payload)); } catch(e){ r = { ok:false, error:"Connexion impossible." }; }
+    if (!r.ok){ $("#msg").innerHTML = errBox(esc(r.error || "Opération refusée.")); go.disabled = false; go.textContent = label; return; }
+    closeSheet(); toast(o.done(r)); renderJournal(true);
+  };
 }
 
 let toastT;
