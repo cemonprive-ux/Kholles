@@ -71,6 +71,7 @@ main{flex:1;padding:16px 16px calc(env(safe-area-inset-bottom) + 28px)}
 .linkbtn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 14px;border-radius:12px;color:var(--ink-2);text-decoration:none;font-weight:600;font-size:14.5px}
 .linkbtn:hover{background:var(--surface)}
 .linkbtn svg{width:18px;height:18px}
+.credit{margin:4px 0 0;color:var(--ink-2);font-size:12px;font-weight:600}
 .kicker{margin:6px 4px 10px;font-size:12px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted)}
 /* Liste des khôlles */
 .list{display:grid;gap:10px}
@@ -533,6 +534,7 @@ function renderHome(){
     </div>
     <div class="foot">
       <a class="linkbtn" href="#/journal">${ICON.lock} Journal des inscriptions (enseignants)</a>
+      <p class="credit">🚀 Powered by Maxens Blanchet</p>
     </div>`;
 }
 
