@@ -180,8 +180,18 @@ select:focus,input.field:focus{outline:none;border-color:var(--accent);box-shado
 .btn.outline.danger{color:var(--err);border-color:var(--err)}
 .btn.danger-fill{background:#B42318;color:#fff}
 .btn.danger-fill:disabled{opacity:.45;cursor:not-allowed}
+.selall{display:flex;align-items:center;gap:10px;min-height:44px;margin:0 2px 8px;padding:0 12px;font-weight:700;font-size:14.5px;cursor:pointer}
+.selall .muted{color:var(--muted);font-weight:600}
+.selall input,.pickbox{width:20px;height:20px;margin:0;accent-color:var(--accent);flex:none;cursor:pointer}
+.entry.pick{display:flex;gap:12px;align-items:flex-start;cursor:pointer}
+.entry.pick .pickbox{margin-top:3px}
+.entry.picked{background:var(--accent-soft)}
+.ebody{flex:1;min-width:0;display:block}
+.ebody > span{display:block}
+.ebody .top{display:flex}
+.selbar{position:sticky;bottom:0;display:grid;gap:10px;margin:16px -16px 0;padding:12px 16px calc(env(safe-area-inset-bottom) + 12px);background:var(--bg);border-top:1px solid var(--line)}
 /* Toast */
-.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 22px);transform:translate(-50%,140%);visibility:hidden;background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;font-weight:700;font-size:15px;z-index:30;transition:transform .25s,visibility 0s linear .25s;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 96px);transform:translate(-50%,140%);visibility:hidden;background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:14px;font-weight:700;font-size:15px;z-index:30;transition:transform .25s,visibility 0s linear .25s;max-width:calc(100% - 32px);box-shadow:var(--shadow)}
 .toast.show{transform:translate(-50%,0);visibility:visible;transition:transform .25s}
 </style>
 </head>
@@ -477,9 +487,11 @@ const API = {
       demoSet("khollapp-demo-archive", arch.concat(moved));
       return { ok:true, moved: moved.length };
     }
-    const n = demoGet("khollapp-demo-archive").length;
-    demoSet("khollapp-demo-archive", []);
-    return { ok:true, removed: n };
+    const arch = demoGet("khollapp-demo-archive");
+    if (p.all){ demoSet("khollapp-demo-archive", []); return { ok:true, removed: arch.length }; }
+    const want = new Set(p.keys || []), keep = arch.filter(e => !want.has(key(e)));
+    demoSet("khollapp-demo-archive", keep);
+    return { ok:true, removed: arch.length - keep.length };
   }
 };
 
@@ -769,10 +781,9 @@ async function renderJournal(force){
     (!state.jSearch || (e.student + " " + (e.from || "")).toLowerCase().includes(state.jSearch.toLowerCase())));
   const badge = (a) => `<span class="badge ${a === "Inscription" ? "b-book" : a === "Remplacement" ? "b-replace" : "b-cancel"}">${esc(a)}</span>`;
   const when = (t) => { const d = new Date(t); return isNaN(d) ? esc(t) : d.toLocaleDateString("fr-FR", { day:"2-digit", month:"2-digit" }) + " " + d.toLocaleTimeString("fr-FR", { hour:"2-digit", minute:"2-digit" }); };
-  const filtered = state.jYear || state.jSearch;
-  const actionBtn = isArch
-    ? (state.archive.length ? `<button class="btn outline danger" id="purge">Vider les archives (${state.archive.length})</button>` : "")
-    : (rows.length ? `<button class="btn outline" id="archive">Archiver ${filtered ? (rows.length > 1 ? "les " + rows.length + " opérations affichées" : "l'opération affichée") : "tout le journal (" + rows.length + ")"}</button>` : "");
+  const sel = state.sel || (state.sel = new Set());
+  [...sel].forEach(k => { if (!source.some(e => e.key === k)) sel.delete(k); });
+  const plural = (n, one, many) => n > 1 ? many.replace("#", n) : one.replace("#", n);
   view.innerHTML = demoBanner() + `
     <div class="tabs" role="tablist">
       <button role="tab" aria-selected="${!isArch}" class="tab${!isArch ? " on" : ""}" data-tab="journal">Journal (${state.journal.length})</button>
@@ -782,31 +793,68 @@ async function renderJournal(force){
       <select id="jYear" aria-label="Promotion"><option value="">Toutes</option>${Object.keys(CONFIG.YEARS).map(y => `<option value="${y}" ${state.jYear===y?"selected":""}>${esc(CONFIG.YEARS[y].short)}</option>`).join("")}</select>
       <input class="field" id="jSearch" type="search" placeholder="Nom…" aria-label="Rechercher un nom" value="${esc(state.jSearch)}">
     </div>
-    <p class="count">${rows.length} opération${rows.length>1?"s":""} ${isArch ? "archivée" + (rows.length>1?"s":"") : ""} · la plus récente en premier</p>
-    ${rows.length ? `<div class="group">${rows.map(e => `
-      <div class="entry">
-        <div class="top">${badge(e.action)}<span class="when">${when(e.at)}</span></div>
-        <div class="who">${e.action === "Remplacement" ? `${esc(e.student)} <span style="font-weight:600;color:var(--muted)">remplace</span> ${esc(e.from)}` : esc(e.student)}</div>
-        <div class="what">${esc(CONFIG.YEARS[e.year] ? CONFIG.YEARS[e.year].short : e.year)} · Khôlle ${esc(e.q)} · ${e.date ? esc(fmtDay(parseISO(String(e.date)))) : ""} · ${esc(e.time)} · ${esc(e.room)}</div>
-        <div class="dev">Appareil ${esc(e.device || "—")}${e.archivedAt ? " · archivé le " + when(e.archivedAt) : ""}</div>
-      </div>`).join("")}</div>` : `<div class="empty">${isArch ? "Aucune opération archivée." : "Aucune opération."}</div>`}
-    <div class="actions">${actionBtn}</div>`;
-  document.querySelectorAll(".tab").forEach(t => t.onclick = () => { state.jTab = t.dataset.tab; renderJournal(); });
-  const ab = $("#archive");
-  if (ab) ab.onclick = () => confirmAdmin({
-    title: "Archiver le journal",
-    text: `${rows.length} opération${rows.length>1?"s":""} ${rows.length>1?"seront déplacées":"sera déplacée"} vers les archives. Elles restent consultables dans l'onglet « Archives » et dans le Google Sheet.`,
+    ${isArch ? `<div class="alert info">${ICON.info}<span>Les opérations archivées restent consultables ici et dans le Google Sheet jusqu'à leur suppression définitive.</span></div>` : ""}
+    ${rows.length ? `
+    <label class="selall"><input type="checkbox" id="selAll"> <span>Tout sélectionner <span class="muted">(${plural(rows.length, "# opération affichée", "# opérations affichées")})</span></span></label>
+    <div class="group">${rows.map(e => `
+      <label class="entry pick${sel.has(e.key) ? " picked" : ""}">
+        <input type="checkbox" class="pickbox" value="${esc(e.key)}" ${sel.has(e.key) ? "checked" : ""} aria-label="Sélectionner">
+        <span class="ebody">
+          <span class="top">${badge(e.action)}<span class="when">${when(e.at)}</span></span>
+          <span class="who">${e.action === "Remplacement" ? `${esc(e.student)} <span style="font-weight:600;color:var(--muted)">remplace</span> ${esc(e.from)}` : esc(e.student)}</span>
+          <span class="what">${esc(CONFIG.YEARS[e.year] ? CONFIG.YEARS[e.year].short : e.year)} · Khôlle ${esc(e.q)} · ${e.date ? esc(fmtDay(parseISO(String(e.date)))) : ""} · ${esc(e.time)} · ${esc(e.room)}</span>
+          <span class="dev">Appareil ${esc(e.device || "—")}${e.archivedAt ? " · archivé le " + when(e.archivedAt) : ""}</span>
+        </span>
+      </label>`).join("")}</div>` : `<div class="empty">${isArch ? "Aucune opération archivée." : "Aucune opération."}</div>`}
+    <div class="selbar" id="selbar">
+      ${isArch
+        ? `<button class="btn danger-fill" id="delSel" disabled></button>
+           ${state.archive.length ? `<button class="btn outline danger" id="purgeAll">Vider toutes les archives (${state.archive.length})</button>` : ""}`
+        : `<button class="btn primary" id="archSel" disabled></button>`}
+    </div>`;
+  const visibleKeys = rows.map(e => e.key);
+  const chosen = () => visibleKeys.filter(k => sel.has(k));
+  const refreshSel = () => {
+    const n = chosen().length;
+    const all = $("#selAll");
+    if (all){ all.checked = n > 0 && n === visibleKeys.length; all.indeterminate = n > 0 && n < visibleKeys.length; }
+    document.querySelectorAll(".pickbox").forEach(b => b.closest(".entry").classList.toggle("picked", b.checked));
+    const a = $("#archSel"), d = $("#delSel");
+    if (a){ a.disabled = !n; a.textContent = n ? "Archiver la sélection (" + n + ")" : "Sélectionnez les opérations à archiver"; }
+    if (d){ d.disabled = !n; d.textContent = n ? "Supprimer la sélection (" + n + ")" : "Sélectionnez les opérations à supprimer"; }
+  };
+  document.querySelectorAll(".pickbox").forEach(b => b.onchange = () => { b.checked ? sel.add(b.value) : sel.delete(b.value); refreshSel(); });
+  const all = $("#selAll");
+  if (all) all.onchange = () => {
+    visibleKeys.forEach(k => all.checked ? sel.add(k) : sel.delete(k));
+    document.querySelectorAll(".pickbox").forEach(b => b.checked = all.checked);
+    refreshSel();
+  };
+  refreshSel();
+  document.querySelectorAll(".tab").forEach(t => t.onclick = () => { state.jTab = t.dataset.tab; sel.clear(); renderJournal(); });
+  const ab = $("#archSel");
+  if (ab) ab.onclick = () => { const keys = chosen(); confirmAdmin({
+    title: "Archiver la sélection",
+    text: `${plural(keys.length, "# opération sera déplacée", "# opérations seront déplacées")} vers les archives. Elles restent consultables dans l'onglet « Archives » et dans le Google Sheet jusqu'à leur suppression définitive.`,
     label: "Archiver", cls: "primary",
-    payload: { action: "archive", keys: rows.map(e => e.key) },
-    done: (r) => `${r.moved} opération${r.moved>1?"s":""} archivée${r.moved>1?"s":""}.`
-  });
-  const pb = $("#purge");
-  if (pb) pb.onclick = () => confirmAdmin({
-    title: "Vider les archives",
-    text: `<b>Suppression définitive</b> ${state.archive.length > 1 ? "des " + state.archive.length + " opérations archivées" : "de l'opération archivée"}, y compris dans le Google Sheet. Cette action est irréversible.`,
+    payload: { action: "archive", keys },
+    done: (r) => plural(r.moved, "# opération archivée.", "# opérations archivées.")
+  }); };
+  const db = $("#delSel");
+  if (db) db.onclick = () => { const keys = chosen(); confirmAdmin({
+    title: "Supprimer la sélection",
+    text: `<b>Suppression définitive</b> de ${plural(keys.length, "# opération archivée", "# opérations archivées")}, y compris dans le Google Sheet. Cette action est irréversible.`,
+    label: "Supprimer définitivement", cls: "danger-fill", warn: true,
+    payload: { action: "purgeArchive", keys },
+    done: (r) => plural(r.removed, "# opération supprimée.", "# opérations supprimées.")
+  }); };
+  const pa = $("#purgeAll");
+  if (pa) pa.onclick = () => confirmAdmin({
+    title: "Vider toutes les archives",
+    text: `<b>Suppression définitive</b> de ${plural(state.archive.length, "l'opération archivée", "toutes les opérations archivées (#)")}, y compris dans le Google Sheet. Cette action est irréversible.`,
     label: "Vider définitivement", cls: "danger-fill", warn: true,
-    payload: { action: "purgeArchive" },
-    done: (r) => `Archives vidées (${r.removed} opération${r.removed>1?"s":""} supprimée${r.removed>1?"s":""}).`
+    payload: { action: "purgeArchive", all: true },
+    done: (r) => plural(r.removed, "Archives vidées (# opération supprimée).", "Archives vidées (# opérations supprimées).")
   });
   $("#jYear").onchange = (e) => { state.jYear = e.target.value; renderJournal(); };
   const js = $("#jSearch");
@@ -831,7 +879,7 @@ function confirmAdmin(o){
     let r;
     try { r = await API.admin(Object.assign({ code: getCode() }, o.payload)); } catch(e){ r = { ok:false, error:"Connexion impossible." }; }
     if (!r.ok){ $("#msg").innerHTML = errBox(esc(r.error || "Opération refusée.")); go.disabled = false; go.textContent = label; return; }
-    closeSheet(); toast(o.done(r)); renderJournal(true);
+    closeSheet(); toast(o.done(r)); if (state.sel) state.sel.clear(); renderJournal(true);
   };
 }
 
