@@ -180,6 +180,43 @@ select:focus,input.field:focus{outline:none;border-color:var(--accent);box-shado
 .btn.outline.danger{color:var(--err);border-color:var(--err)}
 .btn.danger-fill{background:#B42318;color:#fff}
 .btn.danger-fill:disabled{opacity:.45;cursor:not-allowed}
+/* Annulations */
+.pill.cancel{background:var(--err-soft);color:var(--err)}
+.alert.cancel{background:var(--err-soft);color:var(--err);border:1.5px solid var(--err)}
+.alert.cancel a{color:inherit;font-weight:600}
+.clist{margin:6px 0;padding-left:18px}
+.clist li{margin:3px 0}
+.clist .why{display:block;font-size:13px;opacity:.9}
+.group.cancelled .ghead{background:#6B7280}
+.group.cancelled .room{color:#6B7280}
+.cbadge{padding:3px 8px;border-radius:999px;background:#fff;color:#B42318;font-size:12px;font-weight:700}
+.cnote{padding:8px 14px;font-size:13.5px;font-weight:600;color:var(--err);background:var(--err-soft)}
+.group.cancelled .slot .time{text-decoration:line-through}
+.slot.cancelled .state{color:var(--err)}
+/* Espace enseignants */
+.tlogin{text-align:center;padding:20px 8px 10px}
+.tlogin h2{margin:10px 0 4px;font-size:26px}
+.tlogin p{margin:0 0 14px;color:var(--ink-2)}
+.tlock{width:64px;height:64px;margin:0 auto;border-radius:18px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+.tlock svg{width:30px;height:30px}
+.tcard{display:flex;align-items:center;gap:14px;padding:16px;border:1px solid var(--line);border-radius:20px;background:var(--surface);box-shadow:var(--shadow);text-decoration:none;color:inherit}
+.tcard .t{font-weight:700;font-size:18px}
+.tcard .d{color:var(--muted);font-size:14px}
+.tbody{flex:1;min-width:0;display:block}
+.ticon{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;flex:none}
+.ticon svg{width:26px;height:26px}
+.t-annul{background:var(--err-soft);color:var(--err)}
+.t-log{background:var(--y1-soft);color:var(--y1)}
+.srow{display:flex;align-items:center;gap:12px;padding:12px 14px;border-top:1px solid var(--line)}
+.srow:first-child{border-top:0}
+.srow.is-cancelled{background:var(--err-soft)}
+.sinfo{flex:1;min-width:0}
+.sday{font-weight:700}
+.smeta{font-size:13.5px;color:var(--ink-2);margin-top:2px}
+.sbtn{flex:none;min-height:44px;min-width:96px;padding:0 14px;border-radius:12px;font-weight:700;cursor:pointer;background:transparent}
+.sbtn.cancel{border:1.5px solid var(--err);color:var(--err)}
+.sbtn.restore{border:1.5px solid var(--accent);color:var(--accent);background:var(--surface)}
+.badge.b-annul{background:var(--err-soft);color:var(--err)}
 .selall{display:flex;align-items:center;gap:10px;min-height:44px;margin:0 2px 8px;padding:0 12px;font-weight:700;font-size:14.5px;cursor:pointer}
 .selall .muted{color:var(--muted);font-weight:600}
 .selall input,.pickbox{width:20px;height:20px;margin:0;accent-color:var(--accent);flex:none;cursor:pointer}
@@ -329,6 +366,8 @@ const ICON = {
   info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/></svg>',
   warn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17v.5"/></svg>',
   chev: '<svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>',
+  ban: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M9.5 13l5 5M14.5 13l-5 5"/></svg>',
+  list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>',
   down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>'
 };
 
@@ -360,6 +399,7 @@ function slotsForDate(year, d, q, explicit){
     const st = toMin(s.start) + n*CONFIG.STEP_MINUTES, en = st + CONFIG.SLOT_MINUTES;
     return {
       id: year+"|"+dISO+"|"+String(st).padStart(4,"0")+"|"+s.room,
+      sid: year+"|"+dISO+"|"+s.room,
       year, q, week: wk, date: d, dateISO: dISO,
       start: st, label: fmtTime(st)+" – "+fmtTime(en), examiner: s.examiner, room: s.room,
       startsAt: new Date(d.getFullYear(), d.getMonth(), d.getDate(), Math.floor(st/60), st%60)
@@ -399,7 +439,9 @@ function fmtDates(dates){
   return out.join(", ");
 }
 
+const cancelOf = (s) => (state.cancels[s.year] || {})[s.sid];
 function slotStatus(s, now = new Date()){
+  if (cancelOf(s)) return "cancelled";
   if (s.startsAt <= now) return "past";
   if (now < s.opensAt) return "notyet";
   return "open";
@@ -424,6 +466,7 @@ function ruleCheck(all, p, ignoreSlot){
   const s = SLOT_INDEX[p.slotId];
   if (!s) return "Créneau inconnu.";
   const st = slotStatus(s);
+  if (st === "cancelled") return "Cette séance a été annulée par l'enseignant.";
   if (st === "past") return "Ce créneau est passé : il n'est plus modifiable.";
   if (st === "notyet") return "Les réservations pour ce créneau ouvrent le " + fmtDate(openingDate(s)) + ".";
   const other = all.find(b => b.year === p.year && Number(b.q) === Number(p.q) && b.student === p.student && b.slotId !== ignoreSlot);
@@ -433,11 +476,11 @@ function ruleCheck(all, p, ignoreSlot){
 
 const API = {
   async list(year){
-    if (DEMO) return demoGet("khollapp-demo").filter(b => b.year === year);
+    if (DEMO) return { bookings: demoGet("khollapp-demo").filter(b => b.year === year), cancels: demoGet("khollapp-demo-cancel").filter(c => c.year === year) };
     const r = await fetch(CONFIG.API_URL + "?action=list&year=" + encodeURIComponent(year), { cache: "no-store" });
     const j = await r.json();
     if (!j.ok) throw new Error(j.error || "Erreur serveur");
-    return j.bookings;
+    return { bookings: j.bookings, cancels: j.cancels || [] };
   },
   async post(p){
     p.device = DEVICE;
@@ -475,11 +518,28 @@ const API = {
     return r.json();
   },
   async admin(p){
+    p.device = DEVICE;
     if (!DEMO){
       const r = await fetch(CONFIG.API_URL, { method: "POST", body: JSON.stringify(p) });
       return r.json();
     }
     const key = (e) => [e.at, e.action, e.student, e.date, e.time].join("|");
+    if (p.action === "cancelSession" || p.action === "restoreSession"){
+      const cancels = demoGet("khollapp-demo-cancel"), log = demoGet("khollapp-demo-log"), at = new Date().toISOString();
+      const base = { year:p.year, q:p.q, date:p.date, room:p.room, device:DEVICE };
+      if (p.action === "restoreSession"){
+        demoSet("khollapp-demo-cancel", cancels.filter(c => c.sid !== p.sid));
+        log.push(Object.assign({ at, action:"Séance rétablie", time:"Séance entière", student:p.examiner, from:"" }, base));
+        demoSet("khollapp-demo-log", log); return { ok:true };
+      }
+      if (!cancels.some(c => c.sid === p.sid)) cancels.push({ sid:p.sid, year:p.year, q:p.q, date:p.date, examiner:p.examiner, room:p.room, reason:p.reason || "", at });
+      const all = demoGet("khollapp-demo"), released = all.filter(b => SLOT_INDEX[b.slotId] && SLOT_INDEX[b.slotId].sid === p.sid);
+      released.forEach(b => log.push(Object.assign({ at, action:"Libéré (séance annulée)", time:SLOT_INDEX[b.slotId].label, student:b.student, from:"" }, base)));
+      log.push(Object.assign({ at, action:"Séance annulée", time:"Séance entière", student:p.examiner, from:p.reason || "" }, base));
+      demoSet("khollapp-demo", all.filter(b => !released.includes(b)));
+      demoSet("khollapp-demo-cancel", cancels); demoSet("khollapp-demo-log", log);
+      return { ok:true, released: released.map(b => b.student) };
+    }
     if (p.action === "archive"){
       const want = new Set(p.keys), log = demoGet("khollapp-demo-log"), arch = demoGet("khollapp-demo-archive"), now = new Date().toISOString();
       const moved = log.filter(e => want.has(key(e))).map(e => Object.assign({}, e, { archivedAt: now }));
@@ -496,7 +556,7 @@ const API = {
 };
 
 /* ---------- État, barre et navigation ---------- */
-const state = { bookings: {}, loaded: {}, showPast: false, poll: null, journal: null, archive: null, jTab: "journal", jYear: "", jSearch: "" };
+const state = { bookings: {}, cancels: {}, loaded: {}, aYear: "1", showPast: false, poll: null, journal: null, archive: null, jTab: "journal", jYear: "", jSearch: "" };
 
 function setBar({ title, sub, back, refresh }){
   $("#title").innerHTML = esc(title) + (sub ? '<span class="sub">'+esc(sub)+'</span>' : "");
@@ -511,21 +571,23 @@ function setAccent(year){
   r.setProperty("--head", year === "2" ? "var(--y2-strong)" : "var(--y1-strong)");
 }
 const parts = () => location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
-$("#back").addEventListener("click", () => { const p = parts(); location.hash = (p[0] === "journal" || p.length < 2) ? "#/" : "#/" + p[0]; });
+$("#back").addEventListener("click", () => { const p = parts(); location.hash = p.length < 2 ? "#/" : "#/" + p[0]; });
 $("#refresh").addEventListener("click", () => route(true));
 window.addEventListener("hashchange", () => { closeSheet(); route(); });
 
 async function loadBookings(year, force){
   if (!force && state.loaded[year] && Date.now() - state.loaded[year] < 15000) return;
-  const list = await API.list(year);
-  const map = {}; list.forEach(b => map[b.slotId] = b);
-  state.bookings[year] = map; state.loaded[year] = Date.now();
+  const r = await API.list(year);
+  const map = {}; r.bookings.forEach(b => map[b.slotId] = b);
+  const cmap = {}; r.cancels.forEach(c => cmap[c.sid] = c);
+  state.bookings[year] = map; state.cancels[year] = cmap; state.loaded[year] = Date.now();
 }
 
 async function route(force){
   clearInterval(state.poll);
   const [year, sub, n] = parts();
-  if (year === "journal") return renderJournal(force);
+  if (year === "journal"){ location.replace("#/prof/journal"); return; }
+  if (year === "prof") return sub === "journal" ? renderJournal(force) : sub === "annulations" ? renderAnnul(force) : renderProf(force);
   if (!year || !CONFIG.YEARS[year]) return renderHome();
   setAccent(year);
   const view = $("#view");
@@ -558,6 +620,7 @@ function renderHome(){
       <p class="tag2">Prépa ECT – Lycée Sidoine Apollinaire</p>
     </div>
     ${demoBanner()}
+    <div id="homeAlerts">${cancelBanner(null)}</div>
     <p class="kicker">Choisissez votre promotion</p>
     <div class="choices">
       ${Object.keys(CONFIG.YEARS).map(y => `
@@ -569,12 +632,38 @@ function renderHome(){
         </a>`).join("")}
     </div>
     <div class="foot">
-      <a class="linkbtn" href="#/journal">${ICON.lock} Journal des inscriptions (enseignants)</a>
+      <a class="linkbtn" href="#/prof">${ICON.lock} Espace enseignants</a>
       <p class="credit">🚀 Powered by Maxens Blanchet</p>
     </div>`;
+  // Chargement discret des deux promotions : alertes d'annulation et préchargement
+  Promise.allSettled(Object.keys(CONFIG.YEARS).map(y => loadBookings(y))).then(() => {
+    const box = $("#homeAlerts"); if (box && !parts()[0]) box.innerHTML = cancelBanner(null);
+  });
+}
+
+/* Bandeau d'alerte des séances annulées (à venir). year = null : toutes promotions ; n : une seule khôlle */
+function upcomingCancels(year, n){
+  const today = iso(new Date());
+  return (year ? [year] : Object.keys(CONFIG.YEARS)).flatMap(y => Object.values(state.cancels[y] || {}).map(c => Object.assign({ year: y }, c)))
+    .filter(c => String(c.date) >= today && (n == null || Number(c.q) === Number(n)))
+    .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+}
+function cancelBanner(year, n){
+  const list = upcomingCancels(year, n);
+  if (!list.length) return "";
+  const item = (c) => {
+    const label = `${year ? "" : esc(CONFIG.YEARS[c.year].short) + " · "}Khôlle ${esc(c.q)} · <b>${esc(fmtDay(parseISO(String(c.date))))}</b> · ${esc(c.examiner)} (${esc(c.room)})`;
+    const why = c.reason ? `<span class="why">Motif : ${esc(c.reason)}</span>` : "";
+    return n != null ? `<li>${label}${why}</li>` : `<li><a href="#/${c.year}/k/${esc(c.q)}">${label}</a>${why}</li>`;
+  };
+  return `<div class="alert cancel" role="alert">${ICON.warn}<span><b>${list.length > 1 ? "Séances de khôlle annulées" : "Séance de khôlle annulée"}</b>
+    <ul class="clist">${list.map(item).join("")}</ul>
+    ${n != null ? "Les inscriptions de ces séances ont été libérées : choisissez un autre créneau de la khôlle." : ""}</span></div>`;
 }
 
 function statusPill(slots, b, now){
+  if (slots.length && slots.every(s => slotStatus(s, now) === "cancelled")) return '<span class="pill cancel">Annulée</span>';
+  slots = slots.filter(s => slotStatus(s, now) !== "cancelled");
   if (slots.every(s => slotStatus(s, now) === "past")) return '<span class="pill done">Terminée</span>';
   const open = slots.filter(s => slotStatus(s, now) === "open");
   const notyet = slots.filter(s => slotStatus(s, now) === "notyet");
@@ -595,11 +684,11 @@ function renderList(year){
     return `<a class="qcard${cur ? " current" : ""}${isPast ? " past" : ""}" href="#/${year}/k/${q.n}">
       <span class="qnum">${q.n}</span>
       <span class="qbody"><span class="qt">Khôlle ${q.n}</span><br><span class="qd">${fmtDates(q.days.map(x => x.date))}</span>
-      <span class="qpills">${cur ? '<span class="pill now">En cours</span>' : ""}${statusPill(q.slots, b, now)}</span></span>
+      <span class="qpills">${cur ? '<span class="pill now">En cours</span>' : ""}${statusPill(q.slots, b, now)}${!isPast && upcomingCancels(year, q.n).length ? '<span class="pill cancel">Séance annulée</span>' : ""}</span></span>
       ${ICON.chev}
     </a>`;
   };
-  $("#view").innerHTML = demoBanner() +
+  $("#view").innerHTML = demoBanner() + cancelBanner(year) +
     (past.length ? `<button class="toggle" id="togglePast">${state.showPast ? "Masquer les khôlles terminées" : "Afficher les khôlles terminées (" + past.length + ")"}</button>` : "") +
     (state.showPast && past.length ? `<p class="kicker">Terminées · consultation seule</p><div class="list">${past.map(card).join("")}</div><div style="height:18px"></div>` : "") +
     `<p class="kicker">Khôlles à venir</p>` +
@@ -614,7 +703,7 @@ function renderQuinzaine(year, n){
   const first = q.days[0].date, last = q.days[q.days.length-1].date;
   setBar({ title: "Khôlle " + n, sub: Y.short + " · " + dnum(first) + " " + MOIS_C[first.getMonth()] + " – " + dnum(last) + " " + MOIS_C[last.getMonth()], back: true, refresh: true });
   const allFrozen = khollePast(q, now);
-  let html = demoBanner();
+  let html = demoBanner() + cancelBanner(year, n);
   html += allFrozen
     ? `<div class="alert info">${ICON.lock}<span><b>Khôlle terminée.</b> Le planning est figé : consultation uniquement.</span></div>`
     : `<div class="rule">${ICON.info}<span><b>Une seule inscription par étudiant</b> pour la Khôlle ${n}, sur l'une des ${q.days.length} dates ci-dessous. Les réservations de toute la khôlle ouvrent 1 mois avant sa première date.</span></div>`;
@@ -624,12 +713,14 @@ function renderQuinzaine(year, n){
     day.slots.forEach(s => { (groups[s.examiner + "|" + s.room] ||= []).push(s); });
     Object.entries(groups).forEach(([g, list]) => {
       const [ex, room] = g.split("|");
-      html += `<div class="group"><div class="ghead"><span class="who">${esc(ex)}</span><span class="room">${esc(room)}</span></div>`;
+      const cx = cancelOf(list[0]);
+      html += `<div class="group${cx ? " cancelled" : ""}"><div class="ghead"><span class="who">${esc(ex)}</span>${cx ? '<span class="cbadge">Annulée</span>' : ""}<span class="room">${esc(room)}</span></div>`;
+      if (cx) html += `<div class="cnote">Séance annulée par l'enseignant${cx.reason ? " · " + esc(cx.reason) : ""}.</div>`;
       list.forEach(s => {
         const bk = b[s.id], st = slotStatus(s, now);
         const locked = st !== "open";
-        const cls = (locked ? "locked " : "") + (bk ? "taken" : "free");
-        const txt = bk ? esc(bk.student) : st === "past" ? "—" : st === "notyet" ? "Ouverture le " + fmtDate(openingDate(s)) : "Libre";
+        const cls = (locked ? "locked " : "") + (st === "cancelled" ? "cancelled" : bk ? "taken" : "free");
+        const txt = st === "cancelled" ? "Annulé" : bk ? esc(bk.student) : st === "past" ? "—" : st === "notyet" ? "Ouverture le " + fmtDate(openingDate(s)) : "Libre";
         html += `<button class="slot ${cls}" data-id="${esc(s.id)}"><span class="time">${s.label}</span><span class="state">${txt}${locked ? ICON.lock : '<span class="dot" aria-hidden="true"></span>'}</span></button>`;
       });
       html += `</div>`;
@@ -639,6 +730,7 @@ function renderQuinzaine(year, n){
   document.querySelectorAll(".slot").forEach(el => el.addEventListener("click", () => {
     const s = SLOT_INDEX[el.dataset.id]; if (!s) return;
     const st = slotStatus(s);
+    if (st === "cancelled") return toast("Séance annulée par l'enseignant.");
     if (st === "past") return toast("Créneau passé : consultation uniquement.");
     if (st === "notyet") return toast("Réservations ouvertes à partir du " + fmtDate(openingDate(s)) + ".");
     const bk = (state.bookings[year] || {})[s.id];
@@ -751,26 +843,15 @@ function setCode(c){ try { sessionStorage.setItem("khollapp-code", c); } catch(e
 
 async function renderJournal(force){
   setAccent("1");
-  setBar({ title: "Journal", sub: "Historique des inscriptions", back: true, refresh: true });
+  setBar({ title: "Journal", sub: "Espace enseignants · inscriptions", back: true, refresh: true });
   const view = $("#view");
   const code = getCode();
-  if (!DEMO && !code){
-    view.innerHTML = `
-      <div class="alert info">${ICON.lock}<span>Accès réservé aux enseignants.</span></div>
-      <form id="codeForm">
-        <label class="lbl" for="code">Code d'accès</label>
-        <input class="field" id="code" type="password" autocomplete="current-password" required>
-        <div class="msg" id="msg"></div>
-        <div class="actions"><button class="btn primary" type="submit">Ouvrir le journal</button></div>
-      </form>`;
-    $("#codeForm").onsubmit = (e) => { e.preventDefault(); setCode($("#code").value.trim()); state.journal = null; renderJournal(true); };
-    return;
-  }
+  if (!(await ensureTeacher())) return;
   if (force || !state.journal){
     view.innerHTML = '<div class="loading"><span class="spin"></span>Chargement…</div>';
     let r;
     try { r = await API.journal(code); } catch(e){ r = { ok:false, error:"Connexion impossible." }; }
-    if (!r.ok){ setCode(""); view.innerHTML = errBox(esc(r.error || "Accès refusé.")) + '<div class="actions"><a class="btn outline" style="display:grid;place-items:center;text-decoration:none" href="#/journal">Réessayer</a></div>'; if (r.error === "Code incorrect.") setTimeout(() => renderJournal(), 1600); return; }
+    if (!r.ok){ if (r.error === "Code incorrect."){ setCode(""); return renderJournal(); } view.innerHTML = errBox(esc(r.error || "Accès refusé.")); return; }
     state.journal = r.log.slice().reverse();
     state.archive = (r.archive || []).slice().reverse();
   }
@@ -779,7 +860,7 @@ async function renderJournal(force){
   const rows = source.filter(e =>
     (!state.jYear || String(e.year) === state.jYear) &&
     (!state.jSearch || (e.student + " " + (e.from || "")).toLowerCase().includes(state.jSearch.toLowerCase())));
-  const badge = (a) => `<span class="badge ${a === "Inscription" ? "b-book" : a === "Remplacement" ? "b-replace" : "b-cancel"}">${esc(a)}</span>`;
+  const badge = (a) => `<span class="badge ${a === "Inscription" || a === "Séance rétablie" ? "b-book" : a === "Remplacement" ? "b-replace" : /annul/i.test(a) ? "b-annul" : "b-cancel"}">${esc(a)}</span>`;
   const when = (t) => { const d = new Date(t); return isNaN(d) ? esc(t) : d.toLocaleDateString("fr-FR", { day:"2-digit", month:"2-digit" }) + " " + d.toLocaleTimeString("fr-FR", { hour:"2-digit", minute:"2-digit" }); };
   const sel = state.sel || (state.sel = new Set());
   [...sel].forEach(k => { if (!source.some(e => e.key === k)) sel.delete(k); });
@@ -801,9 +882,9 @@ async function renderJournal(force){
         <input type="checkbox" class="pickbox" value="${esc(e.key)}" ${sel.has(e.key) ? "checked" : ""} aria-label="Sélectionner">
         <span class="ebody">
           <span class="top">${badge(e.action)}<span class="when">${when(e.at)}</span></span>
-          <span class="who">${e.action === "Remplacement" ? `${esc(e.student)} <span style="font-weight:600;color:var(--muted)">remplace</span> ${esc(e.from)}` : esc(e.student)}</span>
-          <span class="what">${esc(CONFIG.YEARS[e.year] ? CONFIG.YEARS[e.year].short : e.year)} · Khôlle ${esc(e.q)} · ${e.date ? esc(fmtDay(parseISO(String(e.date)))) : ""} · ${esc(e.time)} · ${esc(e.room)}</span>
-          <span class="dev">Appareil ${esc(e.device || "—")}${e.archivedAt ? " · archivé le " + when(e.archivedAt) : ""}</span>
+          <span class="who">${e.action === "Remplacement" ? `${esc(e.student)} <span style="font-weight:600;color:var(--muted)">remplace</span> ${esc(e.from)}` : /^Séance/.test(e.action) ? `${esc(e.student)} <span style="font-weight:600;color:var(--muted)">· séance entière</span>` : esc(e.student)}</span>
+          <span class="what">${esc(CONFIG.YEARS[e.year] ? CONFIG.YEARS[e.year].short : e.year)} · Khôlle ${esc(e.q)} · ${e.date ? esc(fmtDay(parseISO(String(e.date)))) : ""} · ${/^Séance/.test(e.action) ? "" : esc(e.time) + " · "}${esc(e.room)}</span>
+          <span class="dev">${e.action === "Séance annulée" && e.from ? "Motif : " + esc(e.from) + " · " : ""}Appareil ${esc(e.device || "—")}${e.archivedAt ? " · archivé le " + when(e.archivedAt) : ""}</span>
         </span>
       </label>`).join("")}</div>` : `<div class="empty">${isArch ? "Aucune opération archivée." : "Aucune opération."}</div>`}
     <div class="selbar" id="selbar">
@@ -861,11 +942,150 @@ async function renderJournal(force){
   js.oninput = (e) => { state.jSearch = e.target.value; clearTimeout(js._t); js._t = setTimeout(() => { renderJournal(); const n = $("#jSearch"); n.focus(); n.setSelectionRange(n.value.length, n.value.length); }, 250); };
 }
 
+/* ---------- Espace enseignants ---------- */
+// Renvoie true si l'accès est ouvert ; sinon affiche le formulaire de code et renvoie false.
+async function ensureTeacher(){
+  if (DEMO || getCode()) return true;
+  setAccent("1");
+  setBar({ title: "Espace enseignants", back: true });
+  $("#view").innerHTML = `
+    <div class="tlogin">
+      <div class="tlock">${ICON.lock}</div>
+      <h2>Espace enseignants</h2>
+      <p>Annulation des séances et journal des inscriptions.</p>
+    </div>
+    <form id="codeForm">
+      <label class="lbl" for="code">Code d'accès</label>
+      <input class="field" id="code" type="password" autocomplete="current-password" required>
+      <div class="msg" id="msg"></div>
+      <div class="actions"><button class="btn primary" type="submit" id="login">Entrer</button></div>
+    </form>`;
+  $("#codeForm").onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = $("#login"), code = $("#code").value.trim();
+    btn.disabled = true; btn.textContent = "Vérification…";
+    let r;
+    try { r = await API.journal(code); } catch(err){ r = { ok:false, error:"Connexion impossible." }; }
+    if (!r.ok){ $("#msg").innerHTML = errBox(esc(r.error === "Code incorrect." ? "Code incorrect." : r.error || "Accès refusé.")); btn.disabled = false; btn.textContent = "Entrer"; return; }
+    setCode(code);
+    state.journal = r.log.slice().reverse(); state.archive = (r.archive || []).slice().reverse();
+    route();
+  };
+  setTimeout(() => { const f = $("#code"); f && f.focus(); }, 50);
+  return false;
+}
+
+async function renderProf(force){
+  if (!(await ensureTeacher())) return;
+  setAccent("1");
+  setBar({ title: "Espace enseignants", sub: "Gestion des khôlles", back: true, refresh: true });
+  const view = $("#view");
+  if (force || !state.journal) view.innerHTML = '<div class="loading"><span class="spin"></span>Chargement…</div>';
+  const years = Object.keys(CONFIG.YEARS);
+  await Promise.allSettled(years.map(y => loadBookings(y, force)));
+  if (force || !state.journal){
+    let r; try { r = await API.journal(getCode()); } catch(e){ r = { ok:false }; }
+    if (r.ok){ state.journal = r.log.slice().reverse(); state.archive = (r.archive || []).slice().reverse(); }
+    else if (r.error === "Code incorrect."){ setCode(""); return renderProf(); }
+  }
+  const nCancel = upcomingCancels(null).length;
+  const nLog = state.journal ? state.journal.length : 0;
+  view.innerHTML = demoBanner() + `
+    <p class="kicker">Que souhaitez-vous faire ?</p>
+    <div class="choices">
+      <a class="tcard" href="#/prof/annulations">
+        <span class="ticon t-annul">${ICON.ban}</span>
+        <span class="tbody"><span class="t">Annuler une séance</span><br>
+          <span class="d">Annuler ou rétablir une séance de khôlle. Les étudiants voient un bandeau d'alerte.</span>
+          <span class="qpills">${nCancel ? `<span class="pill cancel">${nCancel} séance${nCancel>1?"s":""} annulée${nCancel>1?"s":""} à venir</span>` : '<span class="pill full">Aucune annulation en cours</span>'}</span></span>
+        ${ICON.chev}
+      </a>
+      <a class="tcard" href="#/prof/journal">
+        <span class="ticon t-log">${ICON.list}</span>
+        <span class="tbody"><span class="t">Journal des inscriptions</span><br>
+          <span class="d">Historique des inscriptions, remplacements et annulations. Archivage.</span>
+          <span class="qpills"><span class="pill full">${nLog} opération${nLog>1?"s":""} au journal</span>${state.archive && state.archive.length ? `<span class="pill full">${state.archive.length} archivée${state.archive.length>1?"s":""}</span>` : ""}</span></span>
+        ${ICON.chev}
+      </a>
+    </div>
+    ${DEMO ? "" : `<div class="foot"><button class="linkbtn" id="logout" style="border:0;background:none;cursor:pointer">${ICON.lock} Se déconnecter</button></div>`}`;
+  const lo = $("#logout"); if (lo) lo.onclick = () => { setCode(""); state.journal = null; state.archive = null; location.hash = "#/"; toast("Déconnecté."); };
+}
+
+async function renderAnnul(force){
+  if (!(await ensureTeacher())) return;
+  const year = state.aYear, Y = CONFIG.YEARS[year];
+  setAccent(year);
+  setBar({ title: "Annuler une séance", sub: "Espace enseignants", back: true, refresh: true });
+  const view = $("#view");
+  if (force || !state.bookings[year]) view.innerHTML = '<div class="loading"><span class="spin"></span>Chargement…</div>';
+  try { await loadBookings(year, force); } catch(e){ view.innerHTML = errBox("Impossible de joindre le serveur."); return; }
+  const b = state.bookings[year] || {}, now = new Date();
+  const qs = khollesFor(year).filter(q => !khollePast(q, now));
+  let html = demoBanner() + `
+    <div class="tabs" role="tablist">${Object.keys(CONFIG.YEARS).map(y => `<button role="tab" aria-selected="${y===year}" class="tab${y===year?" on":""}" data-y="${y}">${esc(CONFIG.YEARS[y].label)}</button>`).join("")}</div>
+    <div class="alert info">${ICON.info}<span>Annuler une séance libère les inscriptions de ses créneaux et affiche un <b>bandeau d'alerte</b> aux étudiants. Ils peuvent alors se réinscrire sur une autre date de la khôlle. Une séance annulée par erreur peut être rétablie.</span></div>`;
+  if (!qs.length) html += '<div class="empty">Aucune séance à venir.</div>';
+  qs.forEach(q => {
+    html += `<p class="kicker" style="margin-top:18px">Khôlle ${q.n} · ${esc(fmtDates(q.days.map(x => x.date)))}</p><div class="group">`;
+    q.days.filter(x => !dayFrozen(x.date, now)).forEach(day => {
+      const sessions = {};
+      day.slots.forEach(sl => { (sessions[sl.sid] ||= []).push(sl); });
+      Object.values(sessions).forEach(list => {
+        const s0 = list[0], cx = cancelOf(s0);
+        const n = list.filter(sl => b[sl.id]).length;
+        const hours = list[0].label.split(" – ")[0] + " – " + list[list.length-1].label.split(" – ")[1];
+        html += `<div class="srow${cx ? " is-cancelled" : ""}">
+          <div class="sinfo">
+            <div class="sday">${esc(fmtDay(day.date))}</div>
+            <div class="smeta">${esc(s0.examiner)} · ${esc(s0.room)} · ${hours}</div>
+            <div class="smeta">${cx ? `<span class="pill cancel">Annulée</span>${cx.reason ? " " + esc(cx.reason) : ""}` : `${n} inscrit${n>1?"s":""} / ${list.length}`}</div>
+          </div>
+          ${cx ? `<button class="sbtn restore" data-sid="${esc(s0.sid)}">Rétablir</button>` : `<button class="sbtn cancel" data-sid="${esc(s0.sid)}">Annuler</button>`}
+        </div>`;
+      });
+    });
+    html += `</div>`;
+  });
+  view.innerHTML = html;
+  document.querySelectorAll(".tab[data-y]").forEach(t => t.onclick = () => { state.aYear = t.dataset.y; renderAnnul(); });
+  const sessionSlots = (sid) => Object.values(SLOT_INDEX).filter(sl => sl.sid === sid).sort((a, c) => a.start - c.start);
+  document.querySelectorAll(".sbtn").forEach(btn => btn.onclick = () => {
+    const list = sessionSlots(btn.dataset.sid), s0 = list[0];
+    const payload = { year: s0.year, q: s0.q, sid: s0.sid, date: s0.dateISO, examiner: s0.examiner, room: s0.room };
+    const meta = `<p class="meta"><b>Khôlle ${s0.q}</b> · ${esc(Y.short)}<br>${fmtDay(s0.date)} · ${esc(s0.examiner)} · salle <b>${esc(s0.room)}</b></p>`;
+    if (btn.classList.contains("restore")) return confirmAdmin({
+      title: "Rétablir la séance", meta,
+      text: "La séance redevient visible et réservable par les étudiants. Le bandeau d'alerte disparaît.",
+      label: "Rétablir la séance", cls: "primary",
+      payload: Object.assign({ action: "restoreSession" }, payload),
+      done: () => "Séance rétablie.",
+      after: () => renderAnnul(true)
+    });
+    const inscrits = list.filter(sl => b[sl.id]).map(sl => `<li><b>${esc(b[sl.id].student)}</b> · ${sl.label}</li>`);
+    confirmAdmin({
+      title: "Annuler la séance", meta, warn: true, cls: "danger-fill", label: "Annuler la séance",
+      text: inscrits.length
+        ? `<b>${inscrits.length} inscription${inscrits.length>1?"s":""} ${inscrits.length>1?"seront libérées":"sera libérée"}</b> :<ul class="clist">${inscrits.join("")}</ul>Ces étudiants pourront se réinscrire sur une autre date de la khôlle.`
+        : "Aucun étudiant n'est inscrit sur cette séance.",
+      extra: `<label class="lbl" for="reason">Motif affiché aux étudiants <span style="font-weight:500;color:var(--muted)">(facultatif)</span></label>
+        <input class="field" id="reason" maxlength="120" placeholder="Ex. : examinateur absent, sortie pédagogique…">`,
+      confirmLabel: "Je confirme l'annulation de cette séance.",
+      collect: () => ({ reason: ($("#reason") || {}).value || "" }),
+      payload: Object.assign({ action: "cancelSession" }, payload),
+      done: (r) => (r.released && r.released.length) ? `Séance annulée · ${r.released.length} inscription${r.released.length>1?"s":""} libérée${r.released.length>1?"s":""}.` : "Séance annulée.",
+      after: () => { state.journal = null; renderAnnul(true); }
+    });
+  });
+}
+
 function confirmAdmin(o){
   openSheet(`
     <h4 id="sheetTitle">${o.title}</h4>
+    ${o.meta || ""}
     <div class="alert ${o.warn ? "err" : "info"}" style="margin-top:14px">${o.warn ? ICON.warn : ICON.info}<span>${o.text}</span></div>
-    ${o.warn ? `<label class="check"><input type="checkbox" id="sure"> <span>Je confirme la suppression définitive.</span></label>` : ""}
+    ${o.extra || ""}
+    ${o.warn ? `<label class="check"><input type="checkbox" id="sure"> <span>${o.confirmLabel || "Je confirme la suppression définitive."}</span></label>` : ""}
     <div class="msg" id="msg"></div>
     <div class="actions">
       <button class="btn ${o.cls}" id="go" ${o.warn ? "disabled" : ""}>${o.label}</button>
@@ -877,9 +1097,13 @@ function confirmAdmin(o){
   go.onclick = async () => {
     go.disabled = true; const label = go.textContent; go.textContent = "Traitement…";
     let r;
-    try { r = await API.admin(Object.assign({ code: getCode() }, o.payload)); } catch(e){ r = { ok:false, error:"Connexion impossible." }; }
-    if (!r.ok){ $("#msg").innerHTML = errBox(esc(r.error || "Opération refusée.")); go.disabled = false; go.textContent = label; return; }
-    closeSheet(); toast(o.done(r)); if (state.sel) state.sel.clear(); renderJournal(true);
+    const extra = o.collect ? o.collect() : {};
+    try { r = await API.admin(Object.assign({ code: getCode() }, o.payload, extra)); } catch(e){ r = { ok:false, error:"Connexion impossible." }; }
+    if (!r.ok){
+      if (r.error === "Code incorrect."){ setCode(""); closeSheet(); route(); return; }
+      $("#msg").innerHTML = errBox(esc(r.error || "Opération refusée.")); go.disabled = false; go.textContent = label; return;
+    }
+    closeSheet(); toast(o.done(r)); if (state.sel) state.sel.clear(); (o.after || (() => renderJournal(true)))(r);
   };
 }
 
