@@ -180,6 +180,8 @@ select:focus,input.field:focus{outline:none;border-color:var(--accent);box-shado
 .btn.outline.danger{color:var(--err);border-color:var(--err)}
 .btn.danger-fill{background:#B42318;color:#fff}
 .btn.danger-fill:disabled{opacity:.45;cursor:not-allowed}
+/* Synchronisation discrète */
+#refresh.syncing svg{animation:spin 1s linear infinite}
 /* Agenda */
 .calbtns{display:grid;gap:10px}
 .calbtn{display:flex;align-items:center;justify-content:center;gap:10px;background:#111827;color:#fff;text-decoration:none}
@@ -519,7 +521,7 @@ const API = {
     log.push({ at: new Date().toISOString(), action: {book:"Inscription",cancel:"Désinscription",replace:"Remplacement"}[p.action],
       year:p.year, q:p.q, date:p.date, time:p.time, room:p.room, student:p.student, from:p.from || "", device:p.device });
     demoSet("khollapp-demo-log", log);
-    return { ok:true };
+    return { ok:true, bookings: all.filter(b => b.year === p.year), cancels: demoGet("khollapp-demo-cancel").filter(c => c.year === p.year) };
   },
   async journal(code){
     const keyed = (e) => Object.assign(e, { key: [e.at, e.action, e.student, e.date, e.time].join("|") });
@@ -585,13 +587,31 @@ $("#back").addEventListener("click", () => { const p = parts(); location.hash = 
 $("#refresh").addEventListener("click", () => route(true));
 window.addEventListener("hashchange", () => { closeSheet(); route(); });
 
+// Applique un planning reçu du serveur et le mémorise sur le téléphone (affichage instantané à la visite suivante).
+function applyState(year, r){
+  const map = {}; (r.bookings || []).forEach(b => map[b.slotId] = b);
+  const cmap = {}; (r.cancels || []).forEach(c => cmap[c.sid] = c);
+  state.bookings[year] = map; state.cancels[year] = cmap; state.loaded[year] = Date.now();
+  try { localStorage.setItem("khollapp-cache-" + year, JSON.stringify({ bookings: r.bookings || [], cancels: r.cancels || [] })); } catch(e){}
+}
+// Au démarrage : dernier planning connu (sera aussitôt revérifié auprès du serveur).
+Object.keys(CONFIG.YEARS).forEach(y => {
+  try {
+    const c = JSON.parse(localStorage.getItem("khollapp-cache-" + y) || "null");
+    if (c){ applyState(y, c); state.loaded[y] = 0; }
+  } catch(e){}
+});
+const inflight = {};
 async function loadBookings(year, force){
   if (!force && state.loaded[year] && Date.now() - state.loaded[year] < 15000) return;
-  const r = await API.list(year);
-  const map = {}; r.bookings.forEach(b => map[b.slotId] = b);
-  const cmap = {}; r.cancels.forEach(c => cmap[c.sid] = c);
-  state.bookings[year] = map; state.cancels[year] = cmap; state.loaded[year] = Date.now();
+  if (inflight[year]) return inflight[year];       // une seule requête à la fois par promotion
+  inflight[year] = (async () => {
+    try { applyState(year, await API.list(year)); }
+    finally { delete inflight[year]; }
+  })();
+  return inflight[year];
 }
+function syncing(on){ const b = $("#refresh"); if (b) b.classList.toggle("syncing", on); }
 
 async function route(force){
   clearInterval(state.poll);
@@ -601,15 +621,30 @@ async function route(force){
   if (!year || !CONFIG.YEARS[year]) return renderHome();
   setAccent(year);
   const view = $("#view");
-  if (!state.bookings[year]) view.innerHTML = '<div class="loading"><span class="spin"></span>Chargement…</div>';
-  try { await loadBookings(year, force); }
-  catch(e){
-    setBar({ title: CONFIG.YEARS[year].label, back: true, refresh: true });
-    view.innerHTML = `<div class="alert err">${ICON.warn}<span>Impossible de joindre le serveur des inscriptions. Vérifiez votre connexion puis actualisez.</span></div>`;
-    return;
-  }
   const draw = () => (sub === "k" && n) ? renderQuinzaine(year, Number(n)) : renderList(year);
-  draw();
+  const here = location.hash;
+  if (state.bookings[year]){
+    // Affichage immédiat avec les données connues, puis mise à jour discrète
+    draw();
+    const stale = force || !state.loaded[year] || Date.now() - state.loaded[year] >= 15000;
+    if (stale){
+      syncing(true);
+      loadBookings(year, true)
+        .then(() => { if (location.hash === here && !$("#sheet").classList.contains("open")) draw(); })
+        .catch(() => { if (force) toast("Connexion impossible. Réessayez."); })
+        .finally(() => syncing(false));
+    }
+  } else {
+    view.innerHTML = '<div class="loading"><span class="spin"></span>Chargement…</div>';
+    try { await loadBookings(year, force); }
+    catch(e){
+      setBar({ title: CONFIG.YEARS[year].label, back: true, refresh: true });
+      view.innerHTML = `<div class="alert err">${ICON.warn}<span>Impossible de joindre le serveur des inscriptions. Vérifiez votre connexion puis actualisez.</span></div>`;
+      return;
+    }
+    if (location.hash !== here) return;
+    draw();
+  }
   state.poll = setInterval(async () => {
     if (document.hidden || $("#sheet").classList.contains("open")) return;
     try { await loadBookings(year, true); draw(); } catch(e){}
@@ -779,9 +814,11 @@ async function submit(btn, busyLabel, payload, okMsg, onSuccess){
   btn.disabled = true; btn.textContent = busyLabel;
   let r;
   try { r = await API.post(payload); } catch(e){ r = { ok:false, error:"Connexion impossible. Réessayez." }; }
+  const fresh = Array.isArray(r.bookings);
+  if (fresh) applyState(payload.year, r);           // planning à jour renvoyé avec la réponse : pas de second échange
   if (r.ok){ if (onSuccess) onSuccess(); else { closeSheet(); toast(okMsg); } }
   else { $("#msg").innerHTML = errBox(esc(r.error || "Opération refusée.")); btn.disabled = false; btn.textContent = label; }
-  await refreshCurrent();
+  if (fresh) route(); else await refreshCurrent();
 }
 const payloadOf = (s, extra) => Object.assign({ year:s.year, q:s.q, week:s.week, slotId:s.id, first:s.first, date:s.dateISO, time:s.label, examiner:s.examiner, room:s.room }, extra);
 
