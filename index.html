@@ -893,13 +893,20 @@ const calButtons = () => `
     <a class="btn calbtn" id="calApple">${ICON.cal}<span>iPhone · Calendrier Apple</span></a>
     <a class="btn calbtn alt" id="calGoogle" target="_blank" rel="noopener">${ICON.cal}<span>Android · Google Agenda</span></a>
   </div>
-  <p class="hint"><b>iPhone</b> : ouvre le Calendrier de l'iPhone → touchez « Ajouter tous les événements » (rappel 1 h avant inclus).<br><b>Android</b> : ouvre Google Agenda avec l'événement prérempli → touchez « Enregistrer ».</p>`;
+  <p class="hint"><b>iPhone</b> : ouvre le Calendrier de l'iPhone → touchez « Ajouter tous les événements » (rappel 1 h avant inclus).<br><b>Android</b> : ouvre Google Agenda avec l'événement prérempli → touchez « Enregistrer ».</p>
+  <p class="hint" id="calAltWrap" hidden>iPhone, rien ne s'affiche ? <a id="calAlt" href="#">Autre méthode</a> (si une page d'erreur Google apparaît, ouvrez Kholl'app en navigation privée).</p>`;
 function bindCal(s, student){
   const a = $("#calApple"), g = $("#calGoogle");
   if (a){
-    if (DEMO){ a.href = "#"; a.onclick = (e) => { e.preventDefault(); addToCalendar(s, student); }; }
-    else a.href = icsUrl(s, student);   // fichier servi par le script Google (type text/calendar)
+    // Événement généré par la page elle-même (aucun passage par Google) : lien direct « text/calendar »,
+    // que Safari sur iPhone ouvre dans le Calendrier.
+    a.href = "data:text/calendar;charset=utf-8," + encodeURIComponent(icsText(s, student));
+    a.setAttribute("download", "kholle-" + s.q + "-" + s.dateISO + ".ics");
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    if (isIOS) a.removeAttribute("download");   // sur iPhone : ouverture directe dans le Calendrier
   }
+  const alt = $("#calAlt"), wrap = $("#calAltWrap");
+  if (alt && !DEMO){ alt.href = icsUrl(s, student); wrap.hidden = false; }
   if (g) g.href = googleCalUrl(s, student);
 }
 function openBooked(s, student){
