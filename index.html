@@ -188,6 +188,7 @@ select:focus,input.field:focus{outline:none;border-color:var(--accent);box-shado
 .calbtn.alt{background:#1A73E8 !important;color:#fff !important;border:0 !important}
 .calbtn.alt{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}
 .calbtn svg{width:20px;height:20px}
+.calbtn.preparing{opacity:.75}
 .okmark{width:56px;height:56px;margin:4px auto 10px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center}
 .okmark svg{width:30px;height:30px}
 /* Annulations */
@@ -962,19 +963,28 @@ function bindCal(s, student){
   if (a){
     if (DEMO){ a.href = "#"; a.onclick = (e) => { e.preventDefault(); addToCalendar(s, student); }; }
     else {
+      // Safari connecté à un compte Google : l'adresse script.google.com renvoie une erreur Google Drive.
+      // On prépare donc dès l'ouverture de la fenêtre, sans les cookies Google, l'adresse finale du fichier
+      // agenda (script.googleusercontent.com). Le bouton devient alors un lien direct : le toucher ouvre
+      // le Calendrier (Safari exige que l'ouverture suive immédiatement le geste de l'utilisateur).
+      let ready = null;
       a.href = icsUrl(s, student);
+      a.classList.add("preparing");
+      fetch(icsUrl(s, student), { credentials: "omit", cache: "no-store" })
+        .then(r => { if (/googleusercontent\.com/.test(r.url)) { ready = r.url; a.href = r.url; } })
+        .catch(() => {})
+        .finally(() => a.classList.remove("preparing"));
       a.onclick = async (e) => {
-        // Safari connecté à un compte Google : l'adresse script.google.com renvoie une erreur Google Drive.
-        // On récupère donc d'abord, sans les cookies Google, l'adresse finale du fichier agenda
-        // (script.googleusercontent.com), puis Safari l'ouvre directement dans le Calendrier.
-        e.preventDefault();
+        if (ready) return;                     // lien direct prêt : comportement normal du lien
+        e.preventDefault();                    // pas encore prêt (connexion lente) : on attend puis on ouvre
         const label = a.innerHTML;
         a.innerHTML = ICON.cal + "<span>Préparation…</span>";
         try {
           const r = await fetch(icsUrl(s, student), { credentials: "omit", cache: "no-store" });
-          location.href = /googleusercontent\.com/.test(r.url) ? r.url : icsUrl(s, student);
-        } catch(err){ location.href = icsUrl(s, student); }
-        setTimeout(() => { a.innerHTML = label; }, 1500);
+          ready = /googleusercontent\.com/.test(r.url) ? r.url : null;
+          if (ready){ a.href = ready; a.innerHTML = ICON.cal + "<span>Touchez à nouveau pour ouvrir</span>"; return; }
+        } catch(err){}
+        a.innerHTML = label; location.href = icsUrl(s, student);
       };
     }
   }
