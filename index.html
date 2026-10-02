@@ -223,6 +223,7 @@ select:focus,input.field:focus{outline:none;border-color:var(--accent);box-shado
 .ticon svg{width:26px;height:26px}
 .t-annul{background:var(--err-soft);color:var(--err)}
 .t-log{background:var(--y1-soft);color:var(--y1)}
+.t-guide{background:#EFE7FF;color:#7C3AED}
 .srow{display:flex;align-items:center;gap:12px;padding:12px 14px;border-top:1px solid var(--line)}
 .srow:first-child{border-top:0}
 .srow.is-cancelled{background:var(--err-soft)}
@@ -697,7 +698,7 @@ function renderHome(){
         </a>`).join("")}
     </div>
     <div class="foot">
-      <a class="linkbtn" href="guide.html#etudiants">${ICON.info} Mode d'emploi</a>
+      <a class="linkbtn" href="guide-etudiants.html">${ICON.info} Mode d'emploi</a>
       <a class="linkbtn" href="#/prof">${ICON.lock} Espace enseignants</a>
       <p class="credit">🚀 Powered by Maxens Blanchet</p>
     </div>`;
@@ -1190,6 +1191,12 @@ async function renderProf(force){
         <span class="tbody"><span class="t">Journal des inscriptions</span><br>
           <span class="d">Historique des inscriptions, remplacements et annulations. Archivage.</span>
           <span class="qpills"><span class="pill full">${nLog} opération${nLog>1?"s":""} au journal</span>${state.archive && state.archive.length ? `<span class="pill full">${state.archive.length} archivée${state.archive.length>1?"s":""}</span>` : ""}</span></span>
+        ${ICON.chev}
+      </a>
+      <a class="tcard" href="guide-enseignants.html">
+        <span class="ticon t-guide">${ICON.info}</span>
+        <span class="tbody"><span class="t">Guide enseignant</span><br>
+          <span class="d">Mode d'emploi illustré de l'Espace enseignants : annulations, journal, archives, exports.</span></span>
         ${ICON.chev}
       </a>
     </div>
