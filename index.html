@@ -180,6 +180,13 @@ select:focus,input.field:focus{outline:none;border-color:var(--accent);box-shado
 .btn.outline.danger{color:var(--err);border-color:var(--err)}
 .btn.danger-fill{background:#B42318;color:#fff}
 .btn.danger-fill:disabled{opacity:.45;cursor:not-allowed}
+/* Agenda */
+.calbtns{display:grid;gap:10px}
+.calbtn{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--accent);color:#fff;text-decoration:none}
+.calbtn.alt{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}
+.calbtn svg{width:20px;height:20px}
+.okmark{width:56px;height:56px;margin:4px auto 10px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center}
+.okmark svg{width:30px;height:30px}
 /* Annulations */
 .pill.cancel{background:var(--err-soft);color:var(--err)}
 .alert.cancel{background:var(--err-soft);color:var(--err);border:1.5px solid var(--err)}
@@ -368,6 +375,8 @@ const ICON = {
   chev: '<svg class="chev" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>',
   ban: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M9.5 13l5 5M14.5 13l-5 5"/></svg>',
   list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>',
+  cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M12 13v5M9.5 15.5h5"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
   down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>'
 };
 
@@ -764,12 +773,12 @@ function quinzaineConflict(s, student, ignoreSlot){
   const where = o && o.dateISO !== s.dateISO ? "à une autre date de cette khôlle" : "le même jour";
   return `<b>Inscription impossible.</b> ${esc(student)} est déjà inscrit(e) à la Khôlle ${s.q} ${where} : ${esc(describeSlot(other.slotId))}.<br>Une seule inscription par khôlle. Pour changer de créneau, libérez d'abord celui-ci.`;
 }
-async function submit(btn, busyLabel, payload, okMsg){
+async function submit(btn, busyLabel, payload, okMsg, onSuccess){
   const label = btn.textContent;
   btn.disabled = true; btn.textContent = busyLabel;
   let r;
   try { r = await API.post(payload); } catch(e){ r = { ok:false, error:"Connexion impossible. Réessayez." }; }
-  if (r.ok){ closeSheet(); toast(okMsg); }
+  if (r.ok){ if (onSuccess) onSuccess(); else { closeSheet(); toast(okMsg); } }
   else { $("#msg").innerHTML = errBox(esc(r.error || "Opération refusée.")); btn.disabled = false; btn.textContent = label; }
   await refreshCurrent();
 }
@@ -795,7 +804,7 @@ function openBook(s){
     $("#msg").innerHTML = c ? errBox(c) : "";
     btn.disabled = !sel.value || !!c;
   };
-  btn.onclick = () => submit(btn, "Enregistrement…", payloadOf(s, { action:"book", student: sel.value }), "Inscription enregistrée.");
+  btn.onclick = () => { const who = sel.value; submit(btn, "Enregistrement…", payloadOf(s, { action:"book", student: who }), "Inscription enregistrée.", () => openBooked(s, who)); };
 }
 
 function openTaken(s, bk){
@@ -812,7 +821,9 @@ function openTaken(s, bk){
       <button class="btn warnbtn" id="replace" disabled>Remplacer ${cur}</button>
     </div>
     <div class="divider"></div>
-    <label class="check"><input type="checkbox" id="me"> <span>Je suis ${cur} et je libère ce créneau.</span></label>
+    <p class="lbl" style="margin-bottom:8px">C'est votre créneau ?</p>
+    ${calButtons()}
+    <label class="check" style="margin-top:14px"><input type="checkbox" id="me"> <span>Je suis ${cur} et je libère ce créneau.</span></label>
     <div class="actions">
       <button class="btn outline" id="free" disabled>Libérer le créneau</button>
       <button class="btn ghost" id="close">Fermer</button>
@@ -828,6 +839,73 @@ function openTaken(s, bk){
   me.onchange = () => { free.disabled = !me.checked; };
   rep.onclick = () => submit(rep, "Remplacement…", payloadOf(s, { action:"replace", from: bk.student, student: sel.value }), "Remplacement enregistré.");
   free.onclick = () => submit(free, "Libération…", payloadOf(s, { action:"cancel", student: bk.student }), "Créneau libéré.");
+  bindCal(s, bk.student);
+}
+
+/* ---------- Ajout à l'agenda du téléphone ---------- */
+const APP_URL = location.origin + location.pathname;
+const utc = (d) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+function calEvent(s, student){
+  const end = new Date(s.startsAt.getTime() + CONFIG.SLOT_MINUTES * 60000);
+  return {
+    start: s.startsAt, end,
+    title: `Khôlle d'anglais – Khôlle ${s.q}`,
+    location: `Lycée Sidoine Apollinaire – salle ${s.room}`,
+    details: `${student} · ${CONFIG.YEARS[s.year].short}\nExaminateur : ${s.examiner} · salle ${s.room}\nEn cas de changement, seule Kholl'app fait foi : ${APP_URL}`
+  };
+}
+function icsText(s, student){
+  const e = calEvent(s, student);
+  const x = (t) => String(t).replace(/\\/g, "\\\\").replace(/;/g, "\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+  return [
+    "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Kholl'app//Lycee Sidoine Apollinaire//FR", "CALSCALE:GREGORIAN", "METHOD:PUBLISH",
+    "BEGIN:VEVENT",
+    "UID:" + s.id.replace(/[^A-Za-z0-9-]/g, "-") + "-" + student.replace(/[^A-Za-z]/g, "") + "@khollapp",
+    "DTSTAMP:" + utc(new Date()), "DTSTART:" + utc(e.start), "DTEND:" + utc(e.end),
+    "SUMMARY:" + x(e.title), "LOCATION:" + x(e.location), "DESCRIPTION:" + x(e.details), "URL:" + APP_URL,
+    "BEGIN:VALARM", "ACTION:DISPLAY", "DESCRIPTION:" + x(e.title + " dans 1 heure"), "TRIGGER:-PT1H", "END:VALARM",
+    "END:VEVENT", "END:VCALENDAR"
+  ].join("\r\n");
+}
+function addToCalendar(s, student){
+  const ics = icsText(s, student);
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (isIOS){ location.href = "data:text/calendar;charset=utf-8," + encodeURIComponent(ics); return; }
+  const url = URL.createObjectURL(new Blob([ics], { type: "text/calendar;charset=utf-8" }));
+  const a = document.createElement("a");
+  a.href = url; a.download = "kholle-" + s.q + "-" + s.dateISO + ".ics";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+function googleCalUrl(s, student){
+  const e = calEvent(s, student);
+  return "https://calendar.google.com/calendar/render?action=TEMPLATE"
+    + "&text=" + encodeURIComponent(e.title)
+    + "&dates=" + utc(e.start) + "/" + utc(e.end)
+    + "&location=" + encodeURIComponent(e.location)
+    + "&details=" + encodeURIComponent(e.details)
+    + "&ctz=Europe/Paris";
+}
+const calButtons = () => `
+  <div class="calbtns">
+    <button class="btn calbtn" id="calIcs">${ICON.cal} Ajouter à mon agenda</button>
+    <a class="btn calbtn alt" id="calGoogle" target="_blank" rel="noopener">${ICON.cal} Google Agenda</a>
+  </div>
+  <p class="hint">iPhone : « Ajouter à mon agenda » (rappel 1 h avant inclus). Android : « Google Agenda » si le premier bouton ne fait que télécharger un fichier.</p>`;
+function bindCal(s, student){
+  const i = $("#calIcs"), g = $("#calGoogle");
+  if (i) i.onclick = () => addToCalendar(s, student);
+  if (g) g.href = googleCalUrl(s, student);
+}
+function openBooked(s, student){
+  openSheet(`
+    <div class="okmark">${ICON.check}</div>
+    <h4 id="sheetTitle" style="text-align:center">Inscription enregistrée</h4>
+    <p class="meta" style="text-align:center"><b>${esc(student)}</b><br>Khôlle ${s.q} · ${fmtDay(s.date)} · ${s.label}<br>${esc(s.examiner)} · salle <b>${esc(s.room)}</b></p>
+    ${calButtons()}
+    <div class="actions"><button class="btn ghost" id="close">Fermer</button></div>`);
+  bindCal(s, student);
+  $("#close").onclick = closeSheet;
 }
 
 async function refreshCurrent(){
