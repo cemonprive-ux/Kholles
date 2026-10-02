@@ -182,7 +182,8 @@ select:focus,input.field:focus{outline:none;border-color:var(--accent);box-shado
 .btn.danger-fill:disabled{opacity:.45;cursor:not-allowed}
 /* Agenda */
 .calbtns{display:grid;gap:10px}
-.calbtn{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--accent);color:#fff;text-decoration:none}
+.calbtn{display:flex;align-items:center;justify-content:center;gap:10px;background:#111827;color:#fff;text-decoration:none}
+.calbtn.alt{background:#1A73E8 !important;color:#fff !important;border:0 !important}
 .calbtn.alt{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}
 .calbtn svg{width:20px;height:20px}
 .okmark{width:56px;height:56px;margin:4px auto 10px;border-radius:50%;background:var(--ok-soft);color:var(--ok);display:grid;place-items:center}
@@ -886,15 +887,19 @@ function googleCalUrl(s, student){
     + "&details=" + encodeURIComponent(e.details)
     + "&ctz=Europe/Paris";
 }
+const icsUrl = (s, student) => CONFIG.API_URL + "?action=ics&slot=" + encodeURIComponent(s.id) + "&student=" + encodeURIComponent(student) + "&app=" + encodeURIComponent(APP_URL);
 const calButtons = () => `
   <div class="calbtns">
-    <button class="btn calbtn" id="calIcs">${ICON.cal} Ajouter à mon agenda</button>
-    <a class="btn calbtn alt" id="calGoogle" target="_blank" rel="noopener">${ICON.cal} Google Agenda</a>
+    <a class="btn calbtn" id="calApple">${ICON.cal}<span>iPhone · Calendrier Apple</span></a>
+    <a class="btn calbtn alt" id="calGoogle" target="_blank" rel="noopener">${ICON.cal}<span>Android · Google Agenda</span></a>
   </div>
-  <p class="hint">iPhone : « Ajouter à mon agenda » (rappel 1 h avant inclus). Android : « Google Agenda » si le premier bouton ne fait que télécharger un fichier.</p>`;
+  <p class="hint"><b>iPhone</b> : ouvre le Calendrier de l'iPhone → touchez « Ajouter tous les événements » (rappel 1 h avant inclus).<br><b>Android</b> : ouvre Google Agenda avec l'événement prérempli → touchez « Enregistrer ».</p>`;
 function bindCal(s, student){
-  const i = $("#calIcs"), g = $("#calGoogle");
-  if (i) i.onclick = () => addToCalendar(s, student);
+  const a = $("#calApple"), g = $("#calGoogle");
+  if (a){
+    if (DEMO){ a.href = "#"; a.onclick = (e) => { e.preventDefault(); addToCalendar(s, student); }; }
+    else a.href = icsUrl(s, student);   // fichier servi par le script Google (type text/calendar)
+  }
   if (g) g.href = googleCalUrl(s, student);
 }
 function openBooked(s, student){
