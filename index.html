@@ -283,7 +283,8 @@ const CONFIG = {
 
   SLOT_MINUTES: 40,          // durée d'un créneau
   STEP_MINUTES: 20,          // décalage entre deux créneaux
-  BOOKING_WINDOW_MONTHS: 1,  // réservation ouverte au plus 1 mois avant le créneau
+  BOOKING_WINDOW_MONTHS: 1,  // réservations d'une khôlle ouvertes 1 mois avant sa première date,
+  OPEN_FROM_HOUR: 12,        // à une heure tirée au hasard par le serveur entre 12h et 13h
 
   // Une khôlle = un groupe de N dates de séances (khollesDays par promotion).
   // Les dates listées dans "kholles" font foi ; au-delà, le calendrier est prolongé automatiquement
@@ -459,12 +460,23 @@ function fmtDates(dates){
 }
 
 const cancelOf = (s) => (state.cancels[s.year] || {})[s.sid];
+// Fenêtre d'ouverture : le jour J, entre 12h et 13h. L'heure exacte, tirée au hasard, n'est connue que du serveur.
+const winStart = (s) => new Date(s.opensAt.getTime() + CONFIG.OPEN_FROM_HOUR * 3600000);
+const winEnd = (s) => new Date(s.opensAt.getTime() + (CONFIG.OPEN_FROM_HOUR + 1) * 3600000);
+const inWindow = (s, now = new Date()) => now >= winStart(s) && now < winEnd(s);
 function slotStatus(s, now = new Date()){
   if (cancelOf(s)) return "cancelled";
   if (s.startsAt <= now) return "past";
-  if (now < s.opensAt) return "notyet";
+  if (now < winStart(s)) return "notyet";
+  if (now < winEnd(s) && !(state.opened[s.year] || {})[s.q]) return "notyet";
   return "open";
 }
+// Khôlles dont l'ouverture est en cours (entre 12h et 13h aujourd'hui) : le serveur dit si c'est ouvert
+function windowKholles(year, now = new Date()){
+  return (KHOLLES[year] || []).filter(k => k.slots.length && inWindow(k.slots[0], now));
+}
+const openLabel = (s) => fmtDate(s.opensAt) + " entre 12h et 13h";
+const openShort = (s) => inWindow(s) ? "Ouverture imminente" : "Ouverture le " + fmtDate(s.opensAt) + " · 12h–13h";
 const openingDate = (s) => s.opensAt;
 const dayFrozen = (d, now = new Date()) => now >= addDays(d, 1);
 function describeSlot(id){ const s = SLOT_INDEX[id]; return s ? `${fmtDay(s.date).toLowerCase()}, ${s.label} (${s.examiner}, salle ${s.room})` : id; }
@@ -487,7 +499,7 @@ function ruleCheck(all, p, ignoreSlot){
   const st = slotStatus(s);
   if (st === "cancelled") return "Cette séance a été annulée par l'enseignant.";
   if (st === "past") return "Ce créneau est passé : il n'est plus modifiable.";
-  if (st === "notyet") return "Les réservations pour ce créneau ouvrent le " + fmtDate(openingDate(s)) + ".";
+  if (st === "notyet") return "Les réservations pour ce créneau ouvrent le " + openLabel(s) + ".";
   const other = all.find(b => b.year === p.year && Number(b.q) === Number(p.q) && b.student === p.student && b.slotId !== ignoreSlot);
   if (other) return `${p.student} est déjà inscrit(e) à la Khôlle ${p.q} : ${describeSlot(other.slotId)}.`;
   return null;
@@ -510,11 +522,16 @@ async function postJSON(p, timeoutMs = 30000){
 
 const API = {
   async list(year){
-    if (DEMO) return { bookings: demoGet("khollapp-demo").filter(b => b.year === year), cancels: demoGet("khollapp-demo-cancel").filter(c => c.year === year) };
-    const r = await fetch(CONFIG.API_URL + "?action=list&year=" + encodeURIComponent(year), { cache: "no-store" });
+    const win = windowKholles(year);
+    if (DEMO){
+      const opened = {}; win.forEach(k => opened[k.n] = Date.now() >= winStart(k.slots[0]).getTime() + 30 * 60000);
+      return { bookings: demoGet("khollapp-demo").filter(b => b.year === year), cancels: demoGet("khollapp-demo-cancel").filter(c => c.year === year), opened };
+    }
+    const check = win.map(k => k.n + ":" + k.slots[0].first).join(",");
+    const r = await fetch(CONFIG.API_URL + "?action=list&year=" + encodeURIComponent(year) + (check ? "&check=" + check : ""), { cache: "no-store" });
     const j = await r.json();
     if (!j.ok) throw new Error(j.error || "Erreur serveur");
-    return { bookings: j.bookings, cancels: j.cancels || [] };
+    return { bookings: j.bookings, cancels: j.cancels || [], opened: j.opened || {} };
   },
   async post(p){
     p.device = DEVICE;
@@ -589,7 +606,7 @@ const API = {
 };
 
 /* ---------- État, barre et navigation ---------- */
-const state = { bookings: {}, cancels: {}, loaded: {}, aYear: "1", showPast: false, poll: null, journal: null, archive: null, jTab: "journal", jYear: "", jSearch: "" };
+const state = { bookings: {}, cancels: {}, opened: {}, loaded: {}, aYear: "1", showPast: false, poll: null, journal: null, archive: null, jTab: "journal", jYear: "", jSearch: "" };
 
 function setBar({ title, sub, back, refresh }){
   $("#title").innerHTML = esc(title) + (sub ? '<span class="sub">'+esc(sub)+'</span>' : "");
@@ -613,6 +630,7 @@ function applyState(year, r){
   const map = {}; (r.bookings || []).forEach(b => map[b.slotId] = b);
   const cmap = {}; (r.cancels || []).forEach(c => cmap[c.sid] = c);
   state.bookings[year] = map; state.cancels[year] = cmap; state.loaded[year] = Date.now();
+  if (r.opened) state.opened[year] = Object.assign(state.opened[year] || {}, r.opened);
   try { localStorage.setItem("khollapp-cache-" + year, JSON.stringify({ bookings: r.bookings || [], cancels: r.cancels || [] })); } catch(e){}
 }
 // Au démarrage : dernier planning connu (sera aussitôt revérifié auprès du serveur).
@@ -666,10 +684,14 @@ async function route(force){
     if (location.hash !== here) return;
     draw();
   }
+  // Actualisation automatique : toutes les 30 s, et toutes les 10 s pendant une fenêtre d'ouverture (12h–13h)
+  let tick = 0;
   state.poll = setInterval(async () => {
+    tick++;
     if (document.hidden || $("#sheet").classList.contains("open")) return;
+    if (!windowKholles(year).length && tick % 3) return;
     try { await loadBookings(year, true); draw(); } catch(e){}
-  }, 30000);
+  }, 10000);
 }
 
 /* ---------- Écrans ---------- */
@@ -734,7 +756,7 @@ function statusPill(slots, b, now){
   if (slots.every(s => slotStatus(s, now) === "past")) return '<span class="pill done">Terminée</span>';
   const open = slots.filter(s => slotStatus(s, now) === "open");
   const notyet = slots.filter(s => slotStatus(s, now) === "notyet");
-  if (!open.length && notyet.length) return `<span class="pill soon">Ouverture le ${fmtDate(openingDate(notyet[0]))}</span>`;
+  if (!open.length && notyet.length) return `<span class="pill soon">${openShort(notyet[0])}</span>`;
   const free = open.filter(s => !b[s.id]).length;
   return free ? `<span class="pill free">${free} libre${free>1?"s":""}</span>` : '<span class="pill full">Complet</span>';
 }
@@ -773,7 +795,7 @@ function renderQuinzaine(year, n){
   let html = demoBanner() + cancelBanner(year, n);
   html += allFrozen
     ? `<div class="alert info">${ICON.lock}<span><b>Khôlle terminée.</b> Le planning est figé : consultation uniquement.</span></div>`
-    : `<div class="rule">${ICON.info}<span><b>Une seule inscription par étudiant</b> pour la Khôlle ${n}, sur l'une des ${q.days.length} dates ci-dessous. Les réservations de toute la khôlle ouvrent 1 mois avant sa première date.</span></div>`;
+    : `<div class="rule">${ICON.info}<span><b>Une seule inscription par étudiant</b> pour la Khôlle ${n}, sur l'une des ${q.days.length} dates ci-dessous. Les réservations de toute la khôlle ouvrent 1 mois avant sa première date, à une heure aléatoire entre 12h et 13h.</span></div>`;
   q.days.forEach(day => {
     html += `<div class="weekhead"><h3>${fmtDay(day.date)}</h3>${statusPill(day.slots, b, now)}</div>`;
     const groups = {};
@@ -787,7 +809,7 @@ function renderQuinzaine(year, n){
         const bk = b[s.id], st = slotStatus(s, now);
         const locked = st !== "open";
         const cls = (locked ? "locked " : "") + (st === "cancelled" ? "cancelled" : bk ? "taken" : "free");
-        const txt = st === "cancelled" ? "Annulé" : bk ? esc(bk.student) : st === "past" ? "—" : st === "notyet" ? "Ouverture le " + fmtDate(openingDate(s)) : "Libre";
+        const txt = st === "cancelled" ? "Annulé" : bk ? esc(bk.student) : st === "past" ? "—" : st === "notyet" ? openShort(s) : "Libre";
         html += `<button class="slot ${cls}" data-id="${esc(s.id)}"><span class="time">${s.label}</span><span class="state">${txt}${locked ? ICON.lock : '<span class="dot" aria-hidden="true"></span>'}</span></button>`;
       });
       html += `</div>`;
@@ -799,7 +821,7 @@ function renderQuinzaine(year, n){
     const st = slotStatus(s);
     if (st === "cancelled") return toast("Séance annulée par l'enseignant.");
     if (st === "past") return toast("Créneau passé : consultation uniquement.");
-    if (st === "notyet") return toast("Réservations ouvertes à partir du " + fmtDate(openingDate(s)) + ".");
+    if (st === "notyet") return toast(inWindow(s) ? "Ouverture imminente : entre 12h et 13h aujourd'hui. Restez sur la page." : "Réservations ouvertes le " + openLabel(s) + ".");
     const bk = (state.bookings[year] || {})[s.id];
     bk ? openTaken(s, bk) : openBook(s);
   }));
