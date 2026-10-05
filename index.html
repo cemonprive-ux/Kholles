@@ -180,6 +180,18 @@ select:focus,input.field:focus{outline:none;border-color:var(--accent);box-shado
 .btn.outline.danger{color:var(--err);border-color:var(--err)}
 .btn.danger-fill{background:#B42318;color:#fff}
 .btn.danger-fill:disabled{opacity:.45;cursor:not-allowed}
+/* Ressources */
+.sep{height:1px;background:var(--line);margin:26px 8px 18px}
+.card.res .num{background:#FFEDD5;color:#C2410C}
+.card.res .num svg{width:30px;height:30px}
+.res-intro{margin:4px 4px 16px;color:var(--ink-2);font-weight:600}
+.respart{background:var(--surface);border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow);margin-bottom:16px}
+.respart .ghead{background:#C2410C}
+.restext{margin:0;padding:14px 16px 4px;color:var(--ink-2);font-size:15px}
+.wip{display:flex;align-items:center;gap:12px;margin:12px 16px 16px;padding:14px 16px;border-radius:14px;border:1.5px dashed #F5B98A;background:#FFF7ED;color:#9A3412}
+.wip svg{width:26px;height:26px;flex:none}
+.wip b{font-size:16px}
+.wip small{color:#B45309;font-weight:600}
 /* Synchronisation discrète */
 #refresh.syncing svg{animation:spin 1s linear infinite}
 /* Exports */
@@ -388,6 +400,10 @@ const ICON = {
   list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>',
   cal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M12 13v5M9.5 15.5h5"/></svg>',
   check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2z"/><path d="M4 19V5M8 7h7M8 11h5"/></svg>',
+  doc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>',
+  play: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9.5v5l4.5-2.5z"/></svg>',
+  tools: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>',
   down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>'
 };
 
@@ -657,6 +673,7 @@ async function route(force){
   const [year, sub, n] = parts();
   if (year === "journal"){ location.replace("#/prof/journal"); return; }
   if (year === "prof") return sub === "journal" ? renderJournal(force) : sub === "annulations" ? renderAnnul(force) : renderProf(force);
+  if (year === "ressources") return renderRessources(sub);
   if (!year || !CONFIG.YEARS[year]) return renderHome();
   setAccent(year);
   const view = $("#view");
@@ -718,6 +735,16 @@ function renderHome(){
           <span class="d">${CONFIG.YEARS[y].students.length} étudiants</span></span>
           ${ICON.chev}
         </a>`).join("")}
+    </div>
+    <div class="sep" role="separator"></div>
+    <p class="kicker">S'entraîner</p>
+    <div class="choices">
+      <a class="card res" href="#/ressources">
+        <span class="num">${ICON.book}</span>
+        <span><span class="t">Ressources d'entraînement</span><br>
+        <span class="d">Textes et vidéos, avec leurs corrigés</span></span>
+        ${ICON.chev}
+      </a>
     </div>
     <div class="foot">
       <a class="linkbtn" href="guide-etudiants.html">${ICON.info} Mode d'emploi</a>
@@ -825,6 +852,55 @@ function renderQuinzaine(year, n){
     const bk = (state.bookings[year] || {})[s.id];
     bk ? openTaken(s, bk) : openBook(s);
   }));
+}
+
+/* ---------- Ressources d'entraînement ---------- */
+const RESSOURCES = {
+  textes: {
+    title: "Textes", icon: "doc", sub: "Articles et documents écrits",
+    intro: "Des documents écrits en anglais, du type de ceux proposés en khôlle, pour vous entraîner en autonomie.",
+    parts: [
+      { key: "Sujets", text: "Des articles de presse anglophone sur l'économie, la société et l'actualité, à préparer comme en khôlle : compte rendu, problématique et commentaire." },
+      { key: "Corrigés", text: "Pour chaque texte : une proposition de compte rendu et de commentaire, le vocabulaire clé et les points de méthode pour vous autoévaluer." }
+    ]
+  },
+  videos: {
+    title: "Vidéos", icon: "play", sub: "Documents vidéo et audio",
+    intro: "Des documents vidéo en anglais pour travailler la compréhension orale et l'expression.",
+    parts: [
+      { key: "Sujets", text: "Des reportages, interviews et discours en anglais pour entraîner votre compréhension orale et préparer une restitution structurée." },
+      { key: "Corrigés", text: "Pour chaque vidéo : les éléments de restitution attendus, la transcription des passages essentiels et les expressions utiles à réemployer." }
+    ]
+  }
+};
+function renderRessources(sub){
+  setAccent("1");
+  document.documentElement.style.setProperty("--accent", "#C2410C");
+  document.documentElement.style.setProperty("--accent-soft", "#FFEDD5");
+  const R = RESSOURCES[sub];
+  if (!R){
+    setBar({ title: "Ressources", sub: "S'entraîner aux khôlles", back: true });
+    $("#view").innerHTML = `
+      <div class="alert info">${ICON.info}<span>Des documents pour vous entraîner aux khôlles en autonomie, avec leurs corrigés.</span></div>
+      <div class="choices">
+        ${Object.entries(RESSOURCES).map(([k, r]) => `
+          <a class="card res" href="#/ressources/${k}">
+            <span class="num">${ICON[r.icon]}</span>
+            <span><span class="t">${r.title}</span><br><span class="d">${r.sub} · Sujets et corrigés</span></span>
+            ${ICON.chev}
+          </a>`).join("")}
+      </div>`;
+    return;
+  }
+  setBar({ title: R.title, sub: "Ressources d'entraînement", back: true });
+  $("#view").innerHTML = `
+    <p class="res-intro">${R.intro}</p>
+    ${R.parts.map(pt => `
+      <section class="respart">
+        <div class="ghead"><span class="who">${pt.key}</span></div>
+        <p class="restext">${pt.text}</p>
+        <div class="wip">${ICON.tools}<span><b>Work in progress</b><br><small>Les premiers documents arrivent bientôt.</small></span></div>
+      </section>`).join("")}`;
 }
 
 /* ---------- Feuilles d'action ---------- */
