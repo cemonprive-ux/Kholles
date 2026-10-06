@@ -256,6 +256,8 @@ details.tpart .pl small{font-weight:600;opacity:.75;font-size:12px;margin-left:4
 .cr-stat{background:#fff;border-radius:12px;padding:12px 6px 10px;text-align:center;box-shadow:0 2px 10px rgba(26,39,68,.08);border:1px solid var(--line);border-top:4px solid #C2410C}
 .cr-stat:nth-child(2){border-top-color:#2d5fa6}.cr-stat:nth-child(3){border-top-color:#2a7a4b}
 .cr-stat .n{font-weight:700;font-size:1.45rem;line-height:1;color:#1a2744}
+.cr-stat .n{white-space:nowrap}
+.cr-stat .n.long{font-size:1.1rem}
 .cr-stat .n small{font-size:.55em;color:#C2410C;margin-left:1px}
 .cr-stat .l{font-size:11.5px;line-height:1.3;color:var(--ink-2);margin-top:6px;font-weight:600}
 .cr-meta{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 6px}
@@ -270,6 +272,17 @@ details.tpart .pl small{font-weight:600;opacity:.75;font-size:12px;margin-left:4
 .tbody .cr-era p{margin:0}
 .tbody .cr-era strong{color:#1a2744;background:linear-gradient(transparent 62%,#FFEDD5 62%)}
 .tbody p.dc::first-letter{font-weight:700;color:#C2410C;font-size:2.6em;line-height:.8;float:left;margin:5px 8px 0 0}
+.vwrap{position:relative;width:100%;border-radius:12px;overflow:hidden;background:#0f1a33;box-shadow:0 2px 12px rgba(26,39,68,.18);margin:2px 0 10px}
+.vwrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+details.vscript{margin:4px 0 6px}
+details.vscript>summary{list-style:none;display:flex;align-items:center;gap:8px;cursor:pointer;padding:10px 14px;border-radius:12px;border:1.5px solid #C2410C;color:#C2410C;font-weight:700;background:#FFF7ED}
+details.vscript>summary::-webkit-details-marker{display:none}
+details.vscript>summary svg{width:18px;height:18px;flex:none}
+details.vscript>summary span{flex:1}
+details.vscript>summary .off,details.vscript[open]>summary .on{display:none}
+details.vscript[open]>summary .off{display:inline}
+details.vscript[open]>summary{margin-bottom:12px}
+details.vscript[open]>summary>svg:last-child{transform:rotate(180deg)}
 .tbody .lead{font-style:italic;color:var(--ink-2)}
 .tbody .note{font-size:13px;color:var(--ink-2);font-style:italic;margin-top:-4px}
 .tbody .pb{background:#FFF7ED;border-left:3px solid #C2410C;padding:10px 12px;border-radius:8px}
@@ -371,7 +384,7 @@ details.tpart .pl small{font-weight:600;opacity:.75;font-size:12px;margin-left:4
 /* =====================================================================
    CONFIGURATION — seule partie à modifier
    ===================================================================== */
-const APP_VERSION = "2026.10.06-4";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.06-10";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   // URL de l'application Web Google Apps Script (voir le guide).
@@ -1334,11 +1347,391 @@ const RESSOURCES = {
   },
   videos: {
     title: "Vidéos", icon: "play", sub: "Documents vidéo et audio",
-    intro: "Des documents vidéo en anglais pour travailler la compréhension orale et l'expression.",
-    parts: [
-      { key: "Sujets", text: "Des reportages, interviews et discours en anglais pour entraîner votre compréhension orale et préparer une restitution structurée." },
-      { key: "Corrigés", text: "Pour chaque vidéo : les éléments de restitution attendus, la transcription des passages essentiels et les expressions utiles à réemployer." }
-    ]
+    intro: "Des documents vidéo en anglais, du type de ceux proposés en khôlle, pour travailler la compréhension orale en autonomie.",
+    kind: "video",
+    /* embed : coller ici le code d'intégration (<iframe …>) ou simplement le lien YouTube / Vimeo.
+       transcript : transcription facultative (mêmes balises de repérage que les textes). */
+    items: [
+      {
+        "title": "1 year into Trump’s trade war",
+        "source": "Dale Minaktuk, CBC News",
+        "date": "",
+        "embed": "<iframe title=\"1 year into Trump's Trade War\" width=\"560\" height=\"315\" src=\"https://tube-langues-vivantes.apps.education.fr/videos/embed/3AvuzujXqHP9PMdFVRCx7F\" allow=\"fullscreen\" sandbox=\"allow-same-origin allow-scripts allow-popups allow-forms\" style=\"border: 0px;\"></iframe>",
+        "transcript": "⟦prop|Michelle Gettner⟧ is pointing at all of the ⟦prop|Canadian⟧ ⟦be|products⟧ inside her ⟦be|grocery store⟧, of which there are many. It was part of the store's ⟦be|mantra⟧ when it first opened in ⟦num|2019⟧ to have as many ⟦prop|Canadian⟧ ⟦be|products⟧ as possible. ⟦conn|After⟧ ⟦prop|Donald Trump⟧ started a ⟦be|trade war⟧ with ⟦prop|Canada⟧ ⟦num|last year⟧, the ⟦be|demand⟧ for ⟦prop|Canadian⟧ ⟦be|products⟧ exploded. ⟦conn|So⟧ we made prominent changes with putting maple leaves on ⟦be|products⟧ that are made locally, highlighting them, we have ⟦be|digital tags⟧ so we have stars that highlight when something is coming in locally. The store is filled with little maple leaves, something that also happened in many of the ⟦be|big box grocers⟧.\n\n⟦conn|So⟧ ⟦num|a year since⟧ the ⟦prop|BuyCanadian⟧ movement took off, have ⟦be|consumer buying habits⟧ permanently changed. I just want to ⟦be|spend the money⟧ and I want it to stay in here. I still do look for the signs, ⟦conn|perhaps⟧ less religiously than I did, you know, ⟦num|a year ago⟧. ⟦conn|But⟧ it still matters. I mean, we're not we're not through it yet.\n\nWhat's it like for you? Is it about buying ⟦prop|Canadian⟧ or just most ⟦be|affordable⟧ things that you can find? Most ⟦be|affordable⟧ things. When our household we stuck with it, I made a profound difference to our ⟦prop|Amazon⟧ habits, ⟦conn|for example⟧. ⟦conn|So⟧ ⟦prop|Amazon⟧ used to be an absolute ⟦be|default⟧, you know, go there first of all.\n\n⟦conn|Now⟧ it's a last choice. The messaging is definitely still out there from the prime minister's ⟦be|procurement policies⟧ to the premier's ⟦be|ban⟧ on ⟦prop|American⟧ booze. ⟦conn|And if⟧ you turn on the radio. I'm standing and singing my heart out. For ⟦prop|Canada⟧.\n\nHi, this is ⟦prop|Sarah McLaughlin⟧. ⟦prop|BuyCanadian⟧. Shop as if your country depends on it. We launched it just ⟦num|three days after⟧ ⟦prop|Donald Trump⟧ initiated ⟦be|tariffs⟧ in ⟦prop|Canada⟧. ⟦prop|Larry McInnis⟧ and ⟦prop|Mike Oklemore⟧ created a ⟦be|PSA campaign⟧ featuring prominent Canadians and celebrities.\n\nThis may be a ⟦be|campaign⟧ that lasts ⟦num|a couple of weeks⟧ or ⟦num|a month⟧. Things will probably die down and get back to usual after that. ⟦conn|Well⟧, here we are. It's been ⟦num|over a year⟧. It says that ⟦prop|Canadian⟧ ⟦be|nationalism⟧ is as strong as it's ever been.\n\nIt probably stronger than I remember it being in ⟦num|a long, long time⟧. ⟦prop|Donald Trump⟧ kind of united this country in a way that ⟦prop|Canadian⟧ politicians have been able to. ⟦conn|All over the country⟧, ⟦be|grocers⟧ are seeing ⟦be|sustained demand⟧ for ⟦prop|Canadian⟧ ⟦be|products⟧. This is a ⟦be|permanent shift⟧ and that's based on everything I've heard from the ⟦be|members⟧. This is not something that is going to change.\n\nBack at ⟦prop|Unbox Market⟧, they're happy that ⟦be|consumer dollars⟧ being spent in their store is staying in the country. We've seen ⟦be|growth⟧ and seen more ⟦be|small businesses⟧ doing well and doing better on our ⟦be|shelves⟧, ⟦conn|which I'm hoping means⟧ that they're doing better on other businesses' ⟦be|shelves⟧ ⟦conn|as well⟧. ⟦prop|Dale Minaktuk⟧, ⟦prop|CBC News⟧, ⟦prop|Toronto⟧.",
+        "standfirst": "",
+        "stats": [
+          [
+            "1",
+            "an",
+            "de guerre commerciale"
+          ],
+          [
+            "2019",
+            "",
+            "ouverture de l'épicerie"
+          ],
+          [
+            "3",
+            "jours",
+            "entre les droits de douane et la campagne"
+          ]
+        ],
+        "b2s": [
+          {
+            "label": "Le contexte",
+            "title": "Un an de guerre commerciale",
+            "text": "This CBC report looks at Canada one year after Donald Trump started a **trade war** against it. In a grocery store opened in 2019 with a Canadian-products policy, demand for local goods exploded, so the staff added maple leaves and digital tags."
+          },
+          {
+            "label": "Les consommateurs",
+            "title": "Des habitudes d'achat modifiées",
+            "text": "The \"**Buy Canadian**\" movement has changed **buying habits**, at least for part of the population. Some shoppers still look for the signs, though less strictly, and one household has made Amazon a last choice. However, another shopper mainly looks for the cheapest products."
+          },
+          {
+            "label": "La mobilisation",
+            "title": "Un patriotisme durable",
+            "text": "The message is still everywhere: the prime minister's **procurement policies**, a ban on American alcohol and a radio campaign launched three days after the **tariffs**. A commentator says Canadian **nationalism** is stronger than it has been for a long time and that Trump united the country in a way Canadian politicians could not. Grocers see **lasting demand**, and the store is happy that money stays in the country and helps **small businesses**."
+          }
+        ],
+        "b2n": 157,
+        "c1s": [
+          {
+            "label": "Le contexte",
+            "title": "Un an de guerre commerciale",
+            "text": "Marking one year since Donald Trump launched his **trade war** against Canada, this CBC report suggests that the \"**Buy Canadian**\" surge has **outlived expectations**. Retailers founded on a local-sourcing ethos saw demand for Canadian goods soar and responded with maple-leaf labels and digital tags."
+          },
+          {
+            "label": "Les consommateurs",
+            "title": "Des habitudes d'achat modifiées",
+            "text": "Consumer behaviour has shifted durably, according to the report, even if enthusiasm varies: one shopper checks for signs \"less religiously\" than before and has relegated Amazon to a last resort, while another admits that **affordability, not patriotism**, drives her choices."
+          },
+          {
+            "label": "La mobilisation",
+            "title": "Un patriotisme durable",
+            "text": "Official messaging sustains the momentum, from the prime minister's **procurement policies** to a premier's ban on American alcohol, as does a celebrity campaign launched just after the **tariffs**. A commentator now sees Canadian **nationalism** at its strongest in decades, Trump having united the country as Canadian politicians had struggled to. Grocers report **sustained demand** and anticipate a **permanent shift**, which benefits **small businesses**, whose growth the store hopes will spread to other retailers' shelves."
+          }
+        ],
+        "c1n": 158,
+        "theme": "Protectionism, economic nationalism and consumer patriotism",
+        "comment": "Problématique : Do tariffs and \"buy local\" campaigns protect national economies, or do they hurt the very consumers they claim to defend?\n## I. The return of protectionism\n- Trump's \"America First\" tariffs (2018 steel and aluminium; broad tariffs in 2025); strategic logic: reshoring, bargaining chip, revenue\n- Historical echo: Smoot-Hawley Tariff (1930) and the Great Depression\n- Canada's dependence: about three quarters of exports go to the US; integrated supply chains (USMCA/CUSMA)\n## II. Economic effects\n- Tariffs = tax on consumers: higher prices, inflation, uncertainty for firms\n- Retaliation and trade war spiral; disrupted supply chains; WTO weakened\n- Ricardo's comparative advantage vs. strategic autonomy (Covid, semiconductors, energy)\n- Winners and losers: protected sectors vs. exporters and consumers\n## III. Consumer patriotism and its limits\n- Boycotts and \"Buy Canadian\"; Buy American Act (1933); \"Made in France\" and \"achetez français\"\n- Rally-round-the-flag effect: external pressure strengthens national identity\n- Limits: purchasing power, price sensitivity, attitude–behaviour gap (cf. ethical consumption)\n- Alternatives: diversifying trade partners (CETA, Mercosur), removing internal barriers, supporting small businesses\n## Conclusion et ouverture\n- Economic nationalism can strengthen solidarity but rarely escapes the logic of prices\n- Opening: is the era of globalisation giving way to blocs and economic security?"
+      },
+      {
+        "title": "Australia’s social media ban begins",
+        "source": "Seven News",
+        "date": "",
+        "embed": "<iframe title=\"Australia’s social media ban begins\" width=\"560\" height=\"315\" src=\"https://tube-langues-vivantes.apps.education.fr/videos/embed/sJLPyeH3HeDTSsty53jYCm\" allow=\"fullscreen\" sandbox=\"allow-same-origin allow-scripts allow-popups allow-forms\" style=\"border: 0px;\"></iframe>",
+        "transcript": "⟦prop|Australia's⟧ ⟦be|world leading⟧ ⟦be|social media ban⟧ has officially begun. Our teenagers now guinea pigs in a bold ⟦be|online experiment⟧ aimed at saving lives. ⟦conn|In theory⟧ anyone ⟦num|under the age of 16⟧ should now be locked out of their ⟦be|accounts⟧ ⟦conn|but⟧ many are getting around the ⟦be|restrictions⟧. ⟦conn|At the⟧ ⟦prop|Prime Minister⟧'s official residence the families whose kids have been killed by ⟦be|online bullying⟧. The ⟦be|social media ban⟧ too late for all of them ⟦conn|but⟧ they celebrated its arrival ⟦num|today⟧.\n\nOur kids that we've lost haven't died in vain. ⟦prop|Digital D-Day⟧, the ⟦prop|Prime Minister⟧ calling it his proudest moment. This is ⟦be|world leading⟧, this is ⟦prop|Australia⟧ showing enough is enough. ⟦num|Two million⟧ ⟦prop|Australian⟧ children officially kicked off social media. Things are not good over here.\n\nThis is the end. Logging on to be told they were logged out. Messages like these sprayed ⟦prop|Australia⟧ wide. ⟦conn|In theory⟧. ⟦prop|Instagram⟧ I did the ⟦be|facial recognition⟧ and it said I was good to go.\n\nThe net awash with stories of kids who'd escaped the ⟦be|crackdown⟧. ⟦prop|YouTube⟧ is still operating. ⟦prop|Seven News⟧ has been tracking one group of students from ⟦prop|Western Sydney⟧, ⟦prop|Good Samaritan College⟧. Has anybody not received a message yet? I checked this morning just to see and I'm still able to watch videos.\n\n⟦conn|Surprisingly⟧ I still have access to my account. The experiences mixed ⟦conn|so were⟧ the emotions. You're now officially disconnected how does that feel? I'm upset. It was a real shock for me when I got the ⟦be|notification⟧ that it had signed me out.\n\nSome of my friends they don't have a phone number. Some of them only can communicate using social media. One got access from an old account. That's pretty shocking that one account I can't at all and then the other account I have all the freedom in the world. The ban hits ⟦num|10 of the most popular platforms⟧.\n\nKids ⟦num|under 16⟧ banned. Facial recognition or ⟦be|government ID⟧ needed to ⟦be|verify their age⟧. ⟦conn|But while⟧ a generation of ⟦prop|Australian⟧ school kids are grappling with these new ⟦be|laws⟧, ⟦prop|Apple⟧ ⟦num|today⟧ gave fresh insights into how many of them are really reacting. Mass ⟦be|downloads⟧ of ways to beat the ban. ⟦prop|Apple's⟧ ⟦be|App Store data⟧ revealing the ⟦num|top four⟧ ⟦be|downloads⟧ ⟦num|today⟧, all social media ⟦be|platforms⟧ not on the banned list.\n\nFears of kids being pushed to darker, ⟦be|unregulated⟧ parts of the net. We're not expecting flawlessness. We've built in ⟦be|allowances⟧ for that. The ⟦be|world first move⟧, the centre of worldwide attention. Other countries and doubtless many parents will be watching closely.\n\nFrom newscasts to ⟦prop|Kylie⟧. I think it's a healthy change, yeah. For ⟦prop|Wayne Holdsworth⟧, it's for ⟦prop|Mac⟧. What do you think ⟦prop|Mac⟧ could be thinking ⟦num|today⟧? Well he was on my shoulder when I was presenting and he told me that he was proud and I'm proud of him.\n\n⟦be|Big Tech⟧'s smallest victims. And Chief reporter ⟦prop|Chris Reason⟧ joins me now. ⟦prop|Chris⟧, is the government worried at all about these ⟦be|teething issues⟧? ⟦prop|Mark⟧, they say not. They're confident that social media ⟦be|platforms⟧ will catch up with those kids not yet kicked off and that they'll use their ⟦be|tech and AI⟧ to find those getting around the ban.\n\n⟦conn|The bottom line is⟧ it's all on ⟦be|Big Tech⟧ to get ⟦num|the under 16s⟧ off or face ⟦num|$49 million⟧ ⟦be|fines⟧. ⟦conn|But for all of⟧ the ⟦num|millions⟧ of ⟦prop|Australian⟧ families who have been worried, had fears and concerns about social media and who hasn't, ⟦prop|Mark⟧, ⟦num|today⟧ is a monumental day. It sure is, ⟦prop|Chris⟧. Thank you.",
+        "standfirst": "",
+        "stats": [
+          [
+            "16",
+            "ans",
+            "âge minimum exigé"
+          ],
+          [
+            "2",
+            "M",
+            "d'enfants concernés"
+          ],
+          [
+            "49",
+            "M$",
+            "d'amende pour les plateformes"
+          ]
+        ],
+        "b2s": [
+          {
+            "label": "La mesure",
+            "title": "Une interdiction inédite",
+            "text": "This report from Australian television describes the start of Australia's **world-first social media ban**. In theory, everyone **under 16** is now locked out of their accounts: about two million children, on ten popular platforms. Facial recognition or government ID is needed to check age."
+          },
+          {
+            "label": "Les réactions",
+            "title": "Entre soulagement et contournement",
+            "text": "The Prime Minister calls it his **proudest moment**, and families of children killed after online bullying celebrated, although the law came too late for their own children. However, many teenagers are **getting around the rules**: some passed the **facial recognition** check, others still have access, and Apple data shows that the top four downloads were social media apps not on the banned list. Some students are upset, because friends without a phone number can only communicate through social media."
+          },
+          {
+            "label": "Les enjeux",
+            "title": "Risques et responsabilité des plateformes",
+            "text": "There are fears that children will move to **darker, unregulated** parts of the internet. The government is not worried and says platforms will use technology and AI to find under-16s, or pay **fines of $49 million**."
+          }
+        ],
+        "b2n": 159,
+        "c1s": [
+          {
+            "label": "La mesure",
+            "title": "Une interdiction inédite",
+            "text": "This Seven News report covers the first day of Australia's **pioneering ban** on social media for under-16s, hailed by the Prime Minister as his **proudest moment** and a world-leading stand against Big Tech. Around two million children are theoretically barred from ten major platforms, with age checks relying on **facial recognition** or government ID."
+          },
+          {
+            "label": "Les réactions",
+            "title": "Entre soulagement et contournement",
+            "text": "Families of children who died after online bullying, for whom the ban came too late, celebrated; yet the rollout reveals **teething problems**: some teenagers passed the facial scan, kept access through old accounts or still watch YouTube, and Apple's data shows that the most downloaded apps are social platforms absent from the banned list. Pupils' reactions are mixed."
+          },
+          {
+            "label": "Les enjeux",
+            "title": "Risques et responsabilité des plateformes",
+            "text": "Critics fear that young users will be pushed towards **darker, unregulated** corners of the internet. The government, however, says it never expected flawlessness, is confident that platforms will deploy technology and AI to catch circumventers, and puts the **onus on Big Tech**, which faces **fines of $49 million**."
+          }
+        ],
+        "c1n": 160,
+        "theme": "Banning teenagers from social media: feasibility and responsibilities",
+        "comment": "Problématique : Can a country effectively ban teenagers from social media, and who should enforce and bear the responsibility?\n## I. Why governments are acting\n- Youth mental health: anxiety, depression, cyberbullying, tragedies; Jonathan Haidt, The Anxious Generation (2024)\n- Addictive design and attention economy; harmful content; Big Tech's business model\n- Strong public support; wave of similar projects (Denmark, France, Spain, Malaysia, New Zealand); EU Digital Services Act\n## II. Practical and ethical limits\n- Circumvention: VPNs, false ages, old accounts, migration to platforms not on the list\n- Age verification vs. privacy: facial recognition, government ID, personal data risks\n- Rights and exclusion: isolation of marginalised teenagers; freedom of expression; children's rights (UN Convention)\n- Risk of pushing young people to darker, unregulated corners of the internet\n## III. Beyond the ban: shared responsibility\n- Platforms: safety by design, algorithm transparency, heavy fines\n- Parents and schools: digital literacy, phone bans in schools, France's \"majorité numérique\" law (2023, hardly applied)\n- Evaluation: Australia as a \"guinea pig\" — need for data, international coordination (EU age-verification tools)\n## Conclusion et ouverture\n- A ban is a signal and a tool, not a complete solution; enforcement will decide its credibility\n- Opening: can democracies regulate global platforms without restricting freedoms?"
+      },
+      {
+        "title": "Helping the migrants",
+        "source": "CNN",
+        "date": "",
+        "embed": "<iframe title=\"Helping the migrants\" width=\"560\" height=\"315\" src=\"https://tube-langues-vivantes.apps.education.fr/videos/embed/tHroYFQb5cuyHeTCRcjbJx\" allow=\"fullscreen\" sandbox=\"allow-same-origin allow-scripts allow-popups allow-forms\" style=\"border: 0px;\"></iframe>",
+        "transcript": "What might appear to be a simple case of extreme ⟦be|stockpiling⟧. is actually the preamble to an emotional day. ⟦prop|Sam⟧, ⟦conn|first of all⟧, thank you so much for doing this. ⟦prop|Sam⟧ is not her real name She asked ⟦prop|CNN⟧ not to reveal her identity for fear of ⟦be|retaliation⟧. Could you tell us where we're going? To an apartment to drop off ⟦be|groceries⟧ for a mother and ⟦num|three children⟧.\n\nThey only have enough ⟦be|groceries⟧ for the day. ⟦conn|And then after that⟧ it is bare cabinets, empty fridge. She ⟦be|volunteers⟧ to deliver ⟦be|groceries⟧ to ⟦be|undocumented migrant families⟧, many ⟦be|seeking asylum⟧ in the ⟦prop|Chicago⟧ area, who have stopped going to work. to school and to the store for fear of ⟦be|deportation⟧. Every ⟦be|delivery⟧ costs ⟦num|$80 to $100⟧. ⟦prop|Sam⟧ says she has made ⟦num|up to 15 deliveries⟧ ⟦conn|since⟧ ⟦prop|Trump⟧ took office.\n\n⟦conn|So⟧ some of these families that you visit haven't left their homes ⟦conn|since⟧ ⟦prop|Trump⟧ took office? Yes. ⟦conn|So⟧ ⟦conn|since⟧ ⟦num|Inauguration Day⟧. Yeah. ⟦prop|Sam⟧ says her ⟦be|nonprofit⟧ has received ⟦num|dozens⟧ of ⟦be|requests⟧.\n\nFor migrant families ⟦conn|since⟧ the ⟦prop|ICE⟧ ⟦be|enforcement blitz⟧ started. ⟦prop|Chicago⟧ police say ⟦num|more than 100 people⟧ have been ⟦be|arrested⟧ in the metro area. On this day, ⟦prop|Sam⟧'s meeting a ⟦prop|Venezuelan⟧ mom of ⟦num|three teens⟧. ⟦conn|So⟧ we're pretty close. What's usually your plan?\n\n⟦conn|So⟧ usually I'll notify them on ⟦prop|WhatsApp⟧ that I'm outside. What touches your heart the most The fact that our society's feeding into this ⟦be|propaganda⟧ that it is ⟦be|criminals⟧ and ⟦conn|yet⟧ what I'm seeing is that it's families Families like hers, she says. ⟦prop|Sam⟧'s mom is ⟦prop|Mexican-American⟧. Her dad is indigenous. She says she sees herself in the children of the mothers she serves.\n\nIt is very emotional work. ⟦conn|If⟧ we're not stepping up, nobody is feeding these families. The ⟦prop|Venezuelan⟧ mom was waiting outside. She doesn't want us to use her real name. She arrived in the ⟦prop|US⟧ ⟦num|17 months ago⟧ ⟦be|seeking asylum⟧.\n\n⟦conn|So⟧ you've been in your apartment for ⟦num|two weeks⟧. Porque why don't you ⟦conn|because of⟧ the fear? With this level of fear, ⟦prop|Chicago's⟧ ⟦be|police superintendent⟧ acknowledged the fear in ⟦be|immigrant communities⟧ could impact ⟦be|public safety⟧. I'm pretty sure that there are some people who have not stepped up. and ⟦be|reported a crime⟧ that may have been committed against them ⟦conn|out of fear⟧. ⟦prop|Sam⟧ says it's ⟦conn|not just⟧ undocumented moms who are in fear for their children.\n\nWhat did you tell your son to say to ⟦prop|ICE⟧? Um, if he was questioned by ⟦prop|ICE⟧, I told him to say, I am an ⟦be|American citizen⟧. Please call my mom. She and her ⟦num|ten year old⟧ son We'll be back in a little bit are both ⟦be|US citizens⟧. It breaks my heart.",
+        "standfirst": "",
+        "stats": [
+          [
+            "80–100",
+            "$",
+            "par livraison"
+          ],
+          [
+            "15",
+            "",
+            "livraisons depuis l'investiture"
+          ],
+          [
+            "17",
+            "mois",
+            "depuis l'arrivée de la mère vénézuélienne"
+          ]
+        ],
+        "b2s": [
+          {
+            "label": "Le portrait",
+            "title": "Une bénévole face à la peur",
+            "text": "This CNN report follows a volunteer called Sam (not her real name) who delivers groceries to **undocumented** migrant families in the Chicago area. Many of these families, some of them asylum seekers, no longer go to work, school or the shops because they are **afraid of deportation**, since the **ICE** operations began. Each delivery costs $80 to $100, and Sam has made up to 15 since Trump took office. Without volunteers, she says, **nobody is feeding these families**."
+          },
+          {
+            "label": "Les familles",
+            "title": "Des familles, pas des criminels",
+            "text": "A Venezuelan mother of three teenagers, who arrived 17 months ago, has stayed at home for two weeks. Sam, whose mother is Mexican-American, sees herself in the children. She rejects the idea that migrants are **criminals**: what she sees are families."
+          },
+          {
+            "label": "Les enjeux",
+            "title": "Sécurité publique et citoyens américains",
+            "text": "Chicago's police superintendent admits that this fear could harm **public safety**, because victims may not report crimes. Sam also fears for **US citizens**: she told her ten-year-old son to say he is American if **ICE** questions him."
+          }
+        ],
+        "b2n": 156,
+        "c1s": [
+          {
+            "label": "Le portrait",
+            "title": "Une bénévole face à la peur",
+            "text": "This CNN report profiles \"Sam\", a pseudonymous volunteer who delivers groceries to **undocumented** families in the Chicago area who have stopped working, attending school or shopping for **fear of deportation**. Her nonprofit has received dozens of requests since the **ICE** enforcement blitz, which has led to over 100 local arrests."
+          },
+          {
+            "label": "Les familles",
+            "title": "Des familles, pas des criminels",
+            "text": "One Venezuelan mother of three teenagers, who sought asylum 17 months ago, has been confined to her flat for two weeks. Sam, of Mexican-American and indigenous descent, identifies with the children she helps and challenges the narrative that migrants are **criminals**: what she sees are families."
+          },
+          {
+            "label": "Les enjeux",
+            "title": "Sécurité publique et engagement",
+            "text": "The fear extends to **mixed-status households**, since she has coached her US-citizen son to declare his citizenship if questioned. Chicago's police superintendent concedes that such fear may undermine **public safety** by deterring victims from reporting crimes. Sam insists that, were volunteers not to step up, **nobody would feed these families**, a commitment she finds emotionally taxing."
+          }
+        ],
+        "c1n": 152,
+        "theme": "Immigration enforcement, fear and solidarity in the United States",
+        "comment": "Problématique : How can a democracy reconcile immigration control with the protection of migrants' rights and dignity?\n## I. Immigration: a structural issue\n- Around 11 million undocumented people in the US; key role in agriculture, construction, care work\n- \"Nation of immigrants\" tradition vs. nativism; mass-deportation promises in recent campaigns\n- Push factors: Venezuelan crisis (millions displaced), violence, poverty, climate; asylum backlogs\n- Sanctuary cities vs. federal enforcement (ICE raids): federalism conflict\n## II. The costs of hardline enforcement\n- Climate of fear: people stop working, going to school, seeking healthcare\n- Public safety paradox: victims and witnesses do not report crimes\n- Mixed-status families: US-citizen children (14th Amendment, birthright citizenship debate)\n- Economic effects: labour shortages; human costs; due-process concerns; dehumanising rhetoric (\"criminals\")\n## III. Civil society and solidarity\n- Role of NGOs, churches, volunteers filling the gap left by the State\n- Legality vs. morality: civil disobedience; in France, \"délit de solidarité\" and the principle of fraternity (Cédric Herrou, 2018)\n- Policy options: legalisation (Reagan's 1986 amnesty, DACA), border management, European Pact on Migration and Asylum (2024)\n## Conclusion et ouverture\n- Control and humanity are not mutually exclusive: the debate is about means and rhetoric\n- Opening: how will climate change and conflicts reshape migration flows?"
+      },
+      {
+        "title": "Pronatalism",
+        "source": "",
+        "date": "",
+        "embed": "<iframe title=\"Pronatalism\" width=\"560\" height=\"315\" src=\"https://tube-langues-vivantes.apps.education.fr/videos/embed/sr6KBy4fVEUm8Km9hoZzuT\" allow=\"fullscreen\" sandbox=\"allow-same-origin allow-scripts allow-popups allow-forms\" style=\"border: 0px;\"></iframe>",
+        "transcript": "⟦num|Four kids under five years old⟧ and ⟦prop|Malcolm and Simone Collins⟧ say they're just getting started. They run a ⟦be|foundation⟧ to support ⟦be|pronatalism⟧, a movement mostly populated by ⟦be|religious conservatives⟧ and ⟦be|immigration opponents⟧ concerned that falling ⟦be|fertility rates⟧ could lead to ⟦be|economic and political catastrophe⟧. You're going to have a chain reaction of collapses. The movement's ideas have ⟦conn|also⟧ garnered support from a few ⟦be|tech titans⟧, ⟦conn|including⟧ ⟦prop|Elon Musk⟧. ⟦prop|Musk⟧, father of ⟦num|twelve⟧, who has said civilization will crumble if people don't have more kids.\n\nHaving a kid is a vote for the future. Other ⟦be|technological optimists⟧ like ⟦prop|OpenAI⟧ ⟦prop|Sam Altman⟧ are focusing on improving ⟦be|fertility tech⟧, like creating ⟦be|artificial eggs⟧ and ⟦be|sequencing embryos genes⟧, providing families more options. ⟦conn|Of course⟧ I'm gonna have a big family. Like that's what I'm gonna spend my time doing. You know, I'll just like raise great kids.\n\n⟦prop|Skype⟧ co-founder ⟦prop|Jaan Tallinn⟧ ⟦be|donated⟧ ⟦num|just under half a million dollars⟧. through a ⟦be|donor-advised fund⟧ to the ⟦prop|Collinses Foundation⟧. ⟦conn|Sometimes⟧ I've been kind of asking people ⟦num|two questions⟧ like A, can you program? And B, do you have children? We spoke to the ⟦prop|Collinses⟧ about the tie between ⟦prop|Silicon Valley⟧ and the ⟦be|pronatalist movement⟧ And to an ⟦be|economist⟧ and ⟦be|ethicist⟧ about what they're missing. Alright guys, going in.\n\n⟦be|Demographics⟧ are going to determine our future in ⟦num|the next 100 years⟧ in such a fundamental way. that is hard to think about anything else. Each of these lines shows a ⟦be|projection⟧ of the number of children a woman from these demographics will have in her lifetime. ⟦conn|Right now⟧, the average is ⟦num|between two and three⟧, ⟦conn|but⟧ in ⟦num|50 years⟧, that's on track to be ⟦num|fewer than two⟧, below the ⟦be|replacement rate⟧. The ⟦prop|Collinses⟧ say that could spiral into a more precipitous decline. What they call ⟦be|fertility collapse⟧.\n\nFertility collapse means we may enter a state in which the ⟦be|global economy⟧ is shrinking ⟦num|every year⟧ on average. We simply didn't build the ⟦be|global economy⟧ with this potentiality ever in mind. ⟦conn|When this happens⟧, the entire economic and ⟦be|geopolitical system⟧ that our world runs on will begin to fall apart. ⟦be|Economists⟧ and ⟦be|demographers⟧ ⟦conn|also⟧ see a threat. They say that if populations decline, so will ⟦be|economic output⟧.\n\nLower output is bad ⟦conn|because⟧ you cannot pay back your ⟦be|public debt⟧, you cannot service your ⟦be|social security⟧. ⟦conn|In general⟧, governments have much fewer ⟦be|resources⟧. Countries like ⟦prop|Japan⟧, with a fertility rate of ⟦num|1.3⟧ are already considering proposals to shrink ⟦be|Social Security plans⟧. ⟦prop|Simone Collins⟧, who is running for ⟦be|state representative⟧ in ⟦prop|Pennsylvania⟧ as a ⟦be|Republican⟧ ⟦conn|in part⟧ sees falling ⟦be|fertility rates⟧ as a cultural problem. One of the primary dampeners on fertility, ⟦conn|especially⟧ in developed nations, is a ⟦be|homogenization of culture⟧, ⟦conn|often through⟧ the ⟦be|public school system⟧, ⟦conn|sometimes through⟧ other means as well. universities are a common common culprit as well, um, that causes people to enter a very low fertility ⟦be|urban monoculture⟧, ⟦conn|essentially⟧",
+        "standfirst": "",
+        "stats": [
+          [
+            "4",
+            "",
+            "enfants de moins de 5 ans chez les Collins"
+          ],
+          [
+            "< 2",
+            "",
+            "enfants par femme d'ici 50 ans"
+          ],
+          [
+            "1,3",
+            "",
+            "taux de fécondité au Japon"
+          ]
+        ],
+        "b2s": [
+          {
+            "label": "Le mouvement",
+            "title": "Qui sont les pronatalistes ?",
+            "text": "This report presents **pronatalism**, a movement worried about falling birth rates. Malcolm and Simone Collins, parents of four children under five, run a foundation to support it. The movement is mostly made up of **religious conservatives** and opponents of immigration, but some **tech leaders** also support it: Elon Musk, father of twelve, says civilisation will crumble without more children, Sam Altman is interested in fertility technology, and Jaan Tallinn, a Skype co-founder, gave almost half a million dollars to the Collinses' foundation."
+          },
+          {
+            "label": "Le diagnostic",
+            "title": "La peur d'un effondrement",
+            "text": "The Collinses fear a \"**fertility collapse**\": the average number of children per woman is between two and three today but could fall below two within fifty years, so the **global economy** would shrink. Economists and demographers also see a threat, because lower output means less money to pay **public debt** and **social security**."
+          },
+          {
+            "label": "La dimension culturelle",
+            "title": "Une lecture idéologique",
+            "text": "Simone Collins, a Republican candidate in Pennsylvania, also blames an **urban culture** that is too uniform, spread by schools and universities."
+          }
+        ],
+        "b2n": 156,
+        "c1s": [
+          {
+            "label": "Le mouvement",
+            "title": "Qui sont les pronatalistes ?",
+            "text": "This report scrutinises **pronatalism**, a movement chiefly populated by **religious conservatives** and immigration opponents who fear that falling fertility could trigger economic and political catastrophe. Its best-known couple, Malcolm and Simone Collins, parents of four children under five, run a foundation backed by a near half-million-dollar donation from Skype co-founder Jaan Tallinn. Silicon Valley's endorsement takes several forms: Elon Musk warns that civilisation will crumble without more births, while Sam Altman is drawn to fertility technology."
+          },
+          {
+            "label": "Le diagnostic",
+            "title": "La peur d'un effondrement",
+            "text": "The Collinses predict a \"**fertility collapse**\", with fertility dropping below the **replacement rate** within fifty years and the **global economy** shrinking annually. Economists and demographers share part of the diagnosis: lower output would impair governments' capacity to service **public debt** and fund **social security**, as Japan's 1.3 fertility rate and mooted pension cuts illustrate."
+          },
+          {
+            "label": "La dimension culturelle",
+            "title": "Une lecture idéologique",
+            "text": "Yet the couple also frame the issue culturally, Simone Collins, a Republican candidate in Pennsylvania, blaming an **urban monoculture** fostered by schools and universities."
+          }
+        ],
+        "c1n": 154,
+        "theme": "Demographic decline, fertility and the future of societies",
+        "comment": "Problématique : Is falling fertility a threat justifying pro-birth policies, and what are the limits of such policies?\n## I. A global demographic shift\n- Fertility falling almost everywhere: South Korea below 1, Japan about 1.3, China (one-child policy 1979–2015; population declining since 2022), Europe and US about 1.5–1.6\n- Consequences: ageing, dependency ratio, pay-as-you-go pensions, labour shortages, healthcare costs\n- Nuance: UN projections show world population peaking around the 2080s, near 10 billion\n## II. Policy responses and their limits\n- Family policy: France (family quotient, childcare), Nordic model, Hungary's incentives, baby bonuses\n- Mixed results: South Korea's massive spending has not reversed the trend\n- Alternatives: immigration (Canada, Germany), later retirement, productivity, automation and AI, \"silver economy\"\n## III. Ethical and political debates\n- Why fewer children? Housing, childcare costs, job insecurity, women's careers, climate anxiety, changing values\n- Reproductive freedom and women's rights vs. State or ideological pressure; natalism linked to conservative and nativist discourse\n- Technology and ethics: embryo screening, artificial eggs, \"designer babies\", eugenics concerns\n- Environmental argument: fewer people, lighter footprint? degrowth vs. growth\n## Conclusion et ouverture\n- Demography is slow but powerful: adaptation is likely more realistic than reversal\n- Opening: can societies stay prosperous with smaller, older populations?"
+      },
+      {
+        "title": "Student loans",
+        "source": "",
+        "date": "",
+        "embed": "<iframe title=\"Student loans\" width=\"560\" height=\"315\" src=\"https://tube-langues-vivantes.apps.education.fr/videos/embed/6hMeX7vocUrEo2vjf46BSp\" allow=\"fullscreen\" sandbox=\"allow-same-origin allow-scripts allow-popups allow-forms\" style=\"border: 0px;\"></iframe>",
+        "transcript": "⟦conn|During the pandemic⟧, ⟦be|student loan borrowers⟧ could get a temporary ⟦be|refund⟧ on ⟦be|payments⟧ they made. And ⟦be|defer⟧ student ⟦be|loan⟧ ⟦be|payments⟧ and ⟦be|forgive interest⟧ ⟦conn|until further notice⟧. Money to help during the ⟦prop|COVID⟧ crisis that they would ultimately need to ⟦be|pay back⟧. I was able to get a ⟦be|refund⟧ for ⟦num|$10,000⟧. You can get a ⟦be|refund⟧ on those ⟦be|payments⟧ Few applied for that ⟦be|refund⟧ ⟦conn|until⟧ ⟦prop|President Biden⟧ said he planned to forgive ⟦num|up to $20,000⟧ in ⟦be|federal student loan debt⟧.\n\nWe did it, ⟦prop|Joe⟧. Let's just say I've been forgiven. Borrower ⟦prop|Will Adams⟧, a director for ⟦prop|NBC Bay Area⟧ in ⟦prop|California⟧, had paid off his son's ⟦num|$15,000⟧ ⟦be|loan⟧ during the pandemic ⟦conn|So when⟧ he heard about the ⟦be|forgiveness plan⟧, he applied for the ⟦be|refund⟧, thinking it was ⟦be|debt cancellation⟧. I was hesitant a little bit when we got the money, like is this fake? Is this a ⟦be|scam⟧?\n\n⟦conn|But⟧ the ⟦be|check⟧ was real and he says he spent the ⟦num|fifteen grand⟧ on travel and home expenses. ⟦conn|Now⟧ ⟦num|two years later⟧ he's expected to pay it all back plus ⟦be|interest⟧. How did you feel when you heard you were ⟦be|on the hook⟧ for ⟦num|almost sixteen thousand dollars⟧? You know, I was shocked. The ⟦be|check⟧ I'm looking at right now it says ⟦prop|Fed Student Loan Refund⟧.\n\nSo to me, it's a ⟦be|refund⟧. I I wouldn't think I'd have to pay it back, but you know, now now here I am ⟦prop|Adams⟧ is not alone. ⟦num|An estimated 250,000⟧ ⟦be|borrowers⟧ now owe the government for those so-called refunds. ⟦conn|Why?⟧ ⟦prop|The Supreme Court⟧ rejected ⟦prop|Biden's⟧ ⟦be|debt forgiveness plan⟧, ⟦conn|so anyone⟧ who received a ⟦be|refund⟧ is now being asked to return that money, which confused many ⟦be|borrowers⟧ like ⟦prop|Adams⟧. The communication from the government was uh was very spotty during that period of time.\n\n⟦prop|Scott Buchanan⟧ is the ⟦be|executive director⟧ of the ⟦prop|Student Loan Servicing Alliance⟧. ⟦conn|That's why⟧ we strongly advise ⟦be|borrowers⟧ to be very thoughtful before they requested a ⟦be|refund⟧ and continue to wait ⟦conn|until⟧ actual ⟦be|loan forgiveness⟧. These ⟦be|borrowers⟧ are stuck in an incredibly unfair situation. ⟦prop|Persis Yu⟧ of the ⟦prop|Student Borrower Protection Center⟧ is helping families navigate the confusion. What is your advice to people who are in this situation?\n\nThe only path forward is to try to figure out how to make their day-to-day ⟦be|finances⟧ work ⟦prop|The Department of Education⟧ declined to be interviewed. They say ⟦be|borrowers⟧ should contact their ⟦be|servicers⟧ ⟦num|before the end of the year⟧ to avoid going into ⟦be|default⟧. Ask about different ⟦be|income-driven repayment plans⟧ that can lower your ⟦be|interest⟧ and ⟦be|monthly payment⟧ ⟦conn|And if⟧ you're a ⟦be|public employee⟧, see if you qualify for forgiveness under the ⟦be|Public Service Loan Forgiveness Program⟧. That ⟦num|$78 billion⟧ is currently approved to help ⟦num|more than a million people⟧ wipe out their ⟦be|federal student loans⟧. ⟦conn|For Will⟧, who now has to pay ⟦num|$700⟧ in ⟦be|interest⟧ on top of the ⟦be|loan⟧ he already paid back, this ⟦be|repayment⟧ will be a family affair.",
+        "standfirst": "",
+        "stats": [
+          [
+            "250 000",
+            "",
+            "emprunteurs concernés"
+          ],
+          [
+            "20 000",
+            "$",
+            "d'annulation promise par Biden"
+          ],
+          [
+            "16 000",
+            "$",
+            "à rembourser pour Will Adams"
+          ]
+        ],
+        "b2s": [
+          {
+            "label": "Le contexte",
+            "title": "Un remboursement pris pour un cadeau",
+            "text": "This TV report tells the story of Americans who now have to **repay** money they thought was a gift. During the pandemic, student loan borrowers could get a **temporary refund** of their payments and also defer payments, but this help had to be paid back in the end. Few people applied until President Biden announced a plan to **forgive up to $20,000** of federal student debt."
+          },
+          {
+            "label": "Le cas de Will Adams",
+            "title": "De l'aide à la dette",
+            "text": "Will Adams, who had paid off his son's $15,000 loan, applied for a refund, thinking it was **debt cancellation**. He spent the money on travel and home expenses. But the **Supreme Court** rejected Biden's plan, so about 250,000 borrowers are now asked to return their refunds. Adams must **repay** almost $16,000, plus $700 in interest."
+          },
+          {
+            "label": "Les conseils",
+            "title": "Éviter le défaut de paiement",
+            "text": "The Department of Education advises people to contact their **servicers** before the end of the year to avoid **default** and to ask about cheaper repayment plans. For Adams, repaying will be a **family affair**."
+          }
+        ],
+        "b2n": 155,
+        "c1s": [
+          {
+            "label": "Le contexte",
+            "title": "Un remboursement pris pour un cadeau",
+            "text": "This report examines the predicament of roughly 250,000 borrowers asked to return pandemic-era student loan \"refunds\". Conceived as temporary relief, the refunds attracted few applicants until President Biden pledged to **forgive up to $20,000** of federal debt."
+          },
+          {
+            "label": "Le cas de Will Adams",
+            "title": "De l'aide à la dette",
+            "text": "Will Adams, who had already repaid his son's $15,000 loan, applied, assuming it amounted to cancellation; the cheque seemed genuine, and he spent it on travel and household expenses. After the **Supreme Court** struck down the forgiveness plan, however, he is expected to **repay** nearly $16,000, plus about $700 in interest."
+          },
+          {
+            "label": "Les réactions",
+            "title": "Éviter le défaut de paiement",
+            "text": "Industry representatives blame **spotty government communication** and had urged borrowers to wait for actual forgiveness, whereas a consumer advocate calls the situation **incredibly unfair** and sees no way out except rebalancing household finances. The Department of Education, which declined to be interviewed, advises contacting **servicers** before year-end to avert **default**, exploring **income-driven repayment**, and checking eligibility for Public Service Loan Forgiveness. For Adams, repayment will be a **family affair**."
+          }
+        ],
+        "c1n": 157,
+        "theme": "Student debt and the cost of higher education",
+        "comment": "Problématique : Who should bear the cost of higher education — students, the State or employers — and is student debt sustainable?\n## I. A system built on debt\n- US student debt: around $1.7 trillion, tens of millions of borrowers; tuition rising faster than wages\n- Logic of the \"graduate premium\": degree seen as a private investment with a personal return\n- Contrasts: very low fees in France, free or almost free in Nordic countries and Germany (tuition abolished in 2014), UK fees above £9,000 since 2012 with income-contingent loans\n## II. Social and economic consequences\n- Delayed life milestones: housing, marriage, children, entrepreneurship; reduced social mobility\n- Inequalities: heavier burden for low-income and Black borrowers; predatory for-profit colleges; risk of default\n- Psychological stress and financial insecurity; distrust of institutions when the rules change (forgiveness announced, then cancelled)\n- France: student precarity (part-time jobs, food banks), role of means-tested grants\n## III. Policy responses and debates\n- Forgiveness: Biden's plan struck down by the Supreme Court (2023) → fairness towards those who repaid or never attended college; moral hazard\n- Targeted tools: income-driven repayment, Public Service Loan Forgiveness\n- Structural options: debt-free college (Sanders, Warren), price caps, accountability of universities, apprenticeships and work-study (alternance)\n## Conclusion et ouverture\n- Is higher education a private good or a public good? The answer shapes who pays\n- Opening: will AI and the labour market reduce the perceived value of degrees?"
+      },
+      {
+        "title": "The Royals on their way to Australia",
+        "source": "Katie Watson, BBC News",
+        "date": "",
+        "embed": "<iframe title=\"The Royals on their way to Australia\" width=\"560\" height=\"315\" src=\"https://tube-langues-vivantes.apps.education.fr/videos/embed/hzLaKcVJx577dttcRf67f9\" allow=\"fullscreen\" sandbox=\"allow-same-origin allow-scripts allow-popups allow-forms\" style=\"border: 0px;\"></iframe>",
+        "transcript": "⟦prop|King Charles⟧ and ⟦prop|Queen Camilla⟧ are on their way to ⟦prop|Australia⟧ for the biggest ⟦be|overseas trip⟧ since the King began cancer treatment in ⟦num|February⟧. It is a visit which has reopened questions about the future of the ⟦be|monarchy⟧ in ⟦prop|Australia⟧ and the debate about whether the country should become a ⟦be|republic⟧. From ⟦prop|Sydney⟧, here's our ⟦be|correspondent⟧ ⟦prop|Katie Watson⟧. For ⟦prop|Australia's⟧ young ⟦be|monarchists⟧, there's a lot to celebrate. The fact ⟦prop|King Charles⟧ is travelling ⟦num|10,000 miles⟧ and across ⟦num|10 different time zones⟧.\n\n⟦conn|all the while⟧ having cancer treatment is, say these students, testament to his fondness for this country. I'm really excited. I think he's such a big A big part of our history and our tradition. It's really wonderful that we get to celebrate it. People aren't going to line the streets waving ⟦prop|Union Jacks⟧.\n\nThey're going to be waving the ⟦prop|Australian⟧ flag ⟦conn|because⟧ the king is just as much the king of ⟦prop|Australia⟧ as he is the king of ⟦prop|England⟧. At ⟦prop|London Airport⟧, the ⟦be|heir to the throne⟧ prepared to say goodbye to ⟦prop|Britain⟧ for ⟦num|a few months⟧. The king first came here ⟦num|aged 17⟧, spending ⟦num|two terms⟧ at a rural ⟦be|boarding school⟧ and calling it by far the best experience of his education. He's since returned ⟦num|15 times⟧, ⟦conn|most recently⟧, with the now Queen for the ⟦num|2018⟧ ⟦prop|Commonwealth Games⟧. Monarchy, the Farewell of Tour!\n\n⟦conn|But⟧ ⟦be|Republicans⟧ here say the country needs to move on. They've released this tongue-in-cheek video encouraging Australians to think about a future without the royals. ⟦num|This weekend⟧ the King and Queen will land here in ⟦prop|Sydney⟧ and be shown around by one of the country's most prominent ⟦be|Republicans⟧. ⟦prop|Prime Minister Anthony Albanese⟧ has long made it clear that ⟦prop|Australia⟧ needs to ⟦be|rid itself of the monarchy⟧. ⟦conn|But⟧ plans to hold ⟦be|a vote⟧ on the issue have been ⟦be|shelved⟧.\n\nThere just isn't the appetite for what many see is a distraction from bigger issues like the ⟦be|cost of living crisis⟧. ⟦conn|And⟧ the government was defeated in a separate ⟦be|referendum⟧ ⟦num|last October⟧ on giving greater ⟦be|political rights⟧ to ⟦be|Indigenous people⟧. It was a bruising ⟦be|campaign⟧ that divided ⟦prop|Australia⟧. For many ⟦prop|First Nations⟧ communities A vote on the ⟦be|monarchy⟧ just isn't a priority. We're not white ⟦prop|Australia⟧ anymore, we're a brown ⟦prop|Australia⟧.\n\nIt'd be very interesting to see, you know, a a brown ⟦be|head of state⟧ or a black ⟦be|head of state⟧. ⟦conn|But⟧ you know, ⟦conn|before we do that⟧ we need to include our first nation. ⟦conn|And⟧ acknowledge and recognise that. There are plenty of nods to the royals in ⟦prop|Sydney⟧, but these pubgoers give very little thought to the king. I'd feel that my friends have the same opinion as me ⟦conn|But⟧ I'd feel older generations like my parents and my grandparents would have much more of a stronger connection to the ⟦be|monarchy⟧ and the king.\n\n⟦prop|Australia's⟧ flag with a ⟦prop|Union Jack⟧ in the corner is the most ubiquitous reminder of the country's ties with ⟦prop|Great Britain⟧. ⟦conn|In most places⟧ ⟦conn|though⟧, the ⟦prop|Aboriginal⟧ flag now flies alongside it. ⟦prop|Australia⟧ is a very different country to the one ⟦prop|King Charles⟧ first visited ⟦num|nearly 60 years ago⟧. ⟦prop|Katie Watson⟧ ⟦prop|BBC News⟧ in ⟦prop|Sydney⟧",
+        "standfirst": "",
+        "stats": [
+          [
+            "10 000",
+            "miles",
+            "parcourus par le roi"
+          ],
+          [
+            "15",
+            "",
+            "visites depuis ses 17 ans"
+          ],
+          [
+            "60",
+            "ans",
+            "depuis sa première visite"
+          ]
+        ],
+        "b2s": [
+          {
+            "label": "La visite",
+            "title": "Un voyage royal symbolique",
+            "text": "This BBC report follows King Charles and Queen Camilla to Australia, the King's biggest overseas trip since he began **cancer treatment** in February. The visit has reopened the debate on whether Australia should become a **republic**. Young **monarchists** are proud that the King is travelling 10,000 miles despite his illness. He first came at 17 and has returned 15 times."
+          },
+          {
+            "label": "Le débat",
+            "title": "Monarchie ou république ?",
+            "text": "But republicans want the country to **move on** and have released a funny video about a future without the royals. Prime Minister Anthony Albanese has long wanted to end the monarchy, but the plan for a vote has been **put aside**. People care more about the **cost of living**, and the government lost a **referendum** last October on Indigenous rights, after a divisive campaign."
+          },
+          {
+            "label": "Conclusion",
+            "title": "Une Australie qui a changé",
+            "text": "Many **First Nations** people say the monarchy is not a priority and that they must be recognised first. Australia is very different from the country Charles first visited nearly 60 years ago."
+          }
+        ],
+        "b2n": 156,
+        "c1s": [
+          {
+            "label": "La visite",
+            "title": "Un voyage royal symbolique",
+            "text": "As King Charles and Queen Camilla embark on his biggest overseas trip since his **cancer treatment** began in February, this BBC report shows how the visit has revived the question of an Australian **republic**. Young **monarchists** see his 10,000-mile journey, undertaken despite illness, as proof of his affection for the country, which he first visited at 17 and has since revisited 15 times."
+          },
+          {
+            "label": "Le débat",
+            "title": "Monarchie ou république ?",
+            "text": "Republicans, by contrast, argue that Australia must **move on**, even releasing a tongue-in-cheek video about life without the royals. Prime Minister Anthony Albanese, a long-standing republican, has nevertheless **shelved** plans for a vote: there is little appetite for what many regard as a distraction from the **cost-of-living crisis**, and the government's defeat in last October's **referendum** on Indigenous political rights left deep scars."
+          },
+          {
+            "label": "Conclusion",
+            "title": "Une Australie divisée",
+            "text": "Many **First Nations** people consider the monarchy a non-priority and insist that their recognition should come first. **Generational divides** are also apparent, younger pubgoers being indifferent whereas older Australians retain stronger ties."
+          }
+        ],
+        "c1n": 158,
+        "theme": "Monarchy, republicanism and national identity in the Commonwealth",
+        "comment": "Problématique : Does monarchy still have a place in modern Commonwealth democracies, or is it a colonial relic?\n## I. Arguments for monarchy: continuity and symbol\n- Constitutional monarchy: head of state above politics (UK, Spain, Netherlands, Scandinavia, Japan)\n- Stability, tradition, soft power, tourism; Commonwealth of 56 members, 15 realms\n- Popularity of the institution, legacy of Elizabeth II, media fascination\n## II. Challenges to legitimacy\n- Hereditary and unelected vs. democratic principles\n- Colonial legacy and Indigenous peoples; slavery reparations debate; Barbados became a republic (2021); William and Kate's Caribbean tour (2022)\n- Image problems: scandals (Prince Andrew, Harry and Meghan), cost, generation gap, King's health\n## III. Redefining national identity\n- Australia: 1999 referendum rejected a republic; disagreement on how to choose a president (elected or appointed)\n- Indigenous recognition: 2023 Voice referendum rejected → priorities and reconciliation\n- Multicultural societies seeking symbols that reflect them; other models (Ireland, India, France)\n- Competing priorities: cost of living, housing, climate\n## Conclusion et ouverture\n- The monarchy's future depends less on law than on legitimacy and generational change\n- Opening: can a symbolic institution adapt to a post-colonial world?"
+      }
+    ],
+    commentNote: "Chaque commentaire prolonge le document vers son thème : problématique, plan thématique en trois parties, conclusion et ouverture. Présentation en notes, à développer à l'oral."
   }
 };
 const hlTags = (h) => h.replace(/⟦(be|num|prop|conn)\|([^⟧]+)⟧/g, '<mark class="$1">$2</mark>');
@@ -1374,7 +1767,24 @@ function richText(src){
     flush(); return out;
   }).join("");
 }
+function videoEmbed(code){
+  code = String(code || "").trim(); if (!code) return "";
+  let src = (code.match(/src\s*=\s*["']([^"']+)["']/i) || [])[1] || code;
+  src = src.replace(/&amp;/g, "&").trim();
+  let m;
+  if ((m = src.match(/(?:youtube\.com\/watch\?(?:.*&)?v=|youtu\.be\/|youtube\.com\/shorts\/|youtube\.com\/live\/)([\w-]{11})/))) src = "https://www.youtube-nocookie.com/embed/" + m[1];
+  else if ((m = src.match(/^https:\/\/vimeo\.com\/(\d+)/))) src = "https://player.vimeo.com/video/" + m[1];
+  if (!/^https:\/\//i.test(src)) return "";
+  const w = +(code.match(/width\s*=\s*["']?(\d+)/i) || [])[1], h = +(code.match(/height\s*=\s*["']?(\d+)/i) || [])[1];
+  const ratio = w && h ? `${w} / ${h}` : "16 / 9";
+  return `<div class="vwrap" style="aspect-ratio:${ratio}"><iframe src="${esc(src)}" title="Vidéo" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe></div>`;
+}
+document.addEventListener("toggle", (e) => {
+  const d = e.target; if (d.open || !d.querySelectorAll) return;
+  d.querySelectorAll(".vwrap iframe").forEach(f => { const u = f.src; f.src = "about:blank"; f.src = u; });
+}, true);
 function renderTextes(R){
+  const isV = R.kind === "video";
   const wip = `<div class="wip">${ICON.tools}<span><b>Work in progress</b><br><small>Ce contenu arrive bientôt.</small></span></div>`;
   const words = t => t.trim() ? t.trim().split(/\s+/).length : 0;
   const part = (n, label, body, extra = "", pre = "", post = "") => `
@@ -1386,7 +1796,7 @@ function renderTextes(R){
     const secs = it[key] || [];
     const strong = (h) => h.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
     const body = !secs.length ? wip : `
-      <div class="cr-stats">${(it.stats || []).map(([v, u, l]) => `<div class="cr-stat"><div class="n">${esc(v)}${u ? `<small>${esc(u)}</small>` : ""}</div><div class="l">${esc(l)}</div></div>`).join("")}</div>
+      <div class="cr-stats">${(it.stats || []).map(([v, u, l]) => `<div class="cr-stat"><div class="n${(v + u).length > 5 ? " long" : ""}">${esc(v).replace(/ /g, "\u202f")}${u ? `<small>${esc(u)}</small>` : ""}</div><div class="l">${esc(l)}</div></div>`).join("")}</div>
       <div class="cr-meta"><span class="cr-chip lvl">Niveau ${lvl}</span><span class="cr-chip">${secs.length} temps</span></div>
       <div class="cr-tl">${secs.map((sc, i) => `
         <div class="cr-era">
@@ -1396,24 +1806,34 @@ function renderTextes(R){
         </div>`).join("")}</div>`;
     return `
     <details class="tpart">
-      <summary><span class="pn">${n}</span><span class="pl">Compte rendu · niveau ${lvl} <small>${nw} mots</small></span>${ICON.down}</summary>
+      <summary><span class="pn">${n}</span><span class="pl">Compte rendu · niveau ${lvl}${nw ? ` <small>${nw} mots</small>` : ""}</span>${ICON.down}</summary>
       <div class="tbody cr">${body}</div>
     </details>`;
   };
+  const videoPart = (it) => {
+    const v = videoEmbed(it.embed), tr = (it.transcript || "").trim();
+    const body = !v && !tr ? wip : (v || `<div class="wip">${ICON.play}<span><b>Vidéo à venir</b><br><small>Le lecteur s'affichera ici.</small></span></div>`)
+      + (tr ? `<details class="vscript"><summary>${ICON.doc}<span class="on">Afficher le script</span><span class="off">Masquer le script</span>${ICON.down}</summary><div class="article">${richText(tr)}</div>${HL_LEGEND}</details>` : "");
+    return `
+    <details class="tpart">
+      <summary><span class="pn">1</span><span class="pl">La vidéo</span>${ICON.down}</summary>
+      <div class="tbody">${body}</div>
+    </details>`;
+  };
   return `
-    <p class="res-intro">${R.intro} Touchez un texte pour afficher le document, les comptes rendus et la proposition de commentaire.</p>
+    <p class="res-intro">${R.intro} Touchez ${isV ? "une vidéo" : "un texte"} pour afficher le document, les comptes rendus et la proposition de commentaire.</p>
     ${R.items.map((it, i) => `
       <details class="txt">
         <summary>
           <span class="num">${i + 1}</span>
-          <span class="tt"><span class="t">${esc(it.title)}</span><span class="d">${esc(it.source)} · ${esc(it.date)}</span></span>
+          <span class="tt"><span class="t">${esc(it.title || (isV ? "Vidéo " : "Texte ") + (i + 1))}</span><span class="d">${it.title ? [it.source, it.date].filter(Boolean).map(esc).join(" · ") : "Bientôt disponible"}</span></span>
           ${ICON.down}
         </summary>
         <div class="tparts">
-          ${part(1, "Le texte", it.text, "", `<div class="article">` + (it.standfirst ? `<p class="lead">${esc(it.standfirst)}</p>` : ""), `</div>` + HL_LEGEND)}
+          ${isV ? videoPart(it) : part(1, "Le texte", it.text, "", `<div class="article">` + (it.standfirst ? `<p class="lead">${esc(it.standfirst)}</p>` : ""), `</div>` + HL_LEGEND)}
           ${summaryPart(2, "B2", it, "b2s", it.b2n)}
           ${summaryPart(3, "C1", it, "c1s", it.c1n)}
-          ${part(4, "Proposition de commentaire", it.comment.trim() ? `## ${it.theme}\n> ${R.commentNote || ""}\n\n` + it.comment : "")}
+          ${part(4, "Proposition de commentaire", (it.comment || "").trim() ? `## ${it.theme}\n> ${R.commentNote || ""}\n\n` + it.comment : "")}
         </div>
       </details>`).join("")}`;
 }
