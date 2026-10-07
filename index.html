@@ -325,7 +325,7 @@ details.vscript[open]>summary>svg:last-child{transform:rotate(180deg)}
 .tcard{display:flex;align-items:center;gap:14px;padding:16px;border:1px solid var(--line);border-radius:20px;background:var(--surface);box-shadow:var(--shadow);text-decoration:none;color:inherit}
 .tcard .t{font-weight:700;font-size:18px}
 .tcard .d{color:var(--muted);font-size:14px}
-.tbody{flex:1;min-width:0;display:block}
+.tcbody{flex:1;min-width:0;display:block}
 .ticon{width:52px;height:52px;border-radius:15px;display:grid;place-items:center;flex:none}
 .ticon svg{width:26px;height:26px}
 .t-annul{background:var(--err-soft);color:var(--err)}
@@ -384,7 +384,7 @@ details.vscript[open]>summary>svg:last-child{transform:rotate(180deg)}
 /* =====================================================================
    CONFIGURATION — seule partie à modifier
    ===================================================================== */
-const APP_VERSION = "2026.10.06-10";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.07-2";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   // URL de l'application Web Google Apps Script (voir le guide).
@@ -1543,8 +1543,8 @@ const RESSOURCES = {
       },
       {
         "title": "Pronatalism",
-        "source": "",
-        "date": "",
+        "source": "Wall Street Journal",
+        "date": "19 September 2024",
         "embed": "<iframe title=\"Pronatalism\" width=\"560\" height=\"315\" src=\"https://tube-langues-vivantes.apps.education.fr/videos/embed/sr6KBy4fVEUm8Km9hoZzuT\" allow=\"fullscreen\" sandbox=\"allow-same-origin allow-scripts allow-popups allow-forms\" style=\"border: 0px;\"></iframe>",
         "transcript": "⟦num|Four kids under five years old⟧ and ⟦prop|Malcolm and Simone Collins⟧ say they're just getting started. They run a ⟦be|foundation⟧ to support ⟦be|pronatalism⟧, a movement mostly populated by ⟦be|religious conservatives⟧ and ⟦be|immigration opponents⟧ concerned that falling ⟦be|fertility rates⟧ could lead to ⟦be|economic and political catastrophe⟧. You're going to have a chain reaction of collapses. The movement's ideas have ⟦conn|also⟧ garnered support from a few ⟦be|tech titans⟧, ⟦conn|including⟧ ⟦prop|Elon Musk⟧. ⟦prop|Musk⟧, father of ⟦num|twelve⟧, who has said civilization will crumble if people don't have more kids.\n\nHaving a kid is a vote for the future. Other ⟦be|technological optimists⟧ like ⟦prop|OpenAI⟧ ⟦prop|Sam Altman⟧ are focusing on improving ⟦be|fertility tech⟧, like creating ⟦be|artificial eggs⟧ and ⟦be|sequencing embryos genes⟧, providing families more options. ⟦conn|Of course⟧ I'm gonna have a big family. Like that's what I'm gonna spend my time doing. You know, I'll just like raise great kids.\n\n⟦prop|Skype⟧ co-founder ⟦prop|Jaan Tallinn⟧ ⟦be|donated⟧ ⟦num|just under half a million dollars⟧. through a ⟦be|donor-advised fund⟧ to the ⟦prop|Collinses Foundation⟧. ⟦conn|Sometimes⟧ I've been kind of asking people ⟦num|two questions⟧ like A, can you program? And B, do you have children? We spoke to the ⟦prop|Collinses⟧ about the tie between ⟦prop|Silicon Valley⟧ and the ⟦be|pronatalist movement⟧ And to an ⟦be|economist⟧ and ⟦be|ethicist⟧ about what they're missing. Alright guys, going in.\n\n⟦be|Demographics⟧ are going to determine our future in ⟦num|the next 100 years⟧ in such a fundamental way. that is hard to think about anything else. Each of these lines shows a ⟦be|projection⟧ of the number of children a woman from these demographics will have in her lifetime. ⟦conn|Right now⟧, the average is ⟦num|between two and three⟧, ⟦conn|but⟧ in ⟦num|50 years⟧, that's on track to be ⟦num|fewer than two⟧, below the ⟦be|replacement rate⟧. The ⟦prop|Collinses⟧ say that could spiral into a more precipitous decline. What they call ⟦be|fertility collapse⟧.\n\nFertility collapse means we may enter a state in which the ⟦be|global economy⟧ is shrinking ⟦num|every year⟧ on average. We simply didn't build the ⟦be|global economy⟧ with this potentiality ever in mind. ⟦conn|When this happens⟧, the entire economic and ⟦be|geopolitical system⟧ that our world runs on will begin to fall apart. ⟦be|Economists⟧ and ⟦be|demographers⟧ ⟦conn|also⟧ see a threat. They say that if populations decline, so will ⟦be|economic output⟧.\n\nLower output is bad ⟦conn|because⟧ you cannot pay back your ⟦be|public debt⟧, you cannot service your ⟦be|social security⟧. ⟦conn|In general⟧, governments have much fewer ⟦be|resources⟧. Countries like ⟦prop|Japan⟧, with a fertility rate of ⟦num|1.3⟧ are already considering proposals to shrink ⟦be|Social Security plans⟧. ⟦prop|Simone Collins⟧, who is running for ⟦be|state representative⟧ in ⟦prop|Pennsylvania⟧ as a ⟦be|Republican⟧ ⟦conn|in part⟧ sees falling ⟦be|fertility rates⟧ as a cultural problem. One of the primary dampeners on fertility, ⟦conn|especially⟧ in developed nations, is a ⟦be|homogenization of culture⟧, ⟦conn|often through⟧ the ⟦be|public school system⟧, ⟦conn|sometimes through⟧ other means as well. universities are a common common culprit as well, um, that causes people to enter a very low fertility ⟦be|urban monoculture⟧, ⟦conn|essentially⟧",
         "standfirst": "",
@@ -1606,8 +1606,8 @@ const RESSOURCES = {
       },
       {
         "title": "Student loans",
-        "source": "",
-        "date": "",
+        "source": "NBC, Today",
+        "date": "26 December 2024",
         "embed": "<iframe title=\"Student loans\" width=\"560\" height=\"315\" src=\"https://tube-langues-vivantes.apps.education.fr/videos/embed/6hMeX7vocUrEo2vjf46BSp\" allow=\"fullscreen\" sandbox=\"allow-same-origin allow-scripts allow-popups allow-forms\" style=\"border: 0px;\"></iframe>",
         "transcript": "⟦conn|During the pandemic⟧, ⟦be|student loan borrowers⟧ could get a temporary ⟦be|refund⟧ on ⟦be|payments⟧ they made. And ⟦be|defer⟧ student ⟦be|loan⟧ ⟦be|payments⟧ and ⟦be|forgive interest⟧ ⟦conn|until further notice⟧. Money to help during the ⟦prop|COVID⟧ crisis that they would ultimately need to ⟦be|pay back⟧. I was able to get a ⟦be|refund⟧ for ⟦num|$10,000⟧. You can get a ⟦be|refund⟧ on those ⟦be|payments⟧ Few applied for that ⟦be|refund⟧ ⟦conn|until⟧ ⟦prop|President Biden⟧ said he planned to forgive ⟦num|up to $20,000⟧ in ⟦be|federal student loan debt⟧.\n\nWe did it, ⟦prop|Joe⟧. Let's just say I've been forgiven. Borrower ⟦prop|Will Adams⟧, a director for ⟦prop|NBC Bay Area⟧ in ⟦prop|California⟧, had paid off his son's ⟦num|$15,000⟧ ⟦be|loan⟧ during the pandemic ⟦conn|So when⟧ he heard about the ⟦be|forgiveness plan⟧, he applied for the ⟦be|refund⟧, thinking it was ⟦be|debt cancellation⟧. I was hesitant a little bit when we got the money, like is this fake? Is this a ⟦be|scam⟧?\n\n⟦conn|But⟧ the ⟦be|check⟧ was real and he says he spent the ⟦num|fifteen grand⟧ on travel and home expenses. ⟦conn|Now⟧ ⟦num|two years later⟧ he's expected to pay it all back plus ⟦be|interest⟧. How did you feel when you heard you were ⟦be|on the hook⟧ for ⟦num|almost sixteen thousand dollars⟧? You know, I was shocked. The ⟦be|check⟧ I'm looking at right now it says ⟦prop|Fed Student Loan Refund⟧.\n\nSo to me, it's a ⟦be|refund⟧. I I wouldn't think I'd have to pay it back, but you know, now now here I am ⟦prop|Adams⟧ is not alone. ⟦num|An estimated 250,000⟧ ⟦be|borrowers⟧ now owe the government for those so-called refunds. ⟦conn|Why?⟧ ⟦prop|The Supreme Court⟧ rejected ⟦prop|Biden's⟧ ⟦be|debt forgiveness plan⟧, ⟦conn|so anyone⟧ who received a ⟦be|refund⟧ is now being asked to return that money, which confused many ⟦be|borrowers⟧ like ⟦prop|Adams⟧. The communication from the government was uh was very spotty during that period of time.\n\n⟦prop|Scott Buchanan⟧ is the ⟦be|executive director⟧ of the ⟦prop|Student Loan Servicing Alliance⟧. ⟦conn|That's why⟧ we strongly advise ⟦be|borrowers⟧ to be very thoughtful before they requested a ⟦be|refund⟧ and continue to wait ⟦conn|until⟧ actual ⟦be|loan forgiveness⟧. These ⟦be|borrowers⟧ are stuck in an incredibly unfair situation. ⟦prop|Persis Yu⟧ of the ⟦prop|Student Borrower Protection Center⟧ is helping families navigate the confusion. What is your advice to people who are in this situation?\n\nThe only path forward is to try to figure out how to make their day-to-day ⟦be|finances⟧ work ⟦prop|The Department of Education⟧ declined to be interviewed. They say ⟦be|borrowers⟧ should contact their ⟦be|servicers⟧ ⟦num|before the end of the year⟧ to avoid going into ⟦be|default⟧. Ask about different ⟦be|income-driven repayment plans⟧ that can lower your ⟦be|interest⟧ and ⟦be|monthly payment⟧ ⟦conn|And if⟧ you're a ⟦be|public employee⟧, see if you qualify for forgiveness under the ⟦be|Public Service Loan Forgiveness Program⟧. That ⟦num|$78 billion⟧ is currently approved to help ⟦num|more than a million people⟧ wipe out their ⟦be|federal student loans⟧. ⟦conn|For Will⟧, who now has to pay ⟦num|$700⟧ in ⟦be|interest⟧ on top of the ⟦be|loan⟧ he already paid back, this ⟦be|repayment⟧ will be a family affair.",
         "standfirst": "",
@@ -2244,21 +2244,21 @@ async function renderProf(force){
     <div class="choices">
       <a class="tcard" href="#/prof/annulations">
         <span class="ticon t-annul">${ICON.ban}</span>
-        <span class="tbody"><span class="t">Annuler une séance</span><br>
+        <span class="tcbody"><span class="t">Annuler une séance</span><br>
           <span class="d">Annuler ou rétablir une séance de khôlle. Les étudiants voient un bandeau d'alerte.</span>
           <span class="qpills">${nCancel ? `<span class="pill cancel">${nCancel} séance${nCancel>1?"s":""} annulée${nCancel>1?"s":""} à venir</span>` : '<span class="pill full">Aucune annulation en cours</span>'}</span></span>
         ${ICON.chev}
       </a>
       <a class="tcard" href="#/prof/journal">
         <span class="ticon t-log">${ICON.list}</span>
-        <span class="tbody"><span class="t">Journal des inscriptions</span><br>
+        <span class="tcbody"><span class="t">Journal des inscriptions</span><br>
           <span class="d">Historique des inscriptions, remplacements et annulations. Archivage.</span>
           <span class="qpills"><span class="pill full">${nLog} opération${nLog>1?"s":""} au journal</span>${state.archive && state.archive.length ? `<span class="pill full">${state.archive.length} archivée${state.archive.length>1?"s":""}</span>` : ""}</span></span>
         ${ICON.chev}
       </a>
       <a class="tcard" href="guide-enseignants.html">
         <span class="ticon t-guide">${ICON.info}</span>
-        <span class="tbody"><span class="t">Guide enseignant</span><br>
+        <span class="tcbody"><span class="t">Guide enseignant</span><br>
           <span class="d">Mode d'emploi illustré de l'Espace enseignants : annulations, journal, archives, exports.</span></span>
         ${ICON.chev}
       </a>
