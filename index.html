@@ -288,6 +288,32 @@ details.vscript[open]>summary>svg:last-child{transform:rotate(180deg)}
 .tbody .note{font-size:13px;color:var(--ink-2);font-style:italic;margin-top:-4px}
 .tbody .pb{background:#FFF7ED;border-left:3px solid #C2410C;padding:10px 12px;border-radius:8px}
 .tbody .pb b{color:#C2410C}
+@media (prefers-color-scheme: dark){
+  .wip{background:#2A1E14;border-color:#7A4A26;color:#FDBA8C}.wip small{color:#F59E6B}
+  details.txt[open]>summary,details.tpart>summary:hover{background:#2A1E14}
+  .card.res .num,details.txt>summary .num,details.tpart .pn{background:#3A2416;color:#FB923C}
+  details.txt>summary>svg,details.tpart>summary>svg{color:#FB923C}
+  .tbody h4,.hl-why b,.tbody .pb b,.tbody p.dc::first-letter,.cr-stat .n small{color:#FB923C}
+  .hl-legend{background:var(--surface-2)}
+  .hl-btn{background:var(--surface);color:var(--ink)}
+  .hl-btn[data-k="be"]{--cc:#E8C93A}.hl-btn[data-k="num"]{--cc:#F08DB0}.hl-btn[data-k="prop"]{--cc:#6FCF97}.hl-btn[data-k="conn"]{--cc:#B8A1E8}
+  .hl-btn[data-k="be"][aria-pressed="true"]{color:#E8C93A;background:#3A3210}
+  .hl-btn[data-k="num"][aria-pressed="true"]{color:#F08DB0;background:#3A1A27}
+  .hl-btn[data-k="prop"][aria-pressed="true"]{color:#6FCF97;background:#15301F}
+  .hl-btn[data-k="conn"][aria-pressed="true"]{color:#B8A1E8;background:#2A2140}
+  .article.show-be mark.be{background:#E8C93A33;box-shadow:0 0 0 1px #E8C93A inset}
+  .article.show-num mark.num{background:#F08DB033;box-shadow:0 0 0 1px #F08DB0 inset}
+  .article.show-prop mark.prop{background:#6FCF9733;box-shadow:0 0 0 1px #6FCF97 inset}
+  .article.show-conn mark.conn{background:#B8A1E833;box-shadow:0 0 0 1px #B8A1E8 inset}
+  .cr-stat{background:var(--surface)}.cr-stat .n{color:var(--ink)}
+  .cr-chip{background:var(--surface);color:var(--ink)}
+  .cr-era::after{background:var(--surface)}
+  .cr-lab{background:#3B4A66}
+  .tbody .cr-era h4{color:var(--ink)}
+  .tbody .cr-era strong{color:var(--ink);background:linear-gradient(transparent 62%,#5A2E14 62%)}
+  details.vscript>summary{background:#2A1E14;color:#FB923C;border-color:#FB923C}
+  .tbody .pb{background:#2A1E14}
+}
 /* Synchronisation discrète */
 #refresh.syncing svg{animation:spin 1s linear infinite}
 /* Exports */
@@ -385,7 +411,7 @@ details.vscript[open]>summary>svg:last-child{transform:rotate(180deg)}
 /* =====================================================================
    CONFIGURATION — seule partie à modifier
    ===================================================================== */
-const APP_VERSION = "2026.10.08-1";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.08-2";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   // URL de l'application Web Google Apps Script (voir le guide).
