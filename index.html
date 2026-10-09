@@ -204,6 +204,7 @@ select:focus,input.field:focus{outline:none;border-color:var(--accent);box-shado
 .card.subj{padding:14px 16px}
 .card.subj .num{width:48px;height:48px;border-radius:14px;font-size:17px;letter-spacing:.5px;background:var(--accent-soft);color:var(--accent)}
 .card.subj.off{opacity:.55;box-shadow:none;cursor:default}
+.card.subj .num.emo{font-size:26px;letter-spacing:0}
 .card.subj.off .num{background:var(--surface-2);color:var(--muted)}
 .card.alerts{margin-top:14px;font:inherit;line-height:1.45}
 #wantAlerts svg{width:18px;height:18px;vertical-align:-3px;margin-right:4px}
@@ -426,7 +427,7 @@ details.vscript[open]>summary>svg:last-child{transform:rotate(180deg)}
 /* =====================================================================
    CONFIGURATION — seule partie à modifier
    ===================================================================== */
-const APP_VERSION = "2026.10.09-4";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.09-5";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   // URL de l'application Web Google Apps Script (voir le guide).
@@ -457,17 +458,18 @@ const CONFIG = {
   ],
 
   // Matières de la prépa (affichées dans l'ordre alphabétique).
+  // emoji : affiché sur la carte de la matière et à côté du nom de chaque khôlleur de cette matière.
   // years : pour chaque promotion, la clé du planning de cette matière dans YEARS. Sans years : « Bientôt disponible ».
   SUBJECTS: [
-    { key: "allemand",  label: "Allemand" },
-    { key: "anglais",   label: "Anglais",   flag: "🇬🇧", years: { "1": "1",    "2": "2" } },
-    { key: "culture",   label: "Culture générale" },
-    { key: "droit",     label: "Droit" },
-    { key: "economie",  label: "Économie" },
-    { key: "espagnol",  label: "Espagnol",  flag: "🇪🇸", years: { "1": "esp1", "2": "esp2" } },
-    { key: "italien",   label: "Italien" },
-    { key: "management",label: "Management" },
-    { key: "maths",     label: "Mathématiques" }
+    { key: "allemand",  label: "Allemand",         emoji: "🇩🇪" },
+    { key: "anglais",   label: "Anglais",          emoji: "🇬🇧", years: { "1": "1",    "2": "2" } },
+    { key: "culture",   label: "Culture générale", emoji: "📚" },
+    { key: "droit",     label: "Droit",            emoji: "⚖️" },
+    { key: "economie",  label: "Économie",         emoji: "📈" },
+    { key: "espagnol",  label: "Espagnol",         emoji: "🇪🇸", years: { "1": "esp1", "2": "esp2" } },
+    { key: "italien",   label: "Italien",          emoji: "🇮🇹" },
+    { key: "management",label: "Management",       emoji: "🏢" },
+    { key: "maths",     label: "Mathématiques",    emoji: "📐" }
   ],
   PROMOS: { "1": { label: "Première année", short: "1re année" }, "2": { label: "Deuxième année", short: "2e année" } },
 
@@ -611,7 +613,8 @@ const promoOf = (year) => (CONFIG.YEARS[year] || {}).promo || String(year).repla
 const subjectYears = (subject) => Object.keys(CONFIG.YEARS).filter(y => CONFIG.YEARS[y].subject === subject);
 const promoStudents = (promo) => (CONFIG.YEARS[promo] || Object.values(CONFIG.YEARS).find(Y => Y.promo === promo) || { students: [] }).students;
 // Nom du khôlleur suivi du drapeau de sa matière (affichage uniquement)
-const exName = (year, name) => { const m = CONFIG.SUBJECTS.find(x => x.key === (CONFIG.YEARS[year] || {}).subject); return name + (m && m.flag ? " " + m.flag : ""); };
+const subjEmoji = (key) => (CONFIG.SUBJECTS.find(x => x.key === key) || {}).emoji || "";
+const exName = (year, name) => { const e = subjEmoji((CONFIG.YEARS[year] || {}).subject); return name + (e ? " " + e : ""); };
 const deLabel = (label) => (/^[aeiouyéèêàâîôûh]/i.test(label) ? "d'" : "de ") + label.toLowerCase();   // « d'anglais », « d'espagnol »
 
 const JOURS = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
@@ -981,7 +984,7 @@ function openTeacherAlerts(){
   openSheet(`
     <h4 id="sheetTitle">${ICON.bell} Alertes d'absence</h4>
     <p class="meta">Recevez une notification sur ce téléphone dès qu'un étudiant se déclare absent à l'une de vos séances.</p>
-    ${cur ? `<div class="alert ok">${ICON.check}<span>Alertes activées sur cet appareil pour <b>${esc(cur.examiner)}</b>.</span></div>` : ""}
+    ${cur ? `<div class="alert ok">${ICON.check}<span>Alertes activées sur cet appareil pour <b>${esc(cur.examiner + (subjEmoji(getSubject()) ? " " + subjEmoji(getSubject()) : ""))}</b>.</span></div>` : ""}
     ${block || `
       <label class="lbl" for="who">Vous êtes</label>
       ${nameSelect(examiners, "Sélectionnez votre nom…")}
@@ -1168,10 +1171,10 @@ function renderSubjects(promo){
     <div class="subjects">
       ${list.map(m => {
         const y = m.years && m.years[promo];
-        const ini = m.label.normalize("NFD").replace(/[\u0300-\u036f]/g, "").slice(0, 2);
+        const ini = m.emoji || m.label.normalize("NFD").replace(/[\u0300-\u036f]/g, "").slice(0, 2);
         return y && CONFIG.YEARS[y]
-          ? `<a class="card subj" href="#/${y}"><span class="num">${esc(ini)}</span><span><span class="t">${esc(m.label)}</span><br><span class="d">Khôlles ${esc(deLabel(m.label))}</span></span>${ICON.chev}</a>`
-          : `<div class="card subj off" aria-disabled="true"><span class="num">${esc(ini)}</span><span><span class="t">${esc(m.label)}</span><br><span class="d">Bientôt disponible</span></span></div>`;
+          ? `<a class="card subj" href="#/${y}"><span class="num${m.emoji ? " emo" : ""}" aria-hidden="true">${esc(ini)}</span><span><span class="t">${esc(m.label)}</span><br><span class="d">Khôlles ${esc(deLabel(m.label))}</span></span>${ICON.chev}</a>`
+          : `<div class="card subj off" aria-disabled="true"><span class="num${m.emoji ? " emo" : ""}" aria-hidden="true">${esc(ini)}</span><span><span class="t">${esc(m.label)}</span><br><span class="d">Bientôt disponible</span></span></div>`;
       }).join("")}
     </div>
     ${footHTML()}`;
@@ -2345,7 +2348,7 @@ function calEvent(s, student){
     start: s.startsAt, end,
     title: `Khôlle ${deLabel(CONFIG.YEARS[s.year].subjectLabel)} – Khôlle ${s.q}`,
     location: `Lycée Sidoine Apollinaire – salle ${s.room}`,
-    details: `${student} · ${CONFIG.YEARS[s.year].short}\nExaminateur : ${s.examiner} · salle ${s.room}\nEn cas de changement, seule Kholl'app fait foi : ${APP_URL}`
+    details: `${student} · ${CONFIG.YEARS[s.year].short}\nExaminateur : ${exName(s.year, s.examiner)} · salle ${s.room}\nEn cas de changement, seule Kholl'app fait foi : ${APP_URL}`
   };
 }
 function icsText(s, student){
@@ -2630,7 +2633,7 @@ async function renderProf(force){
         <span class="ticon t-alert">${ICON.bell}</span>
         <span class="tcbody"><span class="t">Alertes d'absence</span><br>
           <span class="d">Notification sur ce téléphone quand un étudiant se déclare absent à l'une de vos séances.</span>
-          <span class="qpills">${a ? `<span class="pill free">Activées · ${esc(a.examiner)}</span>` : '<span class="pill full">Non activées</span>'}</span></span>
+          <span class="qpills">${a ? `<span class="pill free">Activées · ${esc(a.examiner + (subjEmoji(getSubject()) ? " " + subjEmoji(getSubject()) : ""))}</span>` : '<span class="pill full">Non activées</span>'}</span></span>
         ${ICON.chev}
       </button>`; })()}
       <a class="tcard" href="guide-enseignants.html">
