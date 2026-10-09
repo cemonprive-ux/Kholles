@@ -426,7 +426,7 @@ details.vscript[open]>summary>svg:last-child{transform:rotate(180deg)}
 /* =====================================================================
    CONFIGURATION — seule partie à modifier
    ===================================================================== */
-const APP_VERSION = "2026.10.09-2";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.09-3";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   // URL de l'application Web Google Apps Script (voir le guide).
@@ -727,6 +727,21 @@ const openLabel = (s) => fmtDate(s.opensAt) + " entre 12h et 13h";
 const openShort = (s) => inWindow(s) ? "Ouverture imminente" : "Ouverture le " + fmtDate(s.opensAt) + " · 12h–13h";
 const openingDate = (s) => s.opensAt;
 const dayFrozen = (d, now = new Date()) => now >= addDays(d, 1);
+// Chevauchement avec une khôlle d'une autre matière : même étudiant, même promotion, même jour, horaires qui se recouvrent.
+function crossConflictMsg(s, student, ignore = [], list = null){
+  const promo = promoOf(s.year);
+  const all = list || Object.keys(CONFIG.YEARS).filter(y => promoOf(y) === promo).flatMap(y => Object.values(state.bookings[y] || {}));
+  const hit = all.find(b => {
+    if (b.student !== student || b.slotId === s.id || ignore.includes(b.slotId) || promoOf(b.year) !== promo) return false;
+    const o = SLOT_INDEX[b.slotId];
+    return o && o.dateISO === s.dateISO && Math.abs(o.start - s.start) < CONFIG.SLOT_MINUTES;
+  });
+  if (!hit) return null;
+  const o = SLOT_INDEX[hit.slotId], Y = CONFIG.YEARS[o.year];
+  return `<b>Inscription impossible.</b> ${esc(student)} a déjà une <b>khôlle ${esc(deLabel(Y.subjectLabel))}</b> ce jour-là, de ${esc(o.label.replace(" – ", " à "))} (${esc(o.examiner)}, salle ${esc(o.room)}).<br>Les deux créneaux se chevauchent : choisissez un autre créneau.`;
+}
+// Charge les plannings des autres matières de la même promotion (pour la vérification des chevauchements)
+const loadSiblings = (year) => Promise.allSettled(Object.keys(CONFIG.YEARS).filter(y => y !== year && promoOf(y) === promoOf(year)).map(y => loadBookings(y)));
 function describeSlot(id){ const s = SLOT_INDEX[id]; return s ? `${fmtDay(s.date).toLowerCase()}, ${s.label} (${s.examiner}, salle ${s.room})` : id; }
 
 /* ---------- Identifiant d'appareil (pour le journal) ---------- */
@@ -750,6 +765,8 @@ function ruleCheck(all, p, ignoreSlot){
   if (st === "notyet") return "Les réservations pour ce créneau ouvrent le " + openLabel(s) + ".";
   const other = all.find(b => b.year === p.year && Number(b.q) === Number(p.q) && b.student === p.student && b.slotId !== ignoreSlot);
   if (other) return `${p.student} est déjà inscrit(e) à la Khôlle ${p.q} : ${describeSlot(other.slotId)}.`;
+  const cross = crossConflictMsg(s, p.student, [ignoreSlot], all);
+  if (cross) return cross.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
   return null;
 }
 
@@ -1052,6 +1069,7 @@ async function route(force){
   if (year === "p" && CONFIG.PROMOS[sub]) return renderSubjects(sub);
   if (!year || !CONFIG.YEARS[year]) return renderHome();
   setAccent(year);
+  loadSiblings(year);
   const view = $("#view");
   const draw = () => (sub === "k" && n) ? renderQuinzaine(year, Number(n)) : renderList(year);
   const here = location.hash;
@@ -2257,6 +2275,8 @@ function openBook(s){
   sel.onchange = () => {
     mode = "book"; btn.textContent = "Confirmer l'inscription";
     const own = sel.value ? ownBooking(s, sel.value) : null, o = own && SLOT_INDEX[own.slotId];
+    const cross = sel.value ? crossConflictMsg(s, sel.value, own ? [own.slotId] : []) : null;
+    if (cross){ $("#msg").innerHTML = errBox(cross); btn.disabled = true; return; }
     if (own && o && slotStatus(o) !== "past" && !tooLateFor(o)){
       // Déjà inscrit à cette khôlle : on propose de déplacer l'inscription ici
       mode = "move"; btn.textContent = "Déplacer mon inscription ici";
@@ -2267,6 +2287,7 @@ function openBook(s){
     $("#msg").innerHTML = c ? errBox(c) : "";
     btn.disabled = !sel.value || !!c;
   };
+  loadSiblings(s.year).then(() => { if (sel.value && $("#who") === sel) sel.onchange(); });
   btn.onclick = () => {
     const who = sel.value;
     submit(btn, mode === "move" ? "Déplacement…" : "Enregistrement…", payloadOf(s, { action: mode, student: who }), mode === "move" ? "Inscription déplacée." : "Inscription enregistrée.", () => openBooked(s, who));
@@ -2301,10 +2322,11 @@ function openTaken(s, bk){
   $("#close").onclick = closeSheet;
   const agree = $("#agree"), sel = $("#who"), rep = $("#replace"), me = $("#me") || {}, free = $("#free") || {};
   const upd = () => {
-    const c = sel.value ? quinzaineConflict(s, sel.value, s.id) : null;
+    const c = sel.value ? (quinzaineConflict(s, sel.value, s.id) || crossConflictMsg(s, sel.value)) : null;
     $("#msg").innerHTML = c ? errBox(c) : "";
     rep.disabled = !(agree.checked && sel.value) || !!c;
   };
+  loadSiblings(s.year).then(() => { if (sel.value && $("#who") === sel) upd(); });
   agree.onchange = upd; sel.onchange = upd;
   me.onchange = () => { free.disabled = !me.checked; };
   rep.onclick = () => submit(rep, "Remplacement…", payloadOf(s, { action:"replace", from: bk.student, student: sel.value }), "Remplacement enregistré.");
