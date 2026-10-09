@@ -426,7 +426,7 @@ details.vscript[open]>summary>svg:last-child{transform:rotate(180deg)}
 /* =====================================================================
    CONFIGURATION — seule partie à modifier
    ===================================================================== */
-const APP_VERSION = "2026.10.09-3";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.09-4";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   // URL de l'application Web Google Apps Script (voir le guide).
@@ -460,11 +460,11 @@ const CONFIG = {
   // years : pour chaque promotion, la clé du planning de cette matière dans YEARS. Sans years : « Bientôt disponible ».
   SUBJECTS: [
     { key: "allemand",  label: "Allemand" },
-    { key: "anglais",   label: "Anglais",   years: { "1": "1",    "2": "2" } },
+    { key: "anglais",   label: "Anglais",   flag: "🇬🇧", years: { "1": "1",    "2": "2" } },
     { key: "culture",   label: "Culture générale" },
     { key: "droit",     label: "Droit" },
     { key: "economie",  label: "Économie" },
-    { key: "espagnol",  label: "Espagnol",  years: { "1": "esp1", "2": "esp2" } },
+    { key: "espagnol",  label: "Espagnol",  flag: "🇪🇸", years: { "1": "esp1", "2": "esp2" } },
     { key: "italien",   label: "Italien" },
     { key: "management",label: "Management" },
     { key: "maths",     label: "Mathématiques" }
@@ -610,6 +610,8 @@ Object.values(CONFIG.YEARS).forEach(Y => { if (typeof Y.students === "string") Y
 const promoOf = (year) => (CONFIG.YEARS[year] || {}).promo || String(year).replace(/^\D+/, "");
 const subjectYears = (subject) => Object.keys(CONFIG.YEARS).filter(y => CONFIG.YEARS[y].subject === subject);
 const promoStudents = (promo) => (CONFIG.YEARS[promo] || Object.values(CONFIG.YEARS).find(Y => Y.promo === promo) || { students: [] }).students;
+// Nom du khôlleur suivi du drapeau de sa matière (affichage uniquement)
+const exName = (year, name) => { const m = CONFIG.SUBJECTS.find(x => x.key === (CONFIG.YEARS[year] || {}).subject); return name + (m && m.flag ? " " + m.flag : ""); };
 const deLabel = (label) => (/^[aeiouyéèêàâîôûh]/i.test(label) ? "d'" : "de ") + label.toLowerCase();   // « d'anglais », « d'espagnol »
 
 const JOURS = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
@@ -738,11 +740,11 @@ function crossConflictMsg(s, student, ignore = [], list = null){
   });
   if (!hit) return null;
   const o = SLOT_INDEX[hit.slotId], Y = CONFIG.YEARS[o.year];
-  return `<b>Inscription impossible.</b> ${esc(student)} a déjà une <b>khôlle ${esc(deLabel(Y.subjectLabel))}</b> ce jour-là, de ${esc(o.label.replace(" – ", " à "))} (${esc(o.examiner)}, salle ${esc(o.room)}).<br>Les deux créneaux se chevauchent : choisissez un autre créneau.`;
+  return `<b>Inscription impossible.</b> ${esc(student)} a déjà une <b>khôlle ${esc(deLabel(Y.subjectLabel))}</b> ce jour-là, de ${esc(o.label.replace(" – ", " à "))} (${esc(exName(o.year, o.examiner))}, salle ${esc(o.room)}).<br>Les deux créneaux se chevauchent : choisissez un autre créneau.`;
 }
 // Charge les plannings des autres matières de la même promotion (pour la vérification des chevauchements)
 const loadSiblings = (year) => Promise.allSettled(Object.keys(CONFIG.YEARS).filter(y => y !== year && promoOf(y) === promoOf(year)).map(y => loadBookings(y)));
-function describeSlot(id){ const s = SLOT_INDEX[id]; return s ? `${fmtDay(s.date).toLowerCase()}, ${s.label} (${s.examiner}, salle ${s.room})` : id; }
+function describeSlot(id){ const s = SLOT_INDEX[id]; return s ? `${fmtDay(s.date).toLowerCase()}, ${s.label} (${exName(s.year, s.examiner)}, salle ${s.room})` : id; }
 
 /* ---------- Identifiant d'appareil (pour le journal) ---------- */
 const DEVICE = (() => {
@@ -1186,7 +1188,7 @@ function cancelBanner(year, n){
   const list = upcomingCancels(year, n);
   if (!list.length) return "";
   const item = (c) => {
-    const label = `${year ? "" : esc(CONFIG.YEARS[c.year].subjectLabel + " · " + CONFIG.YEARS[c.year].short) + " · "}Khôlle ${esc(c.q)} · <b>${esc(fmtDay(parseISO(String(c.date))))}</b> · ${esc(c.examiner)} (${esc(c.room)})`;
+    const label = `${year ? "" : esc(CONFIG.YEARS[c.year].subjectLabel + " · " + CONFIG.YEARS[c.year].short) + " · "}Khôlle ${esc(c.q)} · <b>${esc(fmtDay(parseISO(String(c.date))))}</b> · ${esc(exName(c.year, c.examiner))} (${esc(c.room)})`;
     const why = c.reason ? `<span class="why">Motif : ${esc(c.reason)}</span>` : "";
     return n != null ? `<li>${label}${why}</li>` : `<li><a href="#/${c.year}/k/${esc(c.q)}">${label}</a>${why}</li>`;
   };
@@ -1263,7 +1265,7 @@ function renderQuinzaine(year, n){
     Object.entries(groups).forEach(([g, list]) => {
       const [ex, room] = g.split("|");
       const cx = cancelOf(list[0]);
-      html += `<div class="group${cx ? " cancelled" : ""}"><div class="ghead"><span class="who">${esc(ex)}</span>${cx ? '<span class="cbadge">Annulée</span>' : ""}<span class="room">${esc(room)}</span></div>`;
+      html += `<div class="group${cx ? " cancelled" : ""}"><div class="ghead"><span class="who">${esc(exName(year, ex))}</span>${cx ? '<span class="cbadge">Annulée</span>' : ""}<span class="room">${esc(room)}</span></div>`;
       if (cx) html += `<div class="cnote">Séance annulée par l'enseignant${cx.reason ? " · " + esc(cx.reason) : ""}.</div>`;
       list.forEach(s => {
         const bk = b[s.id], st = slotStatus(s, now);
@@ -2216,7 +2218,7 @@ function closeSheet(){
 $("#scrim").addEventListener("click", closeSheet);
 $("#sheet").addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
 
-const slotMeta = (s) => `<p class="meta"><b>Khôlle ${s.q}</b><br>${fmtDay(s.date)} · ${s.label}<br>${esc(s.examiner)} · salle <b>${esc(s.room)}</b></p>`;
+const slotMeta = (s) => `<p class="meta"><b>Khôlle ${s.q}</b><br>${fmtDay(s.date)} · ${s.label}<br>${esc(exName(s.year, s.examiner))} · salle <b>${esc(s.room)}</b></p>`;
 const errBox = (m) => `<div class="alert err">${ICON.warn}<span>${m}</span></div>`;
 const nameSelect = (list, placeholder) => `<div class="selectwrap"><select id="who"><option value="">${placeholder}</option>${list.map(x => `<option>${esc(x)}</option>`).join("")}</select>${ICON.down}</div>`;
 function quinzaineConflict(s, student, ignoreSlot){
@@ -2311,9 +2313,9 @@ function openTaken(s, bk){
     <p class="lbl" style="margin-bottom:8px">C'est votre créneau ?</p>
     ${calButtons()}
     ${tooLateFor(s)
-      ? `<div class="alert warn" style="margin-top:14px">${ICON.warn}<span><b>Moins d'une heure avant la khôlle.</b> La place ne peut plus être libérée dans Kholl'app : prévenez directement ${esc(s.examiner)}.</span></div>
+      ? `<div class="alert warn" style="margin-top:14px">${ICON.warn}<span><b>Moins d'une heure avant la khôlle.</b> La place ne peut plus être libérée dans Kholl'app : prévenez directement ${esc(exName(s.year, s.examiner))}.</span></div>
     <div class="actions"><button class="btn ghost" id="close">Fermer</button></div>`
-      : `<p class="hint" style="margin-top:14px">Vous ne pourrez pas venir ? Déclarez-vous absent(e) <b>au plus tard 1 h avant</b> : votre place est libérée, et les étudiants de cette séance ainsi que ${esc(s.examiner)} sont prévenus.</p>
+      : `<p class="hint" style="margin-top:14px">Vous ne pourrez pas venir ? Déclarez-vous absent(e) <b>au plus tard 1 h avant</b> : votre place est libérée, et les étudiants de cette séance ainsi que ${esc(exName(s.year, s.examiner))} sont prévenus.</p>
     <label class="check"><input type="checkbox" id="me"> <span>Je suis ${cur} et je ne viendrai pas.</span></label>
     <div class="actions">
       <button class="btn outline danger" id="free" disabled>Je me déclare absent(e)</button>
@@ -2429,7 +2431,7 @@ function openBooked(s, student){
   openSheet(`
     <div class="okmark">${ICON.check}</div>
     <h4 id="sheetTitle" style="text-align:center">Inscription enregistrée</h4>
-    <p class="meta" style="text-align:center"><b>${esc(student)}</b><br>Khôlle ${s.q} · ${fmtDay(s.date)} · ${s.label}<br>${esc(s.examiner)} · salle <b>${esc(s.room)}</b></p>
+    <p class="meta" style="text-align:center"><b>${esc(student)}</b><br>Khôlle ${s.q} · ${fmtDay(s.date)} · ${s.label}<br>${esc(exName(s.year, s.examiner))} · salle <b>${esc(s.room)}</b></p>
     ${calButtons()}
     ${DEMO || PUSH.get("khollapp-alerts") ? "" : `<button class="btn outline" id="wantAlerts" style="width:100%;margin-top:14px">${ICON.bell} Être prévenu(e) si une place se libère</button>`}
     <div class="actions"><button class="btn ghost" id="close">Fermer</button></div>`);
@@ -2677,7 +2679,7 @@ async function renderAnnul(force){
         html += `<div class="srow${cx ? " is-cancelled" : ""}">
           <div class="sinfo">
             <div class="sday">${esc(fmtDay(day.date))}</div>
-            <div class="smeta">${esc(s0.examiner)} · ${esc(s0.room)} · ${hours}</div>
+            <div class="smeta">${esc(exName(s0.year, s0.examiner))} · ${esc(s0.room)} · ${hours}</div>
             <div class="smeta">${cx ? `<span class="pill cancel">Annulée</span>${cx.reason ? " " + esc(cx.reason) : ""}` : `${n} inscrit${n>1?"s":""} / ${list.length}`}</div>
           </div>
           ${cx ? `<button class="sbtn restore" data-sid="${esc(s0.sid)}">Rétablir</button>` : `<button class="sbtn cancel" data-sid="${esc(s0.sid)}">Annuler</button>`}
@@ -2692,7 +2694,7 @@ async function renderAnnul(force){
   document.querySelectorAll(".sbtn").forEach(btn => btn.onclick = () => {
     const list = sessionSlots(btn.dataset.sid), s0 = list[0];
     const payload = { year: s0.year, q: s0.q, sid: s0.sid, date: s0.dateISO, examiner: s0.examiner, room: s0.room };
-    const meta = `<p class="meta"><b>Khôlle ${s0.q}</b> · ${esc(Y.short)}<br>${fmtDay(s0.date)} · ${esc(s0.examiner)} · salle <b>${esc(s0.room)}</b></p>`;
+    const meta = `<p class="meta"><b>Khôlle ${s0.q}</b> · ${esc(Y.short)}<br>${fmtDay(s0.date)} · ${esc(exName(s0.year, s0.examiner))} · salle <b>${esc(s0.room)}</b></p>`;
     if (btn.classList.contains("restore")) return confirmAdmin({
       title: "Rétablir la séance", meta,
       text: "La séance redevient visible et réservable par les étudiants. Le bandeau d'alerte disparaît.",
