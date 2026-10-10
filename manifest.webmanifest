@@ -1,7 +1,7 @@
 {
   "name": "Kholl'app",
   "short_name": "Kholl'app",
-  "description": "Inscriptions aux khôlles d'anglais · Prépa ECT · Lycée Sidoine Apollinaire",
+  "description": "Gestion des khôlles · Prépa ECT · Lycée Sidoine Apollinaire",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",
@@ -9,7 +9,23 @@
   "background_color": "#EDF3FA",
   "theme_color": "#1668F2",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
