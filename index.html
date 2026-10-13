@@ -537,6 +537,26 @@ body.admin-mode{--brand:linear-gradient(180deg,#22385C 0%,#12233D 100%)}
 .vrow .two{margin-top:0}
 .vrow input.field{min-height:44px;font-size:15px}
 .vrow .sbtn{justify-self:start;min-height:36px}
+/* Documents */
+.newpill{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;background:#E11D48;color:#fff;font-size:11.5px;font-weight:700;vertical-align:2px;letter-spacing:.2px}
+.card .num.emo{background:var(--surface-2);border:1px solid var(--line);font-size:30px}
+.dgroup{margin-bottom:6px}
+.drow{display:flex;align-items:center;gap:12px;padding:12px 14px;border-top:1px solid var(--line);text-decoration:none;color:inherit;min-height:60px;flex:1;min-width:0}
+.dgroup>.drow:first-child,.dgroup>.drow2:first-child{border-top:0}
+.drow>svg{width:18px;height:18px;color:var(--muted);flex:none}
+.dico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);flex:none}
+.dico.lnk{background:var(--ok-soft);color:var(--ok)}
+.dico.met{background:#FFEDD5;color:#C2410C}
+.dico svg{width:22px;height:22px}
+.dbody{flex:1;min-width:0;line-height:1.35}
+.dbody b{font-size:15px}
+.dbody small{color:var(--muted);font-size:12.5px}
+.drow2{display:flex;align-items:center;gap:6px;border-top:1px solid var(--line);padding-right:12px}
+.drow2 .drow{border-top:0}
+.drow2 .sbtn{min-height:36px;min-width:0;padding:0 10px}
+.tab:disabled{opacity:.4;cursor:not-allowed}
+.tab svg{width:18px;height:18px;vertical-align:-3px;margin-right:4px}
+#sheet h4 svg{width:20px;height:20px;vertical-align:-3px}
 </style>
 </head>
 <body>
@@ -569,7 +589,7 @@ body.admin-mode{--brand:linear-gradient(180deg,#22385C 0%,#12233D 100%)}
    les matières et les listes d'étudiants sont gérés dans l'appli (espace Gestion,
    espace enseignant) et enregistrés sur le serveur : ce bloc ne sert qu'à la mise en service.
    ===================================================================== */
-const APP_VERSION = "2026.10.12-2";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.13-1";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   API_URL: "https://khollapp.cemonprive.workers.dev/",
@@ -951,6 +971,8 @@ Object.assign(ICON, {
   plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
   out: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>',
   gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
+  link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3.2-3.2a4.5 4.5 0 0 0-6.4-6.4L12 5.6"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3.2 3.2a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2"/></svg>',
+  upload: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M4 15v3a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-3"/></svg>',
   sessions: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M12 13v5M9.5 15.5h5"/></svg>'
 });
 const LISERE = `<svg class="lisere" viewBox="30 50 1130 54" preserveAspectRatio="xMidYMax meet" aria-hidden="true"><path d="M35 98 H818 C835 94 845 90 855 91 C864 92 869 96 873 96 C880 90 887 86 894 86 C898 86 899 90 902 88 C906 84 910 86 915 89 C921 93 925 96 932 96 C946 96 955 97 962 99 C969 99 975 92 985 82 C995 72 1009 68 1022 68 C1035 68 1045 76 1055 86 C1064 95 1071 98 1080 98 C1090 96 1101 94 1115 94 C1131 94 1145 96 1155 99 M1022 68 V56" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
@@ -1088,11 +1110,11 @@ function setAccent(year){
 const parts = () => location.hash.replace(/^#\/?/, "").split("/").filter(Boolean);
 function backTarget(){
   const p = parts(), me = AUTH.student;
-  if (p[0] === "moi") return "#/moi";
+  if (p[0] === "moi") return p[1] === "ressources" && p[2] ? "#/moi/ressources" : "#/moi";
   if (p[0] === "connexion") return "#/";
   if (p[0] === "gestion") return p.length > 1 ? "#/gestion" : "#/";
   if (p[0] === "prof") return p.length > 1 ? "#/prof" : (actSubject() && AUTH.admin ? "#/gestion" : "#/");
-  if (p[0] === "ressources") return p.length > 1 ? "#/ressources" : (me ? "#/moi" : state.resFrom ? "#/" + state.resFrom : "#/");
+  if (p[0] === "ressources") return me ? "#/moi/ressources/anglais" : p.length > 1 ? "#/ressources" : state.resFrom ? "#/" + state.resFrom : "#/";
   if (CONFIG.YEARS[p[0]]) return p.length > 1 ? "#/" + p[0] : (me ? "#/moi" : "#/");
   return "#/";
 }
@@ -1140,7 +1162,7 @@ async function draw(force){
   if (p0 === "prof") return renderProfRoute(sub, force);
   if (p0 === "ressources") return renderRessources(sub);
   if (p0 === "connexion") return renderLogin(sub);
-  if (p0 === "moi") return sub === "code" ? renderMyCode() : renderMe(force);
+  if (p0 === "moi") return sub === "code" ? renderMyCode() : sub === "ressources" ? renderMyRes(n, force) : renderMe(force);
   if (p0 === "p"){ location.replace(AUTH.student ? "#/moi" : "#/connexion/" + (CONFIG.PROMOS[sub] ? sub : "1")); return; }
   if (!p0 || !CONFIG.YEARS[p0]) return renderHome();
   const year = p0;
@@ -1367,9 +1389,9 @@ async function renderMe(force){
       </div>
       <p class="kicker" style="margin-top:22px">Ressources</p>
       <div class="choices" style="margin-top:0">
-        <a class="card res" href="#/ressources">
+        <a class="card res" href="#/moi/ressources">
           <span class="num">${ICON.book}</span>
-          <span><span class="t">Mes ressources</span><br><span class="d">Anglais · méthodo : textes et vidéos, avec leurs corrigés</span></span>
+          <span><span class="t">Mes ressources</span><span id="resBadge"></span><br><span class="d">Documents de vos professeurs, méthodo d'anglais</span></span>
           ${ICON.chev}
         </a>
       </div>
@@ -1377,6 +1399,8 @@ async function renderMe(force){
       ${footHTML(`<a class="linkbtn" href="#/moi/code">${ICON.key} Changer mon code</a><button class="linkbtn" id="logout" type="button" style="border:0;background:none;cursor:pointer">${ICON.out} Se déconnecter de ce téléphone</button><br>`)}`;
     const ac = $("#alertsCard"); if (ac) ac.onclick = openAlerts;
     $("#logout").onclick = () => studentLogout("Déconnecté.");
+    paintResBadge();
+    loadMyDocs().then(paintResBadge).catch(() => {});
   };
   if (years.every(y => state.bookings[y])) paint(); else $("#view").innerHTML = '<div class="loading"><span class="spin"></span>Chargement…</div>';
   syncing(true);
@@ -2448,6 +2472,213 @@ function renderRessources(sub){
       </section>`).join("")}`;
 }
 
+/* ====================================================================== */
+/* Documents : dépôt par les enseignants, consultation par les étudiants   */
+/* ====================================================================== */
+const DOC_NATURES = [["methodo", "Méthodo"], ["cours", "Cours"], ["exercices", "Exercices"], ["corriges", "Corrigés"], ["annales", "Sujets et annales"], ["autre", "Autres documents"]];
+const DOC_ACCEPT = ".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.odt,.odp,.ods,.txt,.jpg,.jpeg,.png,.mp3,.m4a";
+const natureLabel = (k) => (DOC_NATURES.find(n => n[0] === k) || [k, k])[1];
+const fmtSize = (b) => b >= 1048576 ? (b / 1048576).toFixed(1).replace(".", ",") + " Mo" : Math.max(1, Math.round(b / 1024)) + " ko";
+const docExt = (d) => d.kind === "link" ? "Lien" : ((d.fileName.match(/\.([a-z0-9]+)$/i) || [, "Fichier"])[1]).toUpperCase();
+const docDate = (d) => fmtShort(new Date(d.at));
+const docHref = (d, token) => d.kind === "link" ? d.url : CONFIG.API_URL + "?action=doc&id=" + d.id + "&token=" + encodeURIComponent(token);
+const DOCS_SEEN = {
+  get(){ try { return new Set(JSON.parse(localStorage.getItem("khollapp-docs-seen") || "[]")); } catch(e){ return new Set(); } },
+  add(id){ try { const s = this.get(); s.add(id); localStorage.setItem("khollapp-docs-seen", JSON.stringify([...s].slice(-500))); } catch(e){} }
+};
+// « Nouveau » : document de moins de 30 jours, pas encore ouvert sur ce téléphone
+const isNewDoc = (d, seen) => !seen.has(d.id) && Date.now() - new Date(d.at).getTime() < 30 * 86400000;
+
+async function loadMyDocs(force){
+  const me = AUTH.student;
+  if (!me) return null;
+  if (state.docs && state.docs.who !== me.promo + "|" + me.name) state.docs = null;
+  if (!force && state.docs && Date.now() - state.docs.t < 60000) return state.docs;
+  const r = await API.get({ action: "docs", token: me.token });
+  if (r.auth){ studentLogout("Session expirée : reconnectez-vous."); return null; }
+  if (!r.ok) throw new Error(r.error || "Erreur serveur");
+  state.docs = { t: Date.now(), who: me.promo + "|" + me.name, list: r.docs || [] };
+  return state.docs;
+}
+// Pastille sur la carte « Mes ressources » de Ma page
+function paintResBadge(){
+  const el = $("#resBadge"); if (!el || !state.docs) return;
+  const n = state.docs.list.filter(d => isNewDoc(d, DOCS_SEEN.get())).length;
+  el.innerHTML = n ? `<span class="newpill">${plural(n, "# nouveau", "# nouveaux")}</span>` : "";
+}
+const docRow = (d, token, seen, extra = "") => `
+  <a class="drow" href="${esc(docHref(d, token))}" target="_blank" rel="noopener" data-doc="${d.id}">
+    <span class="dico${d.kind === "link" ? " lnk" : ""}">${d.kind === "link" ? ICON.link : ICON.doc}</span>
+    <span class="dbody"><b>${esc(d.title)}</b>${isNewDoc(d, seen) ? ` <span class="newpill">Nouveau</span>` : ""}<br>
+      <small>${esc(docExt(d))}${d.size ? " · " + fmtSize(d.size) : ""} · ${esc(d.author)} · ${esc(docDate(d))}${extra}</small></span>
+    ${ICON.chev}
+  </a>`;
+function bindDocRows(after){
+  $$("[data-doc]").forEach(a => a.addEventListener("click", () => { DOCS_SEEN.add(Number(a.dataset.doc)); setTimeout(after, 400); }));
+}
+
+async function renderMyRes(sub, force){
+  const me = AUTH.student;
+  if (!me){ location.replace("#/"); return; }
+  setAccent(me.promo);
+  const view = $("#view"), here = location.hash;
+  const meta = sub ? subjectMeta(sub) : null;
+  setBar({ title: meta ? (meta.emoji ? meta.emoji + " " : "") + meta.label : "Mes ressources", sub: meta ? "Ressources" : CONFIG.PROMOS[me.promo].label, back: true, refresh: true });
+  if (!state.docs) view.innerHTML = '<div class="loading"><span class="spin"></span>Chargement…</div>';
+  let D;
+  try { D = await loadMyDocs(force); } catch(e){ D = state.docs; if (!D){ view.innerHTML = errBox("Impossible de charger les documents. Vérifiez votre connexion puis actualisez."); return; } }
+  if (!D || location.hash !== here) return;
+  const seen = DOCS_SEEN.get(), paint = () => renderMyRes(sub);
+  if (!sub){
+    const by = {}; D.list.forEach(d => (by[d.subject] = by[d.subject] || []).push(d));
+    const keys = CONFIG.SUBJECTS.filter(s => by[s.key] || s.key === "anglais").sort((a, b) => a.label.localeCompare(b.label, "fr", { sensitivity: "base" }));
+    view.innerHTML = `
+      <div class="alert info">${ICON.info}<span>Les documents déposés par vos professeurs pour votre classe, classés par matière.</span></div>
+      <div class="choices">
+        ${keys.map(s => {
+          const l = by[s.key] || [], nw = l.filter(d => isNewDoc(d, seen)).length;
+          const d = (l.length ? plural(l.length, "# document", "# documents") : "") + (s.key === "anglais" ? (l.length ? " · " : "") + "méthodo : textes et vidéos" : "");
+          return `<a class="card res" href="#/moi/ressources/${esc(s.key)}">
+            <span class="num emo">${esc(s.emoji || "📄")}</span>
+            <span><span class="t">${esc(s.label)}</span>${nw ? ` <span class="newpill">${plural(nw, "# nouveau", "# nouveaux")}</span>` : ""}<br><span class="d">${esc(d)}</span></span>
+            ${ICON.chev}</a>`;
+        }).join("")}
+      </div>
+      ${D.list.length ? "" : `<p class="hint" style="text-align:center;margin-top:16px">Les autres matières apparaîtront ici dès qu'un professeur aura déposé un document.</p>`}`;
+    return;
+  }
+  const list = D.list.filter(d => d.subject === sub);
+  let html = "";
+  DOC_NATURES.forEach(([k, label]) => {
+    const l = list.filter(d => d.nature === k);
+    const builtin = k === "methodo" && sub === "anglais" ? Object.entries(RESSOURCES).map(([rk, r]) => `
+      <a class="drow" href="#/ressources/${rk}"><span class="dico met">${ICON[r.icon]}</span>
+        <span class="dbody"><b>${esc(r.title)}</b><br><small>${esc(r.sub)} · sujets et corrigés</small></span>${ICON.chev}</a>`).join("") : "";
+    if (!l.length && !builtin) return;
+    html += `<p class="kicker" style="margin-top:18px">${esc(label)}</p><div class="group dgroup">${builtin}${l.map(d => docRow(d, me.token, seen)).join("")}</div>`;
+  });
+  view.innerHTML = html || `<div class="empty">Aucun document pour le moment.<br><small>Ils apparaîtront ici dès que vos professeurs en déposeront.</small></div>`;
+  bindDocRows(() => { if (location.hash === here) paint(); });
+}
+
+/* ---------- Espace enseignant : documents de la matière ---------- */
+async function renderTeacherDocs(force){
+  const c = TCTX(), here = location.hash, view = $("#view");
+  setAccent(state.tYear || "1");
+  if (c.admin) document.body.classList.add("admin-mode");
+  setTeacherBar(c, "Documents");
+  if (!state.tdocs || state.tdocs.subject !== c.subject) view.innerHTML = '<div class="loading"><span class="spin"></span>Chargement…</div>';
+  let r;
+  try { r = await API.get({ action: "docs", token: c.token, subject: c.admin ? c.subject : "" }); } catch(e){ r = null; }
+  if (location.hash !== here) return;
+  if (r && r.auth) return teacherExpired();
+  if (!r || !r.ok){ view.innerHTML = adminStrip(c) + errBox(esc((r && r.error) || "Impossible de charger les documents. Vérifiez votre connexion puis actualisez.")); bindAdminStrip(); return; }
+  state.tdocs = { subject: c.subject, list: r.docs, filesEnabled: r.filesEnabled, maxBytes: r.maxBytes };
+  const canDel = (d) => c.admin || c.isResp || (AUTH.teacher && AUTH.teacher.id && d.authorId === AUTH.teacher.id) || (!c.admin && d.author === c.name);
+  const cls = (d) => " · " + d.promos.map(p => (CONFIG.PROMOS[p] || { short: p }).short).join(", ");
+  let html = adminStrip(c) + `
+    <div class="alert info">${ICON.info}<span>Les documents déposés ici apparaissent dans <b>Mes ressources</b> des étudiants des classes choisies.${r.filesEnabled ? "" : "<br><small>Dépôt de fichiers pas encore activé : déposez pour l'instant des liens (Google Drive, YouTube, site…).</small>"}</span></div>
+    <button class="btn primary" id="addDoc" style="width:100%">${ICON.upload} Déposer un document</button>`;
+  if (!r.docs.length) html += `<div class="empty" style="margin-top:16px">Aucun document déposé pour le moment.</div>`;
+  DOC_NATURES.forEach(([k, label]) => {
+    const l = r.docs.filter(d => d.nature === k);
+    if (!l.length) return;
+    html += `<p class="kicker" style="margin-top:20px">${esc(label)}</p><div class="group dgroup">${l.map(d => `
+      <div class="drow2">
+        ${docRow(d, c.token, new Set(r.docs.map(x => x.id)), esc(cls(d)))}
+        ${canDel(d) ? `<button class="sbtn cancel" data-del="${d.id}" type="button">Retirer</button>` : ""}
+      </div>`).join("")}</div>`;
+  });
+  view.innerHTML = html;
+  bindAdminStrip();
+  $("#addDoc").onclick = () => openAddDoc(c);
+  $$("[data-del]").forEach(b => b.onclick = () => openDeleteDoc(c, r.docs.find(d => d.id === Number(b.dataset.del))));
+}
+function openAddDoc(c){
+  const T = state.tdocs, years = subjectYears(c.subject), promos = Object.keys(CONFIG.PROMOS);
+  const def = years.length ? [...new Set(years.map(promoOf))] : promos;
+  let mode = T.filesEnabled ? "file" : "link";
+  openSheet(`
+    <h4 id="sheetTitle">${ICON.upload} Déposer un document</h4>
+    <div class="tabs" role="tablist">
+      <button class="tab" data-m="file" type="button" ${T.filesEnabled ? "" : "disabled"}>${ICON.doc} Fichier</button>
+      <button class="tab" data-m="link" type="button">${ICON.link} Lien</button>
+    </div>
+    ${T.filesEnabled ? "" : `<p class="hint">Le dépôt de fichiers sera disponible dès que le stockage aura été activé.</p>`}
+    <div id="fFile">
+      <label class="lbl" for="dFile">Fichier <span class="muted">(10 Mo au maximum)</span></label>
+      <input class="field" id="dFile" type="file" accept="${DOC_ACCEPT}">
+    </div>
+    <div id="fLink">
+      <label class="lbl" for="dUrl">Adresse du lien</label>
+      <input class="field" id="dUrl" type="url" inputmode="url" placeholder="https://…" autocomplete="off">
+    </div>
+    <label class="lbl" for="dTitle">Titre affiché aux étudiants</label>
+    <input class="field" id="dTitle" type="text" maxlength="120" autocomplete="off">
+    <label class="lbl" for="dNat">Catégorie</label>
+    <div class="selectwrap"><select id="dNat">${DOC_NATURES.map(([k, l]) => `<option value="${k}">${esc(l)}</option>`).join("")}</select>${ICON.down}</div>
+    <p class="lbl">Classes</p>
+    <div class="chips">${promos.map(p => `<button type="button" class="chip${def.includes(p) ? " on" : ""}" data-p="${p}" aria-pressed="${def.includes(p)}">${esc(CONFIG.PROMOS[p].label)}</button>`).join("")}</div>
+    <div class="msg" id="msg"></div>
+    <div class="actions"><button class="btn primary" id="go">Déposer</button><button class="btn ghost" id="close">Annuler</button></div>`);
+  const setMode = (m) => {
+    mode = m;
+    $$("#sheet [data-m]").forEach(b => { b.classList.toggle("on", b.dataset.m === m); b.setAttribute("aria-selected", b.dataset.m === m); });
+    $("#fFile").hidden = m !== "file"; $("#fLink").hidden = m !== "link";
+  };
+  setMode(mode);
+  $$("#sheet [data-m]").forEach(b => b.onclick = () => !b.disabled && setMode(b.dataset.m));
+  $$("#sheet [data-p]").forEach(b => b.onclick = () => { b.classList.toggle("on"); b.setAttribute("aria-pressed", b.classList.contains("on")); });
+  $("#dFile").onchange = () => { const f = $("#dFile").files[0]; if (f && !$("#dTitle").value.trim()) $("#dTitle").value = f.name.replace(/\.[^.]+$/, "").replace(/[_]+/g, " "); };
+  $("#close").onclick = closeSheet;
+  $("#go").onclick = async () => {
+    const msg = (m) => { $("#msg").innerHTML = errBox(esc(m)); };
+    const title = $("#dTitle").value.trim(), nature = $("#dNat").value;
+    const sel = [...$$("#sheet [data-p].on")].map(b => b.dataset.p).join(",");
+    if (!sel) return msg("Cochez au moins une classe.");
+    const base = { token: c.token, subject: c.subject, nature, title, promos: sel };
+    let r, btn = $("#go");
+    if (mode === "file"){
+      const f = $("#dFile").files[0];
+      if (!f) return msg("Choisissez un fichier.");
+      if (f.size > (T.maxBytes || 10485760)) return msg("Fichier trop lourd : 10 Mo au maximum.");
+      if (!title) return msg("Donnez un titre au document.");
+      btn.disabled = true; btn.textContent = "Envoi en cours…";
+      const qs = Object.entries(Object.assign({ action: "uploadDoc", name: f.name }, base)).map(([k, v]) => k + "=" + encodeURIComponent(v)).join("&");
+      try {
+        const res = await fetch(CONFIG.API_URL + "?" + qs, { method: "POST", body: f.slice(0, f.size, "") });
+        r = await res.json();
+      } catch(e){ r = { ok: false, error: "Envoi impossible. Vérifiez votre connexion puis réessayez." }; }
+    } else {
+      const url = $("#dUrl").value.trim();
+      if (!/^https:\/\/\S+\.\S+/.test(url)) return msg("Indiquez une adresse complète commençant par https://");
+      if (!title) return msg("Donnez un titre au document.");
+      btn.disabled = true; btn.textContent = "Envoi en cours…";
+      try { r = await API.post(Object.assign({ action: "addDoc", url }, base)); } catch(e){ r = { ok: false, error: "Connexion impossible." }; }
+    }
+    if (r && r.auth){ closeSheet(); return teacherExpired(); }
+    if (!r || !r.ok){ btn.disabled = false; btn.textContent = "Déposer"; return msg((r && r.error) || "Erreur."); }
+    closeSheet(); toast("Document déposé."); renderTeacherDocs();
+  };
+}
+function openDeleteDoc(c, d){
+  if (!d) return;
+  openSheet(`
+    <h4 id="sheetTitle">Retirer le document ?</h4>
+    <div class="meta"><b>${esc(d.title)}</b><br>${esc(natureLabel(d.nature))} · ${esc(docExt(d))} · ${esc(d.author)} · ${esc(docDate(d))}</div>
+    <div class="alert info">${ICON.info}<span>Il disparaîtra de <b>Mes ressources</b> des étudiants.${d.kind === "file" ? " Le fichier sera supprimé du stockage." : ""}</span></div>
+    <div class="msg" id="msg"></div>
+    <div class="actions"><button class="btn danger-fill" id="go">Retirer</button><button class="btn ghost" id="close">Garder</button></div>`);
+  $("#close").onclick = closeSheet;
+  $("#go").onclick = async () => {
+    $("#go").disabled = true;
+    let r; try { r = await tCall({ action: "deleteDoc", id: d.id }); } catch(e){ r = { ok: false, error: "Connexion impossible." }; }
+    if (r.auth){ closeSheet(); return teacherExpired(); }
+    if (!r.ok){ $("#msg").innerHTML = errBox(esc(r.error || "Erreur.")); $("#go").disabled = false; return; }
+    closeSheet(); toast("Document retiré."); renderTeacherDocs();
+  };
+}
+
 /* ---------- Feuilles d'action ---------- */
 let lastFocus = null;
 function openSheet(html){
@@ -2631,6 +2862,7 @@ function renderProfRoute(sub, force){
   if (sub === "seances") return renderSeances(force);
   if (sub === "calendrier") return renderCalendar();
   if (sub === "code") return renderTeacherCode();
+  if (sub === "documents") return renderTeacherDocs(force);
   return renderProf(force);
 }
 const adminStrip = (c) => c.admin ? `<div class="adminstrip">${ICON.gear}<span>Mode administrateur · ${esc(subjectMeta(c.subject).label)}</span><a href="#/gestion" id="quitAct">Quitter</a></div>` : "";
@@ -2714,6 +2946,7 @@ function profActions(c){
     <div class="agrid">
       <a class="acell" href="#/prof/seances">${ICON.sessions}<b>${c.isResp ? "Séances" : "Mes séances"}</b><small>Ajouter, modifier, retirer</small></a>
       <a class="acell" href="#/prof/annulations">${ICON.ban}<b>Annuler une séance</b><small>${nCancel ? plural(nCancel, "# annulée à venir", "# annulées à venir") : "Aucune en cours"}</small></a>
+      <a class="acell" href="#/prof/documents">${ICON.upload}<b>Documents</b><small>Déposer pour les étudiants</small></a>
       <a class="acell" href="#/prof/journal">${ICON.list}<b>Journal</b><small>Inscriptions et modifications</small></a>
       ${c.isResp ? `<a class="acell" href="#/prof/calendrier">${ICON.cal}<b>Calendrier des khôlles</b><small>Dates de chaque khôlle</small></a>` : ""}
       ${c.admin ? "" : `<button class="acell" id="profAlerts" type="button">${ICON.bell}<b>Alertes d'absence</b><small>${a ? "Activées" : "Non activées"}</small></button>`}
