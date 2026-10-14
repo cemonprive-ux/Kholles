@@ -497,7 +497,7 @@ body.admin-mode{--brand:linear-gradient(180deg,#22385C 0%,#12233D 100%)}
 .srow2:first-child{border-top:0}
 .srow2 .sinfo{flex:1;min-width:0}
 .srow2 .sinfo span{color:var(--ink-2)}
-.sx{display:inline-block;font-size:12px;font-weight:700;color:var(--accent);margin-bottom:2px}
+.sx{display:block;width:max-content;font-size:12px;font-weight:700;color:var(--accent);margin-bottom:2px}
 .sacts{display:flex;flex-direction:column;gap:6px}
 .sacts .sbtn{min-height:36px;min-width:88px}
 .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
@@ -557,6 +557,62 @@ body.admin-mode{--brand:linear-gradient(180deg,#22385C 0%,#12233D 100%)}
 .tab:disabled{opacity:.4;cursor:not-allowed}
 .tab svg{width:18px;height:18px;vertical-align:-3px;margin-right:4px}
 #sheet h4 svg{width:20px;height:20px;vertical-align:-3px}
+/* Alertes par type, échanges */
+.ntogs{display:grid;gap:0;border:1px solid var(--line);border-radius:16px;overflow:hidden;background:var(--surface);margin:12px 0}
+.ntogs.off{opacity:.6}
+.ntog{display:flex;align-items:center;gap:12px;padding:12px 14px;border-top:1px solid var(--line);cursor:pointer;font-size:14.5px;line-height:1.35}
+.ntog:first-child{border-top:0}
+.ntog>span{flex:1}
+.ntog small{color:var(--muted);font-size:12.5px}
+.ntog input{appearance:none;-webkit-appearance:none;flex:none;width:46px;height:28px;border-radius:999px;background:var(--line);position:relative;cursor:pointer;transition:background .15s;margin:0}
+.ntog input::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s}
+.ntog input:checked{background:var(--ok)}
+.ntog input:checked::after{transform:translateX(18px)}
+.ntog input:disabled{cursor:not-allowed}
+.alert.swapc{background:#EDE9FE;color:#4C1D95;border:1px solid #C4B5FD}
+.alert.swapc a{color:inherit}
+.alert.swapc .clist li{margin-top:6px}
+.sbtn.swapbtn{min-height:34px;min-width:0;padding:0 10px;margin-left:4px;border:1.5px solid #7C3AED;color:#6D28D9;background:#fff}
+.swlist .check{margin-bottom:8px}
+.swlist small{color:var(--muted)}
+.swapgrid{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;margin:12px 0}
+.swapgrid>div{padding:12px;border-radius:14px;border:1px solid var(--line);background:var(--surface-2);font-size:13.5px;line-height:1.4}
+.swapgrid>div.new{background:var(--ok-soft);border-color:var(--ok)}
+.swapgrid small{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700}
+.swapgrid b{display:block;font-size:14.5px}
+.swarrow svg{width:22px;height:22px;color:#7C3AED}
+@media (prefers-color-scheme: dark){.alert.swapc{background:#2E1F4F;color:#DDD6FE;border-color:#5B3FA0}.sbtn.swapbtn{background:transparent;color:#C4B5FD;border-color:#8B5CF6}}
+/* Notes */
+a.btn{text-decoration:none;justify-content:center}
+.npill{flex:none;min-width:44px;height:30px;padding:0 8px;border-radius:999px;display:grid;place-items:center;font-weight:700;font-size:13px;background:var(--warn-soft);color:var(--warn)}
+.npill.ok{background:var(--ok-soft);color:var(--ok)}
+.npill svg{width:16px;height:16px}
+.nhead{padding:12px 14px;margin-bottom:10px;border-radius:14px;background:var(--surface);border:1px solid var(--line);font-size:14px;line-height:1.5;color:var(--ink-2)}
+.nhead b{color:var(--ink);font-size:15.5px}
+.nrow{display:flex;align-items:center;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
+.nrow:first-child{border-top:0}
+.nwho{flex:1;min-width:0;line-height:1.25}
+.nwho small{display:block;color:var(--muted);font-size:12px;font-weight:700}
+.nwho b{font-size:15.5px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ninput{width:68px;height:48px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface-2);font:inherit;font-size:22px;font-weight:700;text-align:center;color:var(--ink);font-variant-numeric:tabular-nums}
+.ninput:focus{outline:none;border-color:var(--accent);background:var(--surface)}
+.ninput:disabled{opacity:.7}
+.ninput::placeholder{color:var(--muted);font-size:17px}
+.nsur{color:var(--muted);font-weight:700;font-size:13px;margin-left:-4px}
+.nabs{height:40px;padding:0 9px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);font:inherit;font-size:12.5px;font-weight:700;cursor:pointer}
+.nabs.on{background:var(--err);border-color:var(--err);color:#fff}
+.nstate{width:20px;display:grid;place-items:center;color:var(--ok)}
+.nstate svg{width:18px;height:18px}
+.nstate.err{color:var(--err)}
+.spin.sm{width:14px;height:14px;border-width:2px;margin:0}
+.gtable{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.gtable table{border-collapse:collapse;font-size:13px;min-width:100%}
+.gtable th,.gtable td{padding:8px 8px;border-top:1px solid var(--line);text-align:center;white-space:nowrap;font-variant-numeric:tabular-nums}
+.gtable thead th{border-top:0;background:var(--surface-2);font-size:12px;color:var(--muted)}
+.gtable tbody th{text-align:left;font-weight:600;position:sticky;left:0;background:var(--surface);max-width:150px;overflow:hidden;text-overflow:ellipsis}
+.gtable td.abs{color:var(--err);font-weight:700}
+.gtable td.avg{font-weight:700;color:var(--accent)}
+.trow small.st{flex:none;text-align:right;font-size:12.5px;max-width:58%}
 </style>
 </head>
 <body>
@@ -589,7 +645,7 @@ body.admin-mode{--brand:linear-gradient(180deg,#22385C 0%,#12233D 100%)}
    les matières et les listes d'étudiants sont gérés dans l'appli (espace Gestion,
    espace enseignant) et enregistrés sur le serveur : ce bloc ne sert qu'à la mise en service.
    ===================================================================== */
-const APP_VERSION = "2026.10.13-1";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.14-10";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   API_URL: "https://khollapp.cemonprive.workers.dev/",
@@ -620,7 +676,6 @@ const CONFIG = {
     { key: "droit",      label: "Droit",            emoji: "⚖️", prefix: "droit", open: false },
     { key: "economie",   label: "Économie",         emoji: "📈", prefix: "eco",   open: false },
     { key: "espagnol",   label: "Espagnol",         emoji: "🇪🇸", prefix: "esp",   open: true },
-    { key: "italien",    label: "Italien",          emoji: "🇮🇹", prefix: "ita",   open: false },
     { key: "management", label: "Management",       emoji: "🏢", prefix: "mgt",   open: false },
     { key: "maths",      label: "Mathématiques",    emoji: "📐", prefix: "maths", open: false }
   ],
@@ -736,6 +791,9 @@ const subjectMeta = (key) => CONFIG.SUBJECTS.find(s => s.key === key) || { key, 
 const subjEmoji = (key) => subjectMeta(key).emoji || "";
 const exName = (year, name) => { const e = subjEmoji(subjectOfYear(year)); return name + (e ? " " + e : ""); };
 const subjectYears = (subject) => Object.keys(CONFIG.YEARS).filter(y => subjectOfYear(y) === subject).sort((a, b) => promoOf(a).localeCompare(promoOf(b)));
+// Liste restreinte d'une matière (ex. allemand) : null = toute la classe
+const rosterOf = (year) => { const r = CONFIG.YEARS[year] && CONFIG.YEARS[year].roster; return Array.isArray(r) && r.length ? r : null; };
+const inRoster = (year, name) => { const r = rosterOf(year); return !r || r.includes(name); };
 const promoYears = (promo) => Object.keys(CONFIG.YEARS).filter(y => promoOf(y) === promo && (subjectMeta(subjectOfYear(y)).open));
 const promoStudents = (promo) => (STUDENTS[promo] || []).map(s => s.n);
 const genderOf = (name, promo) => { const s = (STUDENTS[promo] || []).find(x => x.n === name); return s ? s.g || "" : ""; };
@@ -748,7 +806,7 @@ function normalizeConfig(){
   });
   Object.entries(CONFIG.YEARS).forEach(([k, Y]) => {
     const subj = subjectMeta(subjectOfYear(k)), pr = promoOf(k), P = CONFIG.PROMOS[pr] || { label: pr, short: pr };
-    Object.assign(Y, { subject: subj.key, subjectLabel: subj.label, promo: pr, label: P.label, short: P.short, students: promoStudents(pr) });
+    Object.assign(Y, { subject: subj.key, subjectLabel: subj.label, promo: pr, label: P.label, short: P.short, students: promoStudents(pr).filter(n => !Array.isArray(Y.roster) || !Y.roster.length || Y.roster.includes(n)) });
     Y.sessions = (Y.sessions || []).map((s, i) => Object.assign({ id: s.id || (k + "-" + (i + 1)) }, s));
   });
 }
@@ -789,12 +847,13 @@ function sessionsFor(year, date, n, half, explicit){
 function slotsForDate(year, d, n, half, explicit){
   const dISO = iso(d), wk = iso(mondayOf(d));
   return sessionsFor(year, d, n, half, explicit).flatMap(s => Array.from({ length: Number(s.count) }, (_, i) => {
-    const st = toMin(s.start) + i*CONFIG.STEP_MINUTES, en = st + CONFIG.SLOT_MINUTES;
+    const dur = Number(s.dur) || CONFIG.SLOT_MINUTES, step = Number(s.dur) ? (Number(s.step) || dur) : CONFIG.STEP_MINUTES;
+    const st = toMin(s.start) + i*step, en = st + dur;
     return {
       id: year+"|"+dISO+"|"+String(st).padStart(4,"0")+"|"+s.room,
       sid: year+"|"+dISO+"|"+s.room,
       year, q: n, week: wk, date: d, dateISO: dISO, sess: s.id, cap: Math.max(1, Number(s.cap) || 1),
-      start: st, label: fmtTime(st)+" – "+fmtTime(en), examiner: s.examiner, room: s.room,
+      start: st, dur, label: fmtTime(st)+" – "+fmtTime(en), examiner: s.examiner, room: s.room, only: Array.isArray(s.only) && s.only.length ? s.only : null,
       startsAt: new Date(d.getFullYear(), d.getMonth(), d.getDate(), Math.floor(st/60), st%60)
     };
   }));
@@ -812,8 +871,9 @@ function buildKholles(year){
     const days = dates.map(d => ({ date: d, slots: slotsForDate(year, d, n, iso(mondayOf(d)) === wA ? "A" : "B", explicit) })).filter(x => x.slots.length);
     // Toute la khôlle ouvre en même temps : N mois avant sa première date.
     const f = days.length ? days[0].date : null;
-    const opensAt = f ? addMonths(f, -CONFIG.BOOKING_WINDOW_MONTHS) : null;
-    days.forEach(x => x.slots.forEach(s => { s.opensAt = opensAt; s.first = iso(f); SLOT_INDEX[s.id] = s; }));
+    const rule = openRule(year);
+    const opensAt = f ? (rule.now ? new Date(2000, 0, 1) : rule.days ? addDays(f, -rule.days) : addMonths(f, -CONFIG.BOOKING_WINDOW_MONTHS)) : null;
+    days.forEach(x => x.slots.forEach(s => { s.opensAt = opensAt; s.openHour = rule.hour; s.first = iso(f); SLOT_INDEX[s.id] = s; }));
     return { n, days, slots: days.flatMap(x => x.slots), dates };
   }).filter(q => q.slots.length);
 }
@@ -834,8 +894,15 @@ const takers = (s) => (state.bookings[s.year] || {})[s.id] || [];
 const allBookings = (year) => Object.values(state.bookings[year] || {}).flat();
 const freeSeats = (s) => Math.max(0, s.cap - takers(s).length);
 const cancelOf = (s) => (state.cancels[s.year] || {})[s.sid];
-const winStart = (s) => new Date(s.opensAt.getTime() + CONFIG.OPEN_FROM_HOUR * 3600000);
-const winEnd = (s) => new Date(s.opensAt.getTime() + (CONFIG.OPEN_FROM_HOUR + 1) * 3600000);
+// Règle d'ouverture : 1 mois avant entre 12h et 13h (par défaut) ; certaines matières : N jours avant, à une autre heure
+function openRule(year){
+  const m = subjectMeta(subjectOfYear(year));
+  return { now: !!m.openNow, days: Number(m.openDays) || 0, hour: m.openHour != null ? Number(m.openHour) : CONFIG.OPEN_FROM_HOUR };
+}
+const hourWin = (h) => h + "h et " + (h + 1) + "h";
+const openRuleText = (year) => { const r = openRule(year); return r.now ? "sont ouvertes dès maintenant" : "ouvrent " + (r.days ? r.days + " jours" : "1 mois") + " avant sa première date, à une heure aléatoire entre " + hourWin(r.hour); };
+const winStart = (s) => new Date(s.opensAt.getTime() + (s.openHour ?? CONFIG.OPEN_FROM_HOUR) * 3600000);
+const winEnd = (s) => new Date(s.opensAt.getTime() + ((s.openHour ?? CONFIG.OPEN_FROM_HOUR) + 1) * 3600000);
 const inWindow = (s, now = new Date()) => now >= winStart(s) && now < winEnd(s);
 function slotStatus(s, now = new Date()){
   if (cancelOf(s)) return "cancelled";
@@ -845,8 +912,8 @@ function slotStatus(s, now = new Date()){
   return "open";
 }
 function windowKholles(year, now = new Date()){ return khollesFor(year).filter(k => k.slots.length && inWindow(k.slots[0], now)); }
-const openLabel = (s) => fmtDate(s.opensAt) + " entre 12h et 13h";
-const openShort = (s) => inWindow(s) ? "Ouverture imminente" : "Ouverture le " + fmtDate(s.opensAt) + " · 12h–13h";
+const openLabel = (s) => fmtDate(s.opensAt) + " entre " + hourWin(s.openHour ?? CONFIG.OPEN_FROM_HOUR);
+const openShort = (s) => { const h = s.openHour ?? CONFIG.OPEN_FROM_HOUR; return inWindow(s) ? "Ouverture imminente" : "Ouverture le " + fmtDate(s.opensAt) + " · " + h + "h–" + (h + 1) + "h"; };
 const dayFrozen = (d, now = new Date()) => now >= addDays(d, 1);
 const describeSlot = (id) => { const s = SLOT_INDEX[id]; return s ? `${fmtDay(s.date).toLowerCase()}, ${s.label} (${exName(s.year, s.examiner)}, salle ${s.room})` : id; };
 // Chevauchement avec une khôlle d'une autre matière : même étudiant, même promotion, même jour, horaires qui se recouvrent.
@@ -855,7 +922,7 @@ function crossConflictMsg(s, student, ignore = []){
   const hit = Object.keys(CONFIG.YEARS).filter(y => promoOf(y) === promo).flatMap(allBookings).find(b => {
     if (b.student !== student || b.slotId === s.id || ignore.includes(b.slotId)) return false;
     const o = SLOT_INDEX[b.slotId];
-    return o && o.dateISO === s.dateISO && Math.abs(o.start - s.start) < CONFIG.SLOT_MINUTES;
+    return o && o.dateISO === s.dateISO && o.start < s.start + s.dur && s.start < o.start + o.dur;
   });
   if (!hit) return null;
   const o = SLOT_INDEX[hit.slotId];
@@ -888,7 +955,13 @@ const setAct = (k) => { try { k ? sessionStorage.setItem("khollapp-act", k) : se
 function TCTX(){
   const a = AUTH.admin, t = AUTH.teacher, act = actSubject();
   if (a && act) return { admin: true, token: a.token, subject: act, name: "", role: "resp", isResp: true, label: "Administrateur" };
-  if (t) return { admin: false, token: t.token, subject: t.subject, name: t.name || "", role: t.role, isResp: t.role === "resp", legacy: !!t.legacy, label: t.name || "Responsable" };
+  if (t){
+    // Enseignant de plusieurs matières : matière choisie dans l'espace enseignant
+    const subs = Array.isArray(t.subjects) && t.subjects.length ? t.subjects : [t.subject];
+    let cur = ""; try { cur = sessionStorage.getItem("khollapp-tsub") || ""; } catch(e){}
+    const subject = subs.includes(cur) ? cur : t.subject;
+    return { admin: false, token: t.token, subject, subjects: subs, name: t.name || "", role: t.role, isResp: t.role === "resp", legacy: !!t.legacy, label: t.name || "Responsable" };
+  }
   return null;
 }
 
@@ -914,7 +987,7 @@ const API = {
     const check = win.map(k => k.n + ":" + k.slots[0].first).join(",");
     const j = await this.get({ action: "list", year, check });
     if (!j.ok) throw new Error(j.error || "Erreur serveur");
-    return { bookings: j.bookings, cancels: j.cancels || [], opened: j.opened || {} };
+    return { bookings: j.bookings, cancels: j.cancels || [], opened: j.opened || {}, swaps: j.swaps || [] };
   },
   post(p){ p.device = DEVICE; return postJSON(p); }
 };
@@ -971,6 +1044,7 @@ Object.assign(ICON, {
   plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
   out: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>',
   gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
+  swap: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h14l-4-4M20 16H6l4 4"/></svg>',
   link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3.2-3.2a4.5 4.5 0 0 0-6.4-6.4L12 5.6"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3.2 3.2a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2"/></svg>',
   upload: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M4 15v3a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-3"/></svg>',
   sessions: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M12 13v5M9.5 15.5h5"/></svg>'
@@ -1028,30 +1102,47 @@ function alertsBlocker(){
 }
 const permMsg = (e) => e && e.perm ? "Notifications non autorisées : les alertes ne peuvent pas être activées." : "Activation impossible (" + esc(e && e.message || "erreur") + "). Réessayez.";
 
+const NOTIF = [
+  ["open", "Ouverture des réservations", "Quand les inscriptions d'une khôlle de votre classe ouvrent"],
+  ["freed", "Places libérées", "Quand un étudiant de votre classe libère sa place"],
+  ["cancel", "Séance annulée", "Si votre séance est annulée ou si un professeur vous désinscrit"],
+  ["swap", "Échanges", "Demandes d'échange qui vous concernent, et réponses aux vôtres"],
+  ["docs", "Nouveaux documents", "Quand un professeur dépose un document pour votre classe"]
+];
 function openAlerts(){
   const me = AUTH.student;
   if (!me) return askLogin();
-  const cur = PUSH.get("khollapp-alerts"), on = cur && cur.student === me.name, block = alertsBlocker();
+  const cur = PUSH.get("khollapp-alerts"), on = cur && cur.student === me.name, block = alertsBlocker(), off = me.off || [];
   openSheet(`
-    <h4 id="sheetTitle">${ICON.bell} Alertes de places libérées</h4>
-    <p class="meta">Quand un étudiant de <b>votre séance</b> se déclare absent, quelle que soit la matière, vous recevez une notification et pouvez prendre sa place en un geste.</p>
-    ${on ? `<div class="alert ok">${ICON.check}<span>Alertes activées sur cet appareil pour <b>${esc(me.name)}</b>, toutes matières.</span></div>` : ""}
-    ${block || `<div class="msg" id="msg"></div>
-      <div class="actions"><button class="btn primary" id="on">${on ? "Réactiver sur cet appareil" : "Activer les alertes"}</button></div>`}
+    <h4 id="sheetTitle">${ICON.bell} Mes alertes</h4>
+    <p class="meta">Des notifications sur ce téléphone, même Kholl'app fermée. Choisissez celles que vous voulez recevoir.</p>
+    ${on ? `<div class="alert ok">${ICON.check}<span>Alertes activées sur cet appareil pour <b>${esc(me.name)}</b>.</span></div>` : ""}
+    <div class="ntogs${on ? "" : " off"}">${NOTIF.map(([k, t, d]) => `<label class="ntog"><span><b>${t}</b><br><small>${d}</small></span><input type="checkbox" role="switch" data-n="${k}" ${off.includes(k) ? "" : "checked"} ${on ? "" : "disabled"}></label>`).join("")}</div>
+    ${on ? `<p class="hint">Vos choix valent pour tous vos appareils.</p>` : ""}
+    ${on ? "" : block || `<div class="msg" id="msg"></div>
+      <div class="actions"><button class="btn primary" id="on">Activer les alertes</button></div>`}
     <div class="actions">
-      ${on ? `<button class="btn outline danger" id="off">Désactiver les alertes</button>` : ""}
+      ${on ? `<button class="btn outline danger" id="off">Désactiver sur cet appareil</button>` : ""}
       <button class="btn ghost" id="close">Fermer</button>
     </div>`);
   $("#close").onclick = closeSheet;
-  const off = $("#off");
-  if (off) off.onclick = async () => { off.disabled = true; await PUSH.disable(); PUSH.set("khollapp-alerts", null); closeSheet(); toast("Alertes désactivées."); route(); };
+  document.querySelectorAll("#sheet [data-n]").forEach(box => box.onchange = async () => {
+    const offs = [...document.querySelectorAll("#sheet [data-n]")].filter(x => !x.checked).map(x => x.dataset.n);
+    let r; try { r = await API.post({ action: "setNotif", token: me.token, off: offs }); } catch(e){ r = { ok: false }; }
+    if (r.auth){ closeSheet(); return studentLogout(r.error); }
+    if (!r.ok){ box.checked = !box.checked; return toast("Enregistrement impossible. Réessayez."); }
+    AUTH.student = Object.assign({}, AUTH.student, { off: r.off });
+    toast(box.checked ? "Alerte activée." : "Alerte coupée.");
+  });
+  const offBtn = $("#off");
+  if (offBtn) offBtn.onclick = async () => { offBtn.disabled = true; await PUSH.disable(); PUSH.set("khollapp-alerts", null); closeSheet(); toast("Alertes désactivées sur cet appareil."); route(); };
   const b = $("#on");
   if (b) b.onclick = async () => {
     b.disabled = true; b.textContent = "Activation…";
     try {
       await PUSH.enable({ action: "subscribe", token: me.token });
       PUSH.set("khollapp-alerts", { year: me.promo, student: me.name });
-      closeSheet(); toast("Alertes activées."); route();
+      toast("Alertes activées."); openAlerts(); route();
     } catch(e){ $("#msg").innerHTML = errBox(permMsg(e)); b.disabled = false; b.textContent = "Activer les alertes"; }
   };
 }
@@ -1091,7 +1182,7 @@ function openTeacherAlerts(){
 
 /* ---------- État, barre et navigation ---------- */
 const state = { bookings: {}, cancels: {}, opened: {}, loaded: {}, showPast: false, poll: null, journal: null, archive: null, jTab: "journal", jYear: "", jSearch: "",
-  tYear: null, tEx: null, tQ: {}, sYear: null, gPromo: "1", gFilter: "all", gSearch: "", adm: null };
+  swaps: {}, tYear: null, tEx: null, tQ: {}, sYear: null, gPromo: "1", gFilter: "all", gSearch: "", adm: null };
 
 function setBar({ title, sub, back, refresh }){
   $("#title").innerHTML = esc(title) + (sub ? '<span class="sub">'+esc(sub)+'</span>' : "");
@@ -1113,7 +1204,7 @@ function backTarget(){
   if (p[0] === "moi") return p[1] === "ressources" && p[2] ? "#/moi/ressources" : "#/moi";
   if (p[0] === "connexion") return "#/";
   if (p[0] === "gestion") return p.length > 1 ? "#/gestion" : "#/";
-  if (p[0] === "prof") return p.length > 1 ? "#/prof" : (actSubject() && AUTH.admin ? "#/gestion" : "#/");
+  if (p[0] === "prof") return p[1] === "notes" && p[2] ? "#/prof/notes" : p.length > 1 ? "#/prof" : (actSubject() && AUTH.admin ? "#/gestion" : "#/");
   if (p[0] === "ressources") return me ? "#/moi/ressources/anglais" : p.length > 1 ? "#/ressources" : state.resFrom ? "#/" + state.resFrom : "#/";
   if (CONFIG.YEARS[p[0]]) return p.length > 1 ? "#/" + p[0] : (me ? "#/moi" : "#/");
   return "#/";
@@ -1130,8 +1221,9 @@ function applyState(year, r){
   const map = {}; (r.bookings || []).forEach(b => (map[b.slotId] = map[b.slotId] || []).push(b));
   const cmap = {}; (r.cancels || []).forEach(c => cmap[c.sid] = c);
   state.bookings[year] = map; state.cancels[year] = cmap; state.loaded[year] = Date.now();
+  if (Array.isArray(r.swaps)){ state.swaps = state.swaps || {}; state.swaps[year] = r.swaps; }
   if (r.opened) state.opened[year] = Object.assign(state.opened[year] || {}, r.opened);
-  try { localStorage.setItem("khollapp-cache2-" + year, JSON.stringify({ bookings: r.bookings || [], cancels: r.cancels || [] })); } catch(e){}
+  try { localStorage.setItem("khollapp-cache2-" + year, JSON.stringify({ bookings: r.bookings || [], cancels: r.cancels || [], swaps: r.swaps || [] })); } catch(e){}
 }
 Object.keys(CONFIG.YEARS).forEach(y => {
   try { const c = JSON.parse(localStorage.getItem("khollapp-cache2-" + y) || "null"); if (c){ applyState(y, c); state.loaded[y] = 0; } } catch(e){}
@@ -1217,8 +1309,8 @@ const footHTML = (extra = "") => `
 const alertsCardHTML = () => { const a = PUSH.get("khollapp-alerts"), me = AUTH.student, on = a && me && a.student === me.name; return `
     <button class="card alerts${on ? " on" : ""}" id="alertsCard" type="button">
       <span class="num">${ICON.bell}</span>
-      <span><span class="t">Alertes de places libérées</span><br>
-      <span class="d">${on ? "Activées sur cet appareil" : `Soyez ${acc("prévenu", me && me.gender)} si une place se libère dans votre séance`}</span></span>
+      <span><span class="t">Mes alertes</span><br>
+      <span class="d">${on ? "Activées sur cet appareil · " + plural(NOTIF.filter(t => !((me && me.off) || []).includes(t[0])).length, "# type sur " + NOTIF.length, "# types sur " + NOTIF.length) : "Ouverture des réservations, places libérées, échanges, documents…"}</span></span>
       ${ICON.chev}
     </button>`; };
 
@@ -1335,7 +1427,7 @@ function checkStudent(){
 /* ---------- Ma page (étudiant) ---------- */
 function myUpcoming(me, now = new Date()){
   return promoYears(me.promo).flatMap(y => allBookings(y).filter(b => b.student === me.name).map(b => SLOT_INDEX[b.slotId]).filter(Boolean))
-    .filter(s => s.startsAt.getTime() + CONFIG.SLOT_MINUTES * 60000 > now.getTime())
+    .filter(s => s.startsAt.getTime() + s.dur * 60000 > now.getTime())
     .sort((a, b) => a.startsAt - b.startsAt);
 }
 function countdown(s, now = new Date()){
@@ -1364,9 +1456,10 @@ async function renderMe(force){
         <span class="pbody"><b>${esc(subjEmoji(subjectOfYear(s.year)))} ${esc(CONFIG.YEARS[s.year].subjectLabel)} · Khôlle ${s.q}</b><br><span>${esc(s.label)} · ${esc(exName(s.year, s.examiner))} · ${esc(s.room)}</span></span>
         ${ICON.chev}</a>`;
     });
-    const subjects = CONFIG.SUBJECTS.slice().sort((a, b) => a.label.localeCompare(b.label, "fr", { sensitivity: "base" }));
+    const subjects = CONFIG.SUBJECTS.slice().sort((a, b) => a.label.localeCompare(b.label, "fr", { sensitivity: "base" }))
+      .filter(m => { const y = m.years && m.years[me.promo]; return !y || inRoster(y, me.name); });
     const mine = (y) => list.filter(s => s.year === y).length;
-    $("#view").innerHTML = cancelBanner(years) + `
+    $("#view").innerHTML = cancelBanner(years) + swapBanner(me, years, true) + `
       <p class="kicker">Ma prochaine khôlle</p>
       ${next ? `
       <a class="nextk" href="#/${next.year}/k/${next.q}">
@@ -1521,14 +1614,15 @@ function renderQuinzaine(year, n){
   setBar({ title: "Khôlle " + n, sub: Y.subjectLabel + " · " + Y.short + " · " + (iso(first) === iso(last) ? fmtShort(first) : fmtShort(first) + " – " + fmtShort(last)), back: true, refresh: true });
   const viewer = me && me.promo === Y.promo ? me.name : null;
   const multi = q.slots.some(s => s.cap > 1);
-  let html = cancelBanner(year, n);
+  let html = cancelBanner(year, n) + (viewer ? swapBanner(me, [year]) : "");
+  if (viewer){ const ms = mySwap(year, n, viewer); if (ms) html += `<div class="alert swapc">${ICON.swap}<span>Votre demande d'échange est en cours (${plural(ms.wants.length, "# créneau proposé", "# créneaux proposés")}).</span></div>`; }
   if (multi){
     const tot = q.slots.filter(s => slotStatus(s, now) !== "cancelled").reduce((a, s) => a + s.cap, 0), used = q.slots.filter(s => slotStatus(s, now) !== "cancelled").reduce((a, s) => a + takers(s).length, 0);
     html += `<div class="fillcard"><div class="fc-top"><span>Places restantes</span><b>${tot - used} sur ${tot}</b></div><div class="fc-bar"><i style="width:${tot ? Math.round(used / tot * 100) : 0}%"></i></div></div>`;
   }
   html += khollePast(q, now)
     ? `<div class="alert info">${ICON.lock}<span><b>Khôlle terminée.</b> Le planning est figé : consultation uniquement.</span></div>`
-    : `<div class="rule">${ICON.info}<span><b>Une seule inscription par étudiant</b> pour la Khôlle ${n}${q.days.length > 1 ? `, sur l'une des ${q.days.length} dates ci-dessous` : ""}. Les réservations de toute la khôlle ouvrent 1 mois avant sa première date, à une heure aléatoire entre 12h et 13h.</span></div>`;
+    : `<div class="rule">${ICON.info}<span><b>Une seule inscription par étudiant</b> pour la Khôlle ${n}${q.days.length > 1 ? `, sur l'une des ${q.days.length} dates ci-dessous` : ""}. Les réservations de toute la khôlle ${openRuleText(year)}.</span></div>`;
   q.days.forEach((day, i) => {
     if (i) html += bandHTML(closedBetween(iso(q.days[i - 1].date), iso(day.date)));
     html += `<div class="weekhead"><h3>${fmtDay(day.date)}</h3>${statusPill(day.slots, now)}</div>`;
@@ -1543,15 +1637,24 @@ function renderQuinzaine(year, n){
     });
   });
   $("#view").innerHTML = html + footHTML();
+  bindSwapButtons();
   $$(".slot").forEach(el => el.addEventListener("click", () => {
     const s = SLOT_INDEX[el.dataset.id]; if (!s) return;
     const st = slotStatus(s), t = takers(s);
     if (viewer && t.some(b => b.student === viewer)) return openMine(s);
     if (st === "cancelled") return toast("Séance annulée par l'enseignant.");
     if (st === "past") return toast("Créneau passé : consultation uniquement.");
-    if (st === "notyet") return toast(inWindow(s) ? "Ouverture imminente : entre 12h et 13h aujourd'hui. Restez sur la page." : "Réservations ouvertes le " + openLabel(s) + ".");
-    if (!freeSeats(s)) return toast(s.cap > 1 ? "Créneau complet." : "Créneau déjà réservé par " + t[0].student + ".");
+    if (st === "notyet") return toast(inWindow(s) ? "Ouverture imminente : entre " + hourWin(s.openHour ?? CONFIG.OPEN_FROM_HOUR) + " aujourd'hui. Restez sur la page." : "Réservations ouvertes le " + openLabel(s) + ".");
+    if (!freeSeats(s)){
+      const own = viewer && allBookings(year).find(b => Number(b.q) === s.q && b.student === viewer), os = own && SLOT_INDEX[own.slotId];
+      const inc = viewer && swapsForMe(me, [year]).find(x => x.slotId === s.id);
+      if (inc) return openSwapAccept(inc);
+      if (os && !tooLateFor(os) && !tooLateFor(s)) return openSwapRequest(os, [s.id]);
+      return toast(s.cap > 1 ? "Créneau complet." : "Créneau déjà réservé par " + t[0].student + ".");
+    }
     if (!me) return askLogin(Y.promo);
+    if (me.promo === Y.promo && !inRoster(year, me.name)) return toast("Cette matière est réservée aux étudiants de sa liste.");
+    if (s.only && !s.only.includes(me.name)) return toast("Ce créneau est réservé à un groupe fixe d'étudiants.");
     if (me.promo !== Y.promo) return toast("Ce planning n'est pas celui de votre classe.");
     openBook(s);
   }));
@@ -2569,7 +2672,7 @@ async function renderTeacherDocs(force){
   setTeacherBar(c, "Documents");
   if (!state.tdocs || state.tdocs.subject !== c.subject) view.innerHTML = '<div class="loading"><span class="spin"></span>Chargement…</div>';
   let r;
-  try { r = await API.get({ action: "docs", token: c.token, subject: c.admin ? c.subject : "" }); } catch(e){ r = null; }
+  try { r = await API.get({ action: "docs", token: c.token, subject: c.subject }); } catch(e){ r = null; }
   if (location.hash !== here) return;
   if (r && r.auth) return teacherExpired();
   if (!r || !r.ok){ view.innerHTML = adminStrip(c) + errBox(esc((r && r.error) || "Impossible de charger les documents. Vérifiez votre connexion puis actualisez.")); bindAdminStrip(); return; }
@@ -2679,6 +2782,306 @@ function openDeleteDoc(c, d){
   };
 }
 
+/* ====================================================================== */
+/* Échanges de créneaux entre étudiants                                    */
+/* ====================================================================== */
+const swapsOf = (year) => (state.swaps && state.swaps[year]) || [];
+const mySwap = (year, q, name) => swapsOf(year).find(x => Number(x.q) === Number(q) && x.student === name) || null;
+// Demandes reçues : un camarade propose son créneau contre le mien
+function swapsForMe(me, years){
+  return (years || promoYears(me.promo)).flatMap(y => {
+    const mine = allBookings(y).filter(b => b.student === me.name);
+    return swapsOf(y).filter(x => x.student !== me.name).map(x => {
+      const b = mine.find(m => Number(m.q) === Number(x.q));
+      const a = SLOT_INDEX[x.slotId], s = b && SLOT_INDEX[b.slotId];
+      return b && a && s && x.wants.includes(b.slotId) && !tooLateFor(a) && !tooLateFor(s) ? Object.assign({}, x, { from: a, to: s }) : null;
+    }).filter(Boolean);
+  });
+}
+const swapLine = (x, withSubj) => `${withSubj ? esc(CONFIG.YEARS[x.year].subjectLabel) + " · " : ""}Khôlle ${esc(x.q)} : <b>${esc(x.student)}</b> propose son créneau du <b>${esc(describeSlot(x.slotId))}</b> contre le vôtre (${esc(x.to.label)}).`;
+function swapBanner(me, years, withLinks){
+  const list = swapsForMe(me, years);
+  if (!list.length) return "";
+  return `<div class="alert swapc">${ICON.swap}<span><b>${list.length > 1 ? "Demandes d'échange" : "Demande d'échange"}</b>
+    <ul class="clist">${list.map(x => withLinks ? `<li><a href="#/${x.year}/k/${x.q}">${swapLine(x, true)}</a></li>` : `<li>${swapLine(x, false)} <button class="sbtn swapbtn" data-swap="${x.id}" type="button">Répondre</button></li>`).join("")}</ul></span></div>`;
+}
+async function swapCall(btn, busy, payload, okMsg){
+  const me = AUTH.student, label = btn.textContent;
+  btn.disabled = true; btn.textContent = busy;
+  let r;
+  try { r = await API.post(Object.assign({ token: me.token, app: APP_URL }, payload)); } catch(e){ r = { ok: false, error: "Connexion impossible (" + e.message + "). Réessayez." }; }
+  if (r.auth){ closeSheet(); return studentLogout(r.error); }
+  if (Array.isArray(r.bookings)) applyState(payload.year, r);
+  if (r.ok){ closeSheet(); toast(okMsg); }
+  else { $("#msg").innerHTML = errBox(esc(r.error || "Opération refusée.")); btn.disabled = false; btn.textContent = label; }
+  draw();
+}
+// Proposer mon créneau à l'échange : je coche les créneaux qui me conviendraient
+function openSwapRequest(s, pre){
+  const me = AUTH.student, q = khollesFor(s.year).find(k => k.n === s.q), cur = mySwap(s.year, s.q, me.name);
+  const cands = q.slots.filter(o => o.id !== s.id && slotStatus(o) !== "cancelled" && slotStatus(o) !== "past" && !tooLateFor(o) && takers(o).some(b => b.student !== me.name));
+  const checked = (o) => pre ? pre.includes(o.id) : cur ? cur.wants.includes(o.id) : true;
+  openSheet(`
+    <h4 id="sheetTitle">${ICON.swap} Proposer un échange</h4>
+    <p class="meta">Votre créneau : <b>${esc(describeSlot(s.id))}</b></p>
+    ${cands.length ? `<p class="lbl" style="margin-top:4px">Créneaux qui vous conviendraient</p>
+      <div class="swlist">${cands.map(o => `<label class="check"><input type="checkbox" value="${esc(o.id)}" ${checked(o) ? "checked" : ""}> <span><b>${esc(fmtDay(o.date))} · ${esc(o.label)}</b><br><small>${esc(exName(o.year, o.examiner))} · ${esc(o.room)} · ${esc(takers(o).map(b => b.student).join(", "))}</small></span></label>`).join("")}</div>
+      <p class="hint">Les étudiants inscrits sur ces créneaux reçoivent votre demande. Le premier qui accepte prend votre place, et vous la sienne. Vous restez ${acc("inscrit", me.gender)} sur votre créneau tant que personne n'a accepté.</p>`
+      : `<div class="empty">Aucun autre créneau occupé dans cette khôlle.<br><small>Pour changer, touchez simplement un créneau libre.</small></div>`}
+    <div class="msg" id="msg"></div>
+    <div class="actions">${cands.length ? `<button class="btn primary" id="go">${cur ? "Mettre à jour la demande" : "Envoyer la demande"}</button>` : ""}<button class="btn ghost" id="close">Annuler</button></div>`);
+  $("#close").onclick = closeSheet;
+  const go = $("#go");
+  if (go) go.onclick = () => {
+    const wants = [...document.querySelectorAll("#sheet .swlist input:checked")].map(i => i.value);
+    if (!wants.length){ $("#msg").innerHTML = errBox("Cochez au moins un créneau."); return; }
+    swapCall(go, "Envoi…", { action: "swapRequest", year: s.year, q: s.q, wants }, "Demande d'échange envoyée.");
+  };
+}
+function openSwapAccept(x){
+  openSheet(`
+    <h4 id="sheetTitle">${ICON.swap} Demande d'échange</h4>
+    <p class="meta"><b>${esc(x.student)}</b> vous propose d'échanger vos créneaux pour la Khôlle ${esc(x.q)}.</p>
+    <div class="swapgrid">
+      <div><small>Vous quittez</small><b>${esc(fmtDay(x.to.date))}</b>${esc(x.to.label)}<br>${esc(exName(x.year, x.to.examiner))} · ${esc(x.to.room)}</div>
+      <span class="swarrow">${ICON.swap}</span>
+      <div class="new"><small>Vous prenez</small><b>${esc(fmtDay(x.from.date))}</b>${esc(x.from.label)}<br>${esc(exName(x.year, x.from.examiner))} · ${esc(x.from.room)}</div>
+    </div>
+    <p class="hint">L'échange est immédiat. ${esc(x.student)} et les khôlleurs concernés sont prévenus.</p>
+    <div class="msg" id="msg"></div>
+    <div class="actions"><button class="btn primary" id="go">Accepter l'échange</button><button class="btn ghost" id="close">Plus tard</button></div>`);
+  $("#close").onclick = closeSheet;
+  $("#go").onclick = () => swapCall($("#go"), "Échange…", { action: "swapAccept", year: x.year, q: x.q, id: x.id }, "Échange effectué.");
+}
+function bindSwapButtons(){
+  $$("[data-swap]").forEach(b => b.onclick = () => {
+    const me = AUTH.student, x = me && swapsForMe(me).find(z => z.id === Number(b.dataset.swap));
+    if (x) openSwapAccept(x); else toast("Cette demande n'est plus valable.");
+  });
+}
+
+/* ====================================================================== */
+/* Notes de khôlle (espace enseignant : jamais visibles des étudiants)     */
+/* ====================================================================== */
+const gKey = (year, q, student) => year + "|" + q + "|" + student;
+async function loadGrades(c, force){
+  if (!force && state.grades && state.grades.subject === c.subject && Date.now() - state.grades.t < 30000) return state.grades;
+  const r = await API.get({ action: "grades", token: c.token, subject: c.subject });
+  if (r.auth){ teacherExpired(); return null; }
+  if (!r.ok) throw new Error(r.error || "Erreur serveur");
+  const map = {}; r.grades.forEach(g => map[gKey(g.year, g.q, g.student)] = g);
+  state.grades = { subject: c.subject, t: Date.now(), map };
+  return state.grades;
+}
+const fmtNote = (g) => !g ? "" : g.absent ? "Abs." : String(g.value).replace(".", ",");
+const canGrade = (c, ex) => c.admin || c.isResp || ex === c.name;
+// Séances passées de la matière, avec leurs inscrits (plus récentes d'abord)
+function pastSessions(c){
+  const now = Date.now(), map = {};
+  subjectYears(c.subject).forEach(y => allBookings(y).forEach(b => {
+    const s = SLOT_INDEX[b.slotId];
+    if (!s || s.startsAt.getTime() > now || cancelOf(s)) return;
+    const S = map[s.sid] || (map[s.sid] = { sid: s.sid, year: s.year, q: s.q, date: s.date, examiner: s.examiner, room: s.room, rows: [] });
+    S.rows.push({ s, student: b.student });
+  }));
+  return Object.values(map).map(S => { S.rows.sort((a, b) => a.s.start - b.s.start); S.first = S.rows[0].s; S.last = S.rows[S.rows.length - 1].s; return S; })
+    .sort((a, b) => b.first.startsAt - a.first.startsAt);
+}
+const sessDone = (S) => S.rows.filter(r => state.grades && state.grades.map[gKey(S.year, S.q, r.student)]).length;
+function toGradeCount(c){
+  if (!state.grades) return null;
+  return pastSessions(c).filter(S => (c.name ? S.examiner === c.name : true) && sessDone(S) < S.rows.length).length;
+}
+async function loadSubjectBookings(c, force){
+  await Promise.all(subjectYears(c.subject).map(y => loadBookings(y, force).catch(() => {})));
+}
+
+async function renderNotes(sid, force){
+  const c = TCTX(), view = $("#view"), here = location.hash;
+  setAccent(state.tYear || "1");
+  if (c.admin) document.body.classList.add("admin-mode");
+  if (!state.grades || state.grades.subject !== c.subject) view.innerHTML = '<div class="loading"><span class="spin"></span>Chargement…</div>';
+  try { await Promise.all([loadSubjectBookings(c, force), loadGrades(c, force)]); }
+  catch(e){ if (!state.grades){ setTeacherBar(c, "Notes"); view.innerHTML = errBox("Impossible de charger les notes. Vérifiez votre connexion puis actualisez."); return; } }
+  if (location.hash !== here || !state.grades) return;
+  if (sid) return renderNoteSession(c, decodeURIComponent(sid));
+  setTeacherBar(c, "Notes");
+  const tab = state.nTab || "saisie";
+  let html = adminStrip(c) + `<div class="alert info">${ICON.lock}<span>Notes <b>confidentielles</b> : visibles des seuls enseignants de la matière, jamais des étudiants.</span></div>
+    <div class="tabs" role="tablist"><button class="tab${tab === "saisie" ? " on" : ""}" data-t="saisie">Saisie</button><button class="tab${tab === "recap" ? " on" : ""}" data-t="recap">Récapitulatif</button></div>`;
+  if (tab === "saisie"){
+    const mineOnly = c.name && state.nMine !== false;
+    const all = pastSessions(c), list = mineOnly ? all.filter(S => S.examiner === c.name) : all;
+    if (c.name) html += `<div class="chips"><button class="chip${mineOnly ? " on" : ""}" data-m="1">Mes séances</button><button class="chip${mineOnly ? "" : " on"}" data-m="0">Toutes les séances</button></div>`;
+    const todo = list.filter(S => sessDone(S) < S.rows.length), done = list.filter(S => sessDone(S) === S.rows.length);
+    const row = (S) => { const n = sessDone(S), t = S.rows.length;
+      return `<a class="prow" href="#/prof/notes/${encodeURIComponent(S.sid)}">
+        <span class="pdate"><span>${JOURS[S.date.getDay()].slice(0, 3)}.</span><b>${S.date.getDate()}</b><span>${MOIS_C[S.date.getMonth()]}</span></span>
+        <span class="pbody"><b>Khôlle ${S.q} · ${esc(CONFIG.YEARS[S.year].short)}</b><br><span>${esc(fmtTime(S.first.start))} – ${esc(fmtTime(S.last.start + S.last.dur))} · ${esc(S.examiner)} · ${esc(S.room)}</span></span>
+        <span class="npill${n === t ? " ok" : ""}">${n === t ? ICON.check : n + "/" + t}</span></a>`; };
+    html += todo.length ? `<p class="kicker" style="margin-top:6px">À noter · ${todo.length}</p><div class="plist">${todo.map(row).join("")}</div>`
+      : `<div class="empty">${list.length ? "Toutes les séances sont notées." : "Aucune séance passée pour le moment."}</div>`;
+    if (done.length) html += `<p class="kicker" style="margin-top:20px">Notées</p><div class="plist">${done.map(row).join("")}</div>`;
+  } else {
+    const years = subjectYears(c.subject), y = years.includes(state.nYear) ? state.nYear : years[0];
+    html += yearTabs(years, y, "data-ny");
+    if (y){
+      const qs = khollesFor(y).filter(k => k.slots.some(s => s.startsAt <= new Date())).map(k => k.n);
+      const names = promoStudents(CONFIG.YEARS[y].promo).filter(n => inRoster(y, n));
+      const cell = (n, k) => { const g = state.grades.map[gKey(y, k, n)]; return `<td class="${g && g.absent ? "abs" : ""}">${fmtNote(g) || "·"}</td>`; };
+      const avg = (n) => { const v = qs.map(k => state.grades.map[gKey(y, k, n)]).filter(g => g && !g.absent).map(g => g.value); return v.length ? (v.reduce((a, b) => a + b, 0) / v.length).toFixed(1).replace(".", ",") : "–"; };
+      html += qs.length ? `<div class="gtable"><table><thead><tr><th>Étudiant</th>${qs.map(k => `<th>K${k}</th>`).join("")}<th>Moy.</th></tr></thead>
+        <tbody>${names.map(n => `<tr><th>${esc(n)}</th>${qs.map(k => cell(n, k)).join("")}<td class="avg">${avg(n)}</td></tr>`).join("")}</tbody></table></div>
+        <p class="hint">K = khôlle · Abs. = absent · moyenne calculée sans les absences.</p>` : `<div class="empty">Aucune khôlle passée pour cette classe.</div>`;
+    }
+    html += `<div class="group exports" style="margin-top:14px"><a class="xrow" href="${exportUrl("grades")}">${ICON.list}<span><b>Exporter les notes pour Excel</b><br><small>Une ligne par étudiant, une colonne par khôlle, moyenne</small></span></a></div>`;
+  }
+  view.innerHTML = html;
+  bindAdminStrip();
+  $$("[data-t]").forEach(b => b.onclick = () => { state.nTab = b.dataset.t; renderNotes(); });
+  $$("[data-m]").forEach(b => b.onclick = () => { state.nMine = b.dataset.m === "1"; renderNotes(); });
+  $$("[data-ny]").forEach(b => b.onclick = () => { state.nYear = b.dataset.ny; renderNotes(); });
+}
+
+function renderNoteSession(c, sid){
+  const S = pastSessions(c).find(x => x.sid === sid);
+  setTeacherBar(c, "Notes");
+  if (!S){ $("#view").innerHTML = `<div class="empty">Séance introuvable.</div>`; return; }
+  const edit = canGrade(c, S.examiner);
+  $("#view").innerHTML = adminStrip(c) + `
+    <div class="nhead"><b>${esc(CONFIG.YEARS[S.year].subjectLabel)} · Khôlle ${S.q} · ${esc(CONFIG.YEARS[S.year].short)}</b><br>${esc(fmtDay(S.date))} · ${esc(exName(S.year, S.examiner))} · salle ${esc(S.room)}</div>
+    ${edit ? `<p class="hint" style="margin:0 4px 10px">Note sur 20, demi-points acceptés (13,5). Enregistrement automatique.</p>` : `<div class="alert info">${ICON.lock}<span>Consultation seule : séance de ${esc(S.examiner)}.</span></div>`}
+    <div class="group ngroup">${S.rows.map((r, i) => { const g = state.grades.map[gKey(S.year, S.q, r.student)]; return `
+      <div class="nrow" data-i="${i}">
+        <span class="nwho"><small>${esc(r.s.label)}</small><b>${esc(r.student)}</b></span>
+        <input class="ninput" type="text" inputmode="decimal" enterkeyhint="next" autocomplete="off" maxlength="4" aria-label="Note de ${esc(r.student)} sur 20"
+          value="${g && !g.absent ? fmtNote(g) : ""}" ${g && g.absent ? 'placeholder="Abs." disabled' : 'placeholder="–"'} ${edit ? "" : "readonly"}>
+        <span class="nsur">/20</span>
+        ${edit ? `<button class="nabs${g && g.absent ? " on" : ""}" type="button" aria-pressed="${!!(g && g.absent)}">Abs.</button>` : ""}
+        <span class="nstate">${g ? ICON.check : ""}</span>
+      </div>`; }).join("")}</div>
+    <div class="actions"><a class="btn outline" href="#/prof/notes">Terminé</a></div>`;
+  bindAdminStrip();
+  if (!edit) return;
+  const rows = [...document.querySelectorAll(".nrow")];
+  const save = async (row, body) => {
+    const r0 = S.rows[Number(row.dataset.i)], st = row.querySelector(".nstate");
+    st.innerHTML = '<span class="spin sm"></span>'; st.className = "nstate";
+    let r; try { r = await tCall(Object.assign({ action: "setGrade", year: S.year, q: S.q, student: r0.student }, body)); } catch(e){ r = { ok: false, error: "Connexion impossible : réessayez." }; }
+    if (r.auth) return teacherExpired();
+    if (!r.ok){ st.innerHTML = ICON.warn; st.className = "nstate err"; toast(r.error || "Erreur."); return false; }
+    const k = gKey(S.year, S.q, r0.student);
+    if (r.grade) state.grades.map[k] = r.grade; else delete state.grades.map[k];
+    st.innerHTML = r.grade ? ICON.check : ""; st.className = "nstate ok";
+    return true;
+  };
+  rows.forEach((row, i) => {
+    const inp = row.querySelector(".ninput"), abs = row.querySelector(".nabs");
+    const commit = async () => {
+      const v = inp.value.trim().replace(".", ","), g = state.grades.map[gKey(S.year, S.q, S.rows[i].student)];
+      if (inp.disabled) return;
+      if (!v){ if (g) await save(row, { clear: true }); return; }
+      const n = Number(v.replace(",", "."));
+      if (!(n >= 0 && n <= 20) || Math.round(n * 2) !== n * 2){ row.querySelector(".nstate").innerHTML = ICON.warn; row.querySelector(".nstate").className = "nstate err"; toast("Note de 0 à 20, demi-points acceptés (13,5)."); return; }
+      inp.value = String(n).replace(".", ",");
+      if (g && !g.absent && g.value === n) return;
+      await save(row, { value: n });
+    };
+    inp.addEventListener("change", commit);
+    inp.addEventListener("keydown", e => { if (e.key === "Enter"){ e.preventDefault(); const nx = rows.slice(i + 1).map(r => r.querySelector(".ninput")).find(x => !x.disabled); nx ? nx.focus() : inp.blur(); } });
+    abs.onclick = async () => {
+      const on = !abs.classList.contains("on");
+      if (await save(row, on ? { absent: true } : { clear: true }) === false) return;
+      abs.classList.toggle("on", on); abs.setAttribute("aria-pressed", on);
+      inp.disabled = on; inp.value = ""; inp.placeholder = on ? "Abs." : "–";
+      if (!on) inp.focus();
+    };
+  });
+  const firstEmpty = rows.map(r => r.querySelector(".ninput")).find(x => !x.disabled && !x.value);
+  if (firstEmpty && !matchMedia("(pointer:coarse)").matches) firstEmpty.focus();
+}
+
+
+/* ---------- Espace enseignant : liste des étudiants de la matière ---------- */
+// Seuls les étudiants de la matière apparaissent (ex. germanistes en allemand, hispanistes en espagnol)
+async function renderTeacherStudents(force){
+  const c = TCTX(), view = $("#view"), here = location.hash, years = subjectYears(c.subject);
+  const year = years.includes(state.tYear) ? state.tYear : years[0];
+  setAccent(year || "1");
+  if (c.admin) document.body.classList.add("admin-mode");
+  setTeacherBar(c, "Étudiants");
+  if (!year){ view.innerHTML = adminStrip(c) + `<div class="empty">Aucun planning pour cette matière.</div>`; bindAdminStrip(); return; }
+  if (!state.bookings[year]) view.innerHTML = '<div class="loading"><span class="spin"></span>Chargement…</div>';
+  try { await loadBookings(year, force); } catch(e){}
+  if (location.hash !== here) return;
+  const Y = CONFIG.YEARS[year], now = new Date(), qs = khollesFor(year);
+  const names = promoStudents(Y.promo).filter(n => inRoster(year, n));
+  const curDefault = (qs.find(q => !khollePast(q, now)) || qs[qs.length - 1] || {}).n;
+  let qn = state.tQ[year] || curDefault; if (!qs.some(q => q.n === qn)) qn = curDefault; state.tQ[year] = qn;
+  const q = qs.find(x => x.n === qn), idx = qs.indexOf(q);
+  const book = {}; allBookings(year).filter(b => Number(b.q) === qn).forEach(b => book[b.student] = b);
+  const nIn = names.filter(n => book[n]).length;
+  let html = adminStrip(c) + yearTabs(years, year) + `
+    <div class="alert info">${ICON.users}<span><b>${plural(names.length, "# étudiant", "# étudiants")}</b> en ${esc(subjectMeta(c.subject).label.toLowerCase())} · ${esc(Y.label)}${rosterOf(year) ? " (liste de la matière)" : " (toute la classe)"}.</span></div>`;
+  if (q) html += `
+    <div class="qnav">
+      <button class="iconbtn2" id="qPrev" ${idx ? "" : "disabled"} aria-label="Khôlle précédente">${ICON.chev}</button>
+      <span><b>Khôlle ${q.n}</b><br><small>${esc(fmtDates(q.days.map(x => x.date)))}</small></span>
+      <button class="iconbtn2" id="qNext" ${idx < qs.length - 1 ? "" : "disabled"} aria-label="Khôlle suivante">${ICON.chev}</button>
+    </div>
+    <div class="stats"><span><b>${nIn}/${names.length}</b>inscrits</span><span><b class="${names.length - nIn ? "err" : "ok"}">${names.length - nIn}</b>sans inscription</span><span><b>${q.slots.filter(s => !cancelOf(s)).reduce((a, s) => a + freeSeats(s), 0)}</b>places libres</span></div>`;
+  html += `<div class="group">${names.map(n => { const b = book[n], s = b && SLOT_INDEX[b.slotId];
+    return `<div class="trow"><span>${esc(n)}</span>${q ? (s ? `<small class="st ok">${esc(fmtShort(s.date))} · ${esc(s.label)}${s.examiner ? " · " + esc(s.examiner) : ""}</small>` : `<small class="st warn">Pas inscrit${genderOf(n, Y.promo) === "F" ? "e" : ""}</small>`) : ""}</div>`; }).join("") || '<div class="trow"><span class="muted">Aucun étudiant.</span></div>'}</div>`;
+  view.innerHTML = html;
+  bindAdminStrip();
+  $$("[data-y]").forEach(b => b.onclick = () => { state.tYear = b.dataset.y; renderTeacherStudents(); });
+  const pv = $("#qPrev"), nx = $("#qNext");
+  if (pv) pv.onclick = () => { state.tQ[year] = qs[idx - 1].n; renderTeacherStudents(); };
+  if (nx) nx.onclick = () => { state.tQ[year] = qs[idx + 1].n; renderTeacherStudents(); };
+}
+
+
+/* ---------- Création de son code personnel (depuis le code de matière) ---------- */
+async function renderClaimCode(){
+  const c = TCTX(), view = $("#view");
+  setTeacherBar(c, "Mon code personnel");
+  if (!c.legacy){ location.replace("#/prof"); return; }
+  view.innerHTML = '<div class="loading"><span class="spin"></span>Chargement…</div>';
+  let r; try { r = await API.post({ action: "claimList", token: c.token }); } catch(e){ r = { ok: false, error: "Connexion impossible." }; }
+  if (r.auth) return teacherExpired();
+  if (!r.ok){ view.innerHTML = errBox(esc(r.error || "Erreur.")); return; }
+  if (!r.names.length){ view.innerHTML = `<div class="empty">Tous les khôlleurs de la matière ont déjà leur code personnel.<br><small>Code oublié ? Demandez à l'administrateur.</small></div>`; return; }
+  view.innerHTML = `
+    <div class="alert info">${ICON.key}<span>Créez votre <b>code personnel</b> : vos actions seront enregistrées à votre nom, et vous retrouverez directement vos séances et vos notes.</span></div>
+    <form id="claimForm" class="panel" style="margin-top:14px">
+      <label class="lbl" for="who">Vous êtes</label>
+      ${nameSelect(r.names, "Sélectionnez votre nom…")}
+      <label class="lbl" for="n1">Choisissez votre code (6 caractères au moins)</label>
+      <input class="field" id="n1" type="password" autocomplete="new-password" minlength="6" required>
+      <label class="lbl" for="n2">Confirmez le code</label>
+      <input class="field" id="n2" type="password" autocomplete="new-password" minlength="6" required>
+      <div class="msg" id="msg"></div>
+      <div class="actions"><button class="btn primary" type="submit" id="go">Créer mon code</button></div>
+    </form>
+    <p class="hint" style="margin-top:12px">Seuls les noms qui n'ont pas encore de code sont proposés. Ensuite, connectez-vous avec ce code, plus avec celui de la matière.</p>`;
+  $("#claimForm").onsubmit = async (e) => {
+    e.preventDefault();
+    const name = $("#who").value, a = $("#n1").value, b = $("#n2").value, btn = $("#go"), msg = (m) => { $("#msg").innerHTML = errBox(esc(m)); };
+    if (!name) return msg("Choisissez votre nom.");
+    if (a.length < 6) return msg("Le code doit compter au moins 6 caractères.");
+    if (a !== b) return msg("Les deux codes sont différents.");
+    btn.disabled = true; btn.textContent = "Création…";
+    let res; try { res = await API.post({ action: "claimTeacherCode", token: c.token, name, code: a }); } catch(err){ res = { ok: false, error: "Connexion impossible." }; }
+    if (res.auth) return teacherExpired();
+    if (!res.ok){ btn.disabled = false; btn.textContent = "Créer mon code"; return msg(res.error || "Erreur."); }
+    AUTH.teacher = Object.assign({ token: res.token }, res.profile);
+    try { sessionStorage.removeItem("khollapp-tsub"); } catch(err){}
+    state.tEx = null; state.journal = null; state.grades = null;
+    toast("Code personnel créé. Bienvenue " + name + " !");
+    location.hash = "#/prof";
+  };
+}
+
 /* ---------- Feuilles d'action ---------- */
 let lastFocus = null;
 function openSheet(html){
@@ -2761,13 +3164,20 @@ function openMine(s){
       ? `<div class="alert warn" style="margin-top:14px">${ICON.warn}<span><b>Moins d'une heure avant la khôlle.</b> La place ne peut plus être libérée dans Kholl'app : prévenez directement ${esc(exName(s.year, s.examiner))}.</span></div>`
       : `<div class="divider"></div>
         <label class="check"><input type="checkbox" id="me"> <span>Je ne pourrai pas venir : je libère ma place.</span></label>
-        <p class="hint" style="margin-top:-6px">Possible jusqu'à 1 h avant. Les étudiants de cette séance et ${esc(exName(s.year, s.examiner))} sont prévenus.</p>
+        <p class="hint" style="margin-top:-6px">Possible jusqu'à 1 h avant. ${esc(exName(s.year, s.examiner))} et les étudiants de votre classe qui ont activé les alertes sont prévenus.</p>
         <div class="msg" id="msg"></div>
-        <div class="actions"><button class="btn outline danger" id="free" disabled>Je me déclare ${acc("absent", g)}</button></div>`}
+        <div class="actions"><button class="btn outline danger" id="free" disabled>Je me déclare ${acc("absent", g)}</button></div>
+        <div class="divider"></div>
+        ${mySwap(s.year, s.q, me.name)
+          ? `<div class="alert swapc">${ICON.swap}<span><b>Demande d'échange en cours</b><br>${plural(mySwap(s.year, s.q, me.name).wants.length, "# créneau proposé", "# créneaux proposés")}. Vous gardez votre place tant que personne n'a accepté.</span></div>
+             <div class="actions"><button class="btn outline" id="swapEdit">Modifier la demande</button><button class="btn ghost" id="swapDel">Retirer la demande</button></div>`
+          : `<div class="actions"><button class="btn outline" id="swapAsk">${ICON.swap} Proposer un échange de créneau</button></div>`}`}
     <div class="actions"><button class="btn ghost" id="close">Fermer</button></div>`);
   $("#close").onclick = closeSheet;
   const box = $("#me"), free = $("#free");
   if (box){ box.onchange = () => { free.disabled = !box.checked; }; free.onclick = () => submit(free, "Enregistrement…", payloadOf(s, { action: "absent" }), "Absence enregistrée : votre place est libérée."); }
+  const sa = $("#swapAsk") || $("#swapEdit"); if (sa) sa.onclick = () => openSwapRequest(s);
+  const sd = $("#swapDel"); if (sd) sd.onclick = () => swapCall(sd, "Retrait…", { action: "swapCancel", year: s.year, q: s.q }, "Demande d'échange retirée.");
   bindCal(s, me.name);
 }
 
@@ -2775,7 +3185,7 @@ function openMine(s){
 const APP_URL = location.origin + location.pathname;
 const utc = (d) => d.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
 function calEvent(s, student){
-  const end = new Date(s.startsAt.getTime() + CONFIG.SLOT_MINUTES * 60000);
+  const end = new Date(s.startsAt.getTime() + s.dur * 60000);
   return {
     start: s.startsAt, end,
     title: `Khôlle ${deLabel(CONFIG.YEARS[s.year].subjectLabel)} – Khôlle ${s.q}`,
@@ -2847,6 +3257,7 @@ function teacherLoginForm(){
     let r; try { r = await API.post({ action: "teacherLogin", code }); } catch(err){ r = { ok: false, error: "Connexion impossible." }; }
     if (!r.ok){ $("#msg").innerHTML = errBox(esc(r.error || "Accès refusé.")); btn.disabled = false; btn.textContent = "Entrer"; return; }
     AUTH.teacher = Object.assign({ token: r.token }, r.profile);
+    try { sessionStorage.removeItem("khollapp-tsub"); } catch(e){}
     setAct(""); state.journal = null; state.tYear = null; state.tEx = null;
     route();
   };
@@ -2863,11 +3274,22 @@ function renderProfRoute(sub, force){
   if (sub === "calendrier") return renderCalendar();
   if (sub === "code") return renderTeacherCode();
   if (sub === "documents") return renderTeacherDocs(force);
+  if (sub === "notes") return renderNotes(parts()[2], force);
+  if (sub === "etudiants") return renderTeacherStudents(force);
+  if (sub === "moncode") return renderClaimCode();
   return renderProf(force);
 }
-const adminStrip = (c) => c.admin ? `<div class="adminstrip">${ICON.gear}<span>Mode administrateur · ${esc(subjectMeta(c.subject).label)}</span><a href="#/gestion" id="quitAct">Quitter</a></div>` : "";
+const adminStrip = (c) => c.admin ? `<div class="adminstrip">${ICON.gear}<span>Mode administrateur · ${esc(subjectMeta(c.subject).label)}</span><a href="#/gestion" id="quitAct">Quitter</a></div>`
+  : c.subjects && c.subjects.length > 1 ? `<div class="chips subjsw">${c.subjects.map(k => { const m = subjectMeta(k); return `<button class="chip${k === c.subject ? " on" : ""}" data-tsub="${esc(k)}" type="button">${esc((m.emoji ? m.emoji + " " : "") + m.label)}</button>`; }).join("")}</div>` : "";
 const yearTabs = (years, cur, attr = "data-y") => years.length > 1 ? `<div class="tabs" role="tablist">${years.map(y => `<button role="tab" aria-selected="${y===cur}" class="tab${y===cur?" on":""}" ${attr}="${y}">${esc(CONFIG.YEARS[y].label)}</button>`).join("")}</div>` : "";
-function bindAdminStrip(){ const q = $("#quitAct"); if (q) q.onclick = () => setAct(""); }
+function bindAdminStrip(){
+  const q = $("#quitAct"); if (q) q.onclick = () => setAct("");
+  $$("[data-tsub]").forEach(b => b.onclick = () => {
+    try { sessionStorage.setItem("khollapp-tsub", b.dataset.tsub); } catch(e){}
+    state.tYear = null; state.journal = null; state.archive = null; state.grades = null; state.tdocs = null; state.tQ = {};
+    route();
+  });
+}
 function setTeacherBar(c, title){
   setBar({ title, sub: (c.admin ? "Administrateur" : c.name || "Responsable") + " · " + subjectMeta(c.subject).label, back: true, refresh: true });
 }
@@ -2946,6 +3368,8 @@ function profActions(c){
     <div class="agrid">
       <a class="acell" href="#/prof/seances">${ICON.sessions}<b>${c.isResp ? "Séances" : "Mes séances"}</b><small>Ajouter, modifier, retirer</small></a>
       <a class="acell" href="#/prof/annulations">${ICON.ban}<b>Annuler une séance</b><small>${nCancel ? plural(nCancel, "# annulée à venir", "# annulées à venir") : "Aucune en cours"}</small></a>
+      <a class="acell" href="#/prof/notes">${ICON.pen}<b>Notes</b><small id="noteCount">${(() => { const n = toGradeCount(c); return n ? `<span class="newpill" style="margin:0">${plural(n, "# séance à noter", "# séances à noter")}</span>` : "Saisir et consulter"; })()}</small></a>
+      <a class="acell" href="#/prof/etudiants">${ICON.users}<b>Étudiants</b><small>Liste et inscriptions</small></a>
       <a class="acell" href="#/prof/documents">${ICON.upload}<b>Documents</b><small>Déposer pour les étudiants</small></a>
       <a class="acell" href="#/prof/journal">${ICON.list}<b>Journal</b><small>Inscriptions et modifications</small></a>
       ${c.isResp ? `<a class="acell" href="#/prof/calendrier">${ICON.cal}<b>Calendrier des khôlles</b><small>Dates de chaque khôlle</small></a>` : ""}
@@ -2959,23 +3383,25 @@ function profActions(c){
       <a class="xrow" href="${exportUrl("cancels")}">${ICON.list}<span><b>Annulations</b><br><small>Séances annulées</small></span></a>
     </div>
     <div class="foot">
-      ${c.admin || c.legacy ? "" : `<a class="linkbtn" href="#/prof/code">${ICON.key} Changer mon code</a>`}
+      ${c.admin ? "" : c.legacy ? `<a class="linkbtn" href="#/prof/moncode">${ICON.key} Créer mon code personnel</a>` : `<a class="linkbtn" href="#/prof/code">${ICON.key} Changer mon code</a>`}
       ${c.admin ? `<a class="linkbtn" href="#/gestion" id="quitAct2">${ICON.out} Quitter la matière</a>` : `<button class="linkbtn" id="logout" style="border:0;background:none;cursor:pointer">${ICON.out} Se déconnecter</button>`}
     </div>`;
 }
 function bindProfActions(c){
+  bindAdminStrip();
+  loadGrades(c).then(() => { const el = $("#noteCount"), n = toGradeCount(c); if (el) el.innerHTML = n ? `<span class="newpill" style="margin:0">${plural(n, "# séance à noter", "# séances à noter")}</span>` : "Saisir et consulter"; }).catch(() => {});
   const pa = $("#profAlerts"); if (pa) pa.onclick = openTeacherAlerts;
   const lo = $("#logout"); if (lo) lo.onclick = () => { AUTH.teacher = null; state.journal = null; state.archive = null; location.hash = "#/"; toast("Déconnecté."); };
   const q2 = $("#quitAct2"); if (q2) q2.onclick = () => setAct("");
 }
-const exportUrl = (what) => { const c = TCTX(); return CONFIG.API_URL + "?action=export&what=" + what + "&token=" + encodeURIComponent(c ? c.token : "") + (c && c.admin ? "&subject=" + encodeURIComponent(c.subject) : ""); };
+const exportUrl = (what) => { const c = TCTX(); return CONFIG.API_URL + "?action=export&what=" + what + "&token=" + encodeURIComponent(c ? c.token : "") +  (c ? "&subject=" + encodeURIComponent(c.subject) : ""); };
 
 // Un créneau vu par l'enseignant : inscrits, inscrire ou désinscrire un étudiant
 function openTeacherSlot(s){
   const t = takers(s), st = slotStatus(s), cx = cancelOf(s), Y = CONFIG.YEARS[s.year];
   const canChange = st !== "past" && !cx;
   const inKholle = new Set(allBookings(s.year).filter(b => Number(b.q) === s.q).map(b => b.student));
-  const candidates = promoStudents(Y.promo).filter(n => !inKholle.has(n));
+  const candidates = promoStudents(Y.promo).filter(n => !inKholle.has(n) && inRoster(s.year, n));
   openSheet(`
     <h4 id="sheetTitle">Créneau</h4>
     ${slotMeta(s)}
@@ -2987,6 +3413,7 @@ function openTeacherSlot(s){
       ${nameSelect(candidates, "Choisir un étudiant…")}
       <p class="hint">Inscription immédiate, même avant l'ouverture des réservations. L'opération est notée au journal.</p>` : ""}
     <div class="msg" id="msg"></div>
+    ${st === "past" && t.length && !cx ? `<div class="actions"><a class="btn primary" href="#/prof/notes/${encodeURIComponent(s.sid)}">${ICON.pen} ${canGrade(TCTX(), s.examiner) ? "Saisir les notes" : "Voir les notes"}</a></div>` : ""}
     <div class="actions">
       ${canChange && freeSeats(s) ? `<button class="btn primary" id="add" disabled>Inscrire</button>` : ""}
       <button class="btn ghost" id="close">Fermer</button>
@@ -3008,7 +3435,7 @@ function openTeacherSlot(s){
 /* ---------- Séances (ajouter, modifier, retirer) ---------- */
 const WD = ["", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
 function sessionText(s){
-  const end = toMin(s.start) + (Number(s.count) - 1) * CONFIG.STEP_MINUTES + CONFIG.SLOT_MINUTES;
+  const d0 = Number(s.dur) || CONFIG.SLOT_MINUTES, end = toMin(s.start) + (Number(s.count) - 1) * (Number(s.dur) ? (Number(s.step) || d0) : CONFIG.STEP_MINUTES) + d0;
   const hours = fmtTime(toMin(s.start)) + " – " + fmtTime(end);
   return s.date
     ? `<b>${esc(fmtDay(parseISO(s.date)))} · ${hours}</b><br><span>${plural(s.count, "# créneau", "# créneaux")} · ${plural(Number(s.cap) || 1, "# place", "# places")} · salle ${esc(s.room)} · Khôlle ${s.q}</span>`
@@ -3127,13 +3554,23 @@ function openEditSession(c, year, s){
     <div class="meta">${sessionText(s)}</div>
     <div class="two"><div><label class="lbl" for="sCount">Créneaux</label>${stepper("sCount", s.count, 1, 12)}</div>
     <div><label class="lbl" for="sCap">Places par créneau</label>${stepper("sCap", Number(s.cap) || 1, 1, 6)}</div></div>
-    <p class="hint">Pour changer le jour, l'heure ou la salle : retirez la séance puis ajoutez-en une nouvelle.</p>
+    <label class="lbl" for="sRoom">Salle</label>
+    <input class="field" id="sRoom" type="text" value="${esc(s.room)}" maxlength="20" autocomplete="off">
+    <p class="hint">Un changement de salle s'applique aussi aux étudiants déjà inscrits. Pour changer le jour ou l'heure : retirez la séance puis ajoutez-en une nouvelle.</p>
     <div class="msg" id="msg"></div>
     <div class="actions"><button class="btn primary" id="go">Enregistrer</button><button class="btn ghost" id="close">Annuler</button></div>`);
   $("#close").onclick = closeSheet; bindSteppers();
   $("#go").onclick = async () => {
     const b = $("#go"); b.disabled = true;
-    const r = await sessionCall({ action: "updateSession", year, id: s.id, count: Number($("#sCount").value), cap: Number($("#sCap").value) }, "Séance modifiée.");
+    const room = $("#sRoom").value.trim().toUpperCase(), count = Number($("#sCount").value), cap = Number($("#sCap").value);
+    if (!room){ $("#msg").innerHTML = errBox("Indiquez la salle."); b.disabled = false; return; }
+    if (room !== String(s.room).toUpperCase()){
+      if (count !== Number(s.count) || cap !== (Number(s.cap) || 1)){ $("#msg").innerHTML = errBox("Changez d'abord la salle seule, puis le nombre de créneaux ou de places."); b.disabled = false; return; }
+      const r0 = await sessionCall({ action: "updateSession", year, id: s.id, count, cap, room }, "Salle modifiée.");
+      if (r0){ await loadBookings(year, true).catch(() => {}); renderSeances(); } else b.disabled = false;
+      return;
+    }
+    const r = await sessionCall({ action: "updateSession", year, id: s.id, count, cap }, "Séance modifiée.");
     if (r) renderSeances(); else b.disabled = false;
   };
 }
