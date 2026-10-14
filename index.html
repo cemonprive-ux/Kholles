@@ -613,6 +613,15 @@ a.btn{text-decoration:none;justify-content:center}
 .gtable td.abs{color:var(--err);font-weight:700}
 .gtable td.avg{font-weight:700;color:var(--accent)}
 .trow small.st{flex:none;text-align:right;font-size:12.5px;max-width:58%}
+/* À réviser */
+.ghead .topic{flex:1;min-width:0;font-size:13px;line-height:1.35;padding:4px 9px;border-radius:9px;background:rgba(255,255,255,.18)}
+.ghead .topic b{font-weight:700}
+.topicbtn{display:inline-flex;align-items:center;gap:5px;min-height:32px;padding:0 9px;border:1.5px solid rgba(255,255,255,.7);border-radius:9px;background:transparent;color:#fff;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;flex:none}
+.topicbtn svg{width:15px;height:15px}
+.ghead .topicbtn + .room, .ghead .topic + .room{margin-left:0}
+.ghead .who + .topicbtn{margin-left:auto}
+.topicline{margin:-4px 0 12px;padding:9px 12px;border-radius:12px;background:var(--accent-soft);color:var(--ink);font-size:14px}
+.nk-topic{display:block;margin-top:6px;padding:8px 12px;border-radius:12px;background:rgba(255,255,255,.18);font-size:14px;line-height:1.35}
 </style>
 </head>
 <body>
@@ -645,7 +654,7 @@ a.btn{text-decoration:none;justify-content:center}
    les matières et les listes d'étudiants sont gérés dans l'appli (espace Gestion,
    espace enseignant) et enregistrés sur le serveur : ce bloc ne sert qu'à la mise en service.
    ===================================================================== */
-const APP_VERSION = "2026.10.14-11";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.14-12";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   API_URL: "https://khollapp.cemonprive.workers.dev/",
@@ -987,7 +996,7 @@ const API = {
     const check = win.map(k => k.n + ":" + k.slots[0].first).join(",");
     const j = await this.get({ action: "list", year, check });
     if (!j.ok) throw new Error(j.error || "Erreur serveur");
-    return { bookings: j.bookings, cancels: j.cancels || [], opened: j.opened || {}, swaps: j.swaps || [] };
+    return { bookings: j.bookings, cancels: j.cancels || [], opened: j.opened || {}, swaps: j.swaps || [], topics: j.topics || [] };
   },
   post(p){ p.device = DEVICE; return postJSON(p); }
 };
@@ -1222,8 +1231,9 @@ function applyState(year, r){
   const cmap = {}; (r.cancels || []).forEach(c => cmap[c.sid] = c);
   state.bookings[year] = map; state.cancels[year] = cmap; state.loaded[year] = Date.now();
   if (Array.isArray(r.swaps)){ state.swaps = state.swaps || {}; state.swaps[year] = r.swaps; }
+  if (Array.isArray(r.topics)){ const tm = {}; r.topics.forEach(t => tm[t.sid] = t.text); state.topics = state.topics || {}; state.topics[year] = tm; }
   if (r.opened) state.opened[year] = Object.assign(state.opened[year] || {}, r.opened);
-  try { localStorage.setItem("khollapp-cache2-" + year, JSON.stringify({ bookings: r.bookings || [], cancels: r.cancels || [], swaps: r.swaps || [] })); } catch(e){}
+  try { localStorage.setItem("khollapp-cache2-" + year, JSON.stringify({ bookings: r.bookings || [], cancels: r.cancels || [], swaps: r.swaps || [], topics: r.topics || [] })); } catch(e){}
 }
 Object.keys(CONFIG.YEARS).forEach(y => {
   try { const c = JSON.parse(localStorage.getItem("khollapp-cache2-" + y) || "null"); if (c){ applyState(y, c); state.loaded[y] = 0; } } catch(e){}
@@ -1467,6 +1477,7 @@ async function renderMe(force){
         <span class="nk-subj">${esc(CONFIG.YEARS[next.year].subjectLabel)} · Khôlle ${next.q}</span>
         <span class="nk-date">${esc(fmtDay(next.date))}</span>
         <span class="nk-time">${esc(next.label)}</span>
+        ${topicOf(next.year, next.sid) ? `<span class="nk-topic"><b>À réviser :</b> ${esc(topicOf(next.year, next.sid))}</span>` : ""}
         <span class="nk-grid"><span><small>${/^Mme/.test(next.examiner) ? "Khôlleuse" : "Khôlleur"}</small>${esc(next.examiner)}</span><span><small>Salle</small>${esc(next.room)}</span></span>
         <span class="nk-more">Voir mon inscription ${ICON.chev}</span>
       </a>` : `<div class="empty">Aucune khôlle à venir.<br><small>Inscrivez-vous depuis vos matières, ci-dessous.</small></div>`}
@@ -1630,7 +1641,7 @@ function renderQuinzaine(year, n){
     day.slots.forEach(s => { (groups[s.examiner + "|" + s.room] ||= []).push(s); });
     Object.entries(groups).forEach(([g, list]) => {
       const [ex, room] = g.split("|"), cx = cancelOf(list[0]);
-      html += `<div class="group${cx ? " cancelled" : ""}"><div class="ghead"><span class="who">${esc(exName(year, ex))}</span>${cx ? '<span class="cbadge">Annulée</span>' : ""}<span class="room">${esc(room)}</span></div>`;
+      html += `<div class="group${cx ? " cancelled" : ""}"><div class="ghead"><span class="who">${esc(exName(year, ex))}</span>${cx ? '<span class="cbadge">Annulée</span>' : topicHTML(year, list[0].sid)}<span class="room">${esc(room)}</span></div>`;
       if (cx) html += `<div class="cnote">Séance annulée par l'enseignant${cx.reason ? " · " + esc(cx.reason) : ""}.</div>`;
       list.forEach(s => { html += slotRow(s, now, viewer); });
       html += `</div>`;
@@ -3082,6 +3093,29 @@ async function renderClaimCode(){
   };
 }
 
+
+/* ---------- « À réviser » : saisie par le khôlleur ---------- */
+function openTopic(c, year, sid, q){
+  const [, iso, room] = sid.split("|"), cur = topicOf(year, sid);
+  openSheet(`
+    <h4 id="sheetTitle">${ICON.pen} À réviser</h4>
+    <p class="meta"><b>${esc(CONFIG.YEARS[year].subjectLabel)} · Khôlle ${q} · ${esc(CONFIG.YEARS[year].short)}</b><br>${esc(fmtDay(parseISO(iso)))} · salle ${esc(room)}</p>
+    <label class="lbl" for="tTxt">Programme de la séance</label>
+    <textarea class="field area" id="tTxt" maxlength="200" style="min-height:110px" placeholder="Ex. : Chapitre 4 : le marché du travail">${esc(cur)}</textarea>
+    <p class="hint">Affiché aux étudiants à droite de votre nom, pour cette séance uniquement. Laissez vide pour effacer.</p>
+    <div class="msg" id="msg"></div>
+    <div class="actions"><button class="btn primary" id="go">Enregistrer</button><button class="btn ghost" id="close">Annuler</button></div>`);
+  $("#close").onclick = closeSheet;
+  $("#go").onclick = async () => {
+    const b = $("#go"), txt = $("#tTxt").value.trim(); b.disabled = true;
+    let r; try { r = await tCall({ action: "setTopic", year, q, sid, text: txt }); } catch(e){ r = { ok: false, error: "Connexion impossible." }; }
+    if (r.auth){ closeSheet(); return teacherExpired(); }
+    if (!r.ok){ $("#msg").innerHTML = errBox(esc(r.error || "Erreur.")); b.disabled = false; return; }
+    if (Array.isArray(r.bookings)) applyState(year, r);
+    closeSheet(); toast(txt ? "Programme enregistré." : "Programme effacé."); state.journal = null; renderProf();
+  };
+}
+
 /* ---------- Feuilles d'action ---------- */
 let lastFocus = null;
 function openSheet(html){
@@ -3098,7 +3132,11 @@ function closeSheet(){
 $("#scrim").addEventListener("click", closeSheet);
 $("#sheet").addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
 
-const slotMeta = (s) => `<p class="meta"><b>${esc(CONFIG.YEARS[s.year].subjectLabel)} · Khôlle ${s.q}</b><br>${fmtDay(s.date)} · ${s.label}<br>${esc(exName(s.year, s.examiner))} · salle <b>${esc(s.room)}</b>${s.cap > 1 ? `<br>${plural(s.cap, "# place", "# places")} · ${plural(takers(s).length, "# inscrit", "# inscrits")}` : ""}</p>`;
+// « À réviser » : programme indiqué par le khôlleur, séance par séance (sid = année|date|salle)
+const topicOf = (year, sid) => ((state.topics || {})[year] || {})[sid] || "";
+const topicHTML = (year, sid) => { const t = topicOf(year, sid); return t ? `<span class="topic"><b>À réviser :</b> ${esc(t)}</span>` : ""; };
+const canTopic = (c, year, examiner) => !!c && ((CONFIG.YEARS[year] || {}).topicsFor || []).includes(examiner) && (c.admin || c.name === examiner);
+const slotMeta = (s) => `<p class="meta"><b>${esc(CONFIG.YEARS[s.year].subjectLabel)} · Khôlle ${s.q}</b><br>${fmtDay(s.date)} · ${s.label}<br>${esc(exName(s.year, s.examiner))} · salle <b>${esc(s.room)}</b>${s.cap > 1 ? `<br>${plural(s.cap, "# place", "# places")} · ${plural(takers(s).length, "# inscrit", "# inscrits")}` : ""}</p>${topicOf(s.year, s.sid) ? `<p class="topicline"><b>À réviser :</b> ${esc(topicOf(s.year, s.sid))}</p>` : ""}`;
 const nameSelect = (list, placeholder, id = "who") => `<div class="selectwrap"><select id="${id}"><option value="">${placeholder}</option>${list.map(x => `<option>${esc(x)}</option>`).join("")}</select>${ICON.down}</div>`;
 const payloadOf = (s, extra) => Object.assign({ year: s.year, q: s.q, slotId: s.id, app: location.origin + location.pathname }, extra);
 const ownBooking = (s, name) => allBookings(s.year).find(x => Number(x.q) === s.q && x.student === name && x.slotId !== s.id) || null;
@@ -3341,7 +3379,8 @@ async function renderProf(force){
       ds.forEach(s => { (groups[s.sid] ||= []).push(s); });
       Object.values(groups).forEach(list => {
         const cx = cancelOf(list[0]);
-        html += `<div class="group${cx ? " cancelled" : ""}"><div class="ghead"><span class="who">${esc(list[0].examiner)}</span>${cx ? '<span class="cbadge">Annulée</span>' : ""}<span class="room">${esc(list[0].room)}</span></div>`;
+        const ed = !cx && canTopic(c, year, list[0].examiner);
+        html += `<div class="group${cx ? " cancelled" : ""}"><div class="ghead"><span class="who">${esc(list[0].examiner)}</span>${cx ? '<span class="cbadge">Annulée</span>' : topicHTML(year, list[0].sid)}${ed ? `<button class="topicbtn" type="button" data-topic="${esc(list[0].sid)}" data-q="${list[0].q}" aria-label="À réviser">${ICON.pen}${topicOf(year, list[0].sid) ? "" : "<span>À réviser</span>"}</button>` : ""}<span class="room">${esc(list[0].room)}</span></div>`;
         list.forEach(s => {
           const t = takers(s), st = slotStatus(s, now);
           html += `<button class="slot tslot${t.length ? " taken" : " free"}${st === "past" ? " locked" : ""}" data-id="${esc(s.id)}"><span class="time">${s.label}</span><span class="state"><span>${t.length ? t.map(b => esc(b.student)).join(" · ") : cx ? "—" : "Libre"}</span>${s.cap > 1 ? `<span class="capn">${t.length}/${s.cap}</span>` : ""}</span></button>`;
@@ -3359,6 +3398,7 @@ async function renderProf(force){
   if (pv) pv.onclick = () => { const i = qs.findIndex(x => x.n === qn); state.tQ[year] = qs[i - 1].n; renderProf(); };
   if (nx) nx.onclick = () => { const i = qs.findIndex(x => x.n === qn); state.tQ[year] = qs[i + 1].n; renderProf(); };
   $$(".tslot").forEach(el => el.onclick = () => { const s = SLOT_INDEX[el.dataset.id]; if (s) openTeacherSlot(s); });
+  $$("[data-topic]").forEach(b => b.onclick = () => openTopic(c, year, b.dataset.topic, Number(b.dataset.q)));
   bindProfActions(c);
 }
 function profActions(c){
