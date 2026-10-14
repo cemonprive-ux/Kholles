@@ -622,6 +622,9 @@ a.btn{text-decoration:none;justify-content:center}
 .ghead .who + .topicbtn{margin-left:auto}
 .topicline{margin:-4px 0 12px;padding:9px 12px;border-radius:12px;background:var(--accent-soft);color:var(--ink);font-size:14px}
 .nk-topic{display:block;margin-top:6px;padding:8px 12px;border-radius:12px;background:rgba(255,255,255,.18);font-size:14px;line-height:1.35}
+.openbar{display:flex;align-items:center;gap:10px;margin:-2px 0 12px;padding:10px 12px;border-radius:14px;background:var(--warn-soft);border:1px solid var(--warn-line);color:var(--warn);font-size:13.5px;font-weight:700}
+.openbar>span{flex:1;display:flex;align-items:center;gap:6px}.openbar svg{width:16px;height:16px;flex:none}
+.openbar .sbtn{min-height:36px;min-width:0;padding:0 12px;border:1.5px solid var(--warn);color:var(--warn);background:var(--surface)}
 </style>
 </head>
 <body>
@@ -654,7 +657,7 @@ a.btn{text-decoration:none;justify-content:center}
    les matières et les listes d'étudiants sont gérés dans l'appli (espace Gestion,
    espace enseignant) et enregistrés sur le serveur : ce bloc ne sert qu'à la mise en service.
    ===================================================================== */
-const APP_VERSION = "2026.10.14-14";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.14-15";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   API_URL: "https://khollapp.cemonprive.workers.dev/",
@@ -880,8 +883,8 @@ function buildKholles(year){
     const days = dates.map(d => ({ date: d, slots: slotsForDate(year, d, n, iso(mondayOf(d)) === wA ? "A" : "B", explicit) })).filter(x => x.slots.length);
     // Toute la khôlle ouvre en même temps : N mois avant sa première date.
     const f = days.length ? days[0].date : null;
-    const rule = openRule(year);
-    const opensAt = f ? (rule.now ? new Date(2000, 0, 1) : rule.days ? addDays(f, -rule.days) : addMonths(f, -CONFIG.BOOKING_WINDOW_MONTHS)) : null;
+    const rule = openRule(year), early = Y.openEarly && Y.openEarly[String(n)];
+    const opensAt = f ? (rule.now || early ? new Date(2000, 0, 1) : rule.days ? addDays(f, -rule.days) : addMonths(f, -CONFIG.BOOKING_WINDOW_MONTHS)) : null;
     days.forEach(x => x.slots.forEach(s => { s.opensAt = opensAt; s.openHour = rule.hour; s.first = iso(f); SLOT_INDEX[s.id] = s; }));
     return { n, days, slots: days.flatMap(x => x.slots), dates };
   }).filter(q => q.slots.length);
@@ -3116,6 +3119,27 @@ function openTopic(c, year, sid, q){
   };
 }
 
+
+/* ---------- Ouverture anticipée des réservations (responsable, administrateur) ---------- */
+function openNowSheet(c, year, n){
+  const Y = CONFIG.YEARS[year], q = khollesFor(year).find(k => k.n === n);
+  openSheet(`
+    <h4 id="sheetTitle">Ouvrir les réservations maintenant ?</h4>
+    <p class="meta"><b>${esc(Y.subjectLabel)} · Khôlle ${n} · ${esc(Y.short)}</b><br>${esc(fmtDates(q.days.map(x => x.date)))}<br>Ouverture prévue : ${esc(openLabel(q.slots[0]))}</p>
+    <div class="alert info">${ICON.bell}<span>Les étudiants de la classe pourront réserver tout de suite. Ceux qui ont activé l'alerte « Ouverture des réservations » reçoivent une notification dans la minute.</span></div>
+    <div class="msg" id="msg"></div>
+    <div class="actions"><button class="btn primary" id="go">Ouvrir maintenant</button><button class="btn ghost" id="close">Annuler</button></div>`);
+  $("#close").onclick = closeSheet;
+  $("#go").onclick = async () => {
+    const b = $("#go"); b.disabled = true;
+    let r; try { r = await tCall({ action: "openNow", year, q: n }); } catch(e){ r = { ok: false, error: "Connexion impossible." }; }
+    if (r.auth){ closeSheet(); return teacherExpired(); }
+    if (!r.ok){ $("#msg").innerHTML = errBox(esc(r.error || "Erreur.")); b.disabled = false; return; }
+    if (r.cfg) applyServerConfig({ cfg: r.cfg });
+    closeSheet(); toast("Réservations ouvertes."); state.journal = null; renderProf();
+  };
+}
+
 /* ---------- Feuilles d'action ---------- */
 let lastFocus = null;
 function openSheet(html){
@@ -3370,6 +3394,8 @@ async function renderProf(force){
         <button class="iconbtn2" id="qNext" ${idx < qs.length - 1 ? "" : "disabled"} aria-label="Khôlle suivante">${ICON.chev}</button>
       </div>
       <div class="stats"><span><b>${used}/${seats}</b>inscrits</span><span><b class="ok">${seats - used}</b>${seats - used > 1 ? "places libres" : "place libre"}</span><span><b class="${nCx ? "err" : ""}">${nCx}</b>${nCx > 1 ? "annulées" : "annulée"}</span></div>`;
+    const qOpen = q.slots.some(s => slotStatus(s, now) === "open" || slotStatus(s, now) === "past");
+    if (c.isResp && !qOpen && !khollePast(q, now)) html += `<div class="openbar"><span>${ICON.lock} Réservations : ${esc(openShort(q.slots[0]))}</span><button class="sbtn" id="openNow" type="button">Ouvrir maintenant</button></div>`;
     q.days.forEach((day, i) => {
       const ds = day.slots.filter(sel);
       if (i) html += bandHTML(closedBetween(iso(q.days[i - 1].date), iso(day.date)));
@@ -3396,6 +3422,7 @@ async function renderProf(force){
   $$(".chip[data-ex]").forEach(b => b.onclick = () => { state.tEx = b.dataset.ex; renderProf(); });
   const pv = $("#qPrev"), nx = $("#qNext");
   if (pv) pv.onclick = () => { const i = qs.findIndex(x => x.n === qn); state.tQ[year] = qs[i - 1].n; renderProf(); };
+  const on = $("#openNow"); if (on) on.onclick = () => openNowSheet(c, year, qn);
   if (nx) nx.onclick = () => { const i = qs.findIndex(x => x.n === qn); state.tQ[year] = qs[i + 1].n; renderProf(); };
   $$(".tslot").forEach(el => el.onclick = () => { const s = SLOT_INDEX[el.dataset.id]; if (s) openTeacherSlot(s); });
   $$("[data-topic]").forEach(b => b.onclick = () => openTopic(c, year, b.dataset.topic, Number(b.dataset.q)));
