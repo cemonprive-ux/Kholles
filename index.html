@@ -406,7 +406,7 @@ details.vscript[open]>summary>svg:last-child{transform:rotate(180deg)}
 .band svg{width:18px;height:18px;flex:none}
 .band b{font-weight:700}
 .list .band,.plist .band{margin:2px 0}
-.lisere-wrap{margin:8px -4px 0;color:#CFCBDC}
+.lisere-wrap{margin:8px -4px 0;color:#B9B3CF}
 .lisere{display:block;width:100%;height:auto}
 @media (prefers-color-scheme: dark){.lisere-wrap{color:#3A4456}}
 .linkbtn.faint{color:var(--muted);font-size:13px;min-height:36px}
@@ -645,7 +645,7 @@ a.btn{text-decoration:none;justify-content:center}
    les matières et les listes d'étudiants sont gérés dans l'appli (espace Gestion,
    espace enseignant) et enregistrés sur le serveur : ce bloc ne sert qu'à la mise en service.
    ===================================================================== */
-const APP_VERSION = "2026.10.14-10";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.14-11";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   API_URL: "https://khollapp.cemonprive.workers.dev/",
@@ -1049,7 +1049,7 @@ Object.assign(ICON, {
   upload: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M4 15v3a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-3"/></svg>',
   sessions: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M12 13v5M9.5 15.5h5"/></svg>'
 });
-const LISERE = `<svg class="lisere" viewBox="30 50 1130 54" preserveAspectRatio="xMidYMax meet" aria-hidden="true"><path d="M35 98 H818 C835 94 845 90 855 91 C864 92 869 96 873 96 C880 90 887 86 894 86 C898 86 899 90 902 88 C906 84 910 86 915 89 C921 93 925 96 932 96 C946 96 955 97 962 99 C969 99 975 92 985 82 C995 72 1009 68 1022 68 C1035 68 1045 76 1055 86 C1064 95 1071 98 1080 98 C1090 96 1101 94 1115 94 C1131 94 1145 96 1155 99 M1022 68 V56" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const LISERE = `<svg class="lisere" viewBox="0 0 1200 140" preserveAspectRatio="xMidYMax meet" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path vector-effect="non-scaling-stroke" d="M4 128 H112 V116 L126 106 L140 116 V128 H150 V112 H176 V120 H190 V104 L206 98 H220 V64 L230 14 L240 64 V92 L251 82 L262 92 V64 L272 18 L282 64 V98 H294 L310 106 V118 H322 V128 H360 C410 128 432 112 468 110 C504 108 526 122 560 122 C598 122 640 72 688 55 Q694 53 700 55 C736 66 770 98 806 110 C834 118 856 112 884 104 C898 99 910 98 922 103 L932 98 L944 103 C962 110 978 104 996 100 C1016 96 1034 108 1060 118 C1092 126 1140 126 1196 126"/><path vector-effect="non-scaling-stroke" d="M694 54 V20"/><path vector-effect="non-scaling-stroke" d="M226 76 V88 M234 76 V88 M268 78 V90 M276 78 V90"/><circle vector-effect="non-scaling-stroke" cx="251" cy="104" r="5"/><path vector-effect="non-scaling-stroke" d="M245 128 V119 A6 6 0 0 1 257 119 V128"/><path vector-effect="non-scaling-stroke" d="M380 134 C520 130 700 128 860 132 C960 134 1060 136 1150 134"/></svg>`;
 
 /* ---------- Alertes : notifications des places libérées ---------- */
 const LATE_MSG = "Moins d'une heure avant la khôlle : la place ne peut plus être libérée dans Kholl'app. Prévenez directement votre khôlleur.";
