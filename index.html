@@ -637,6 +637,27 @@ a.btn{text-decoration:none;justify-content:center}
 #pvbar span{flex:1;min-width:0}
 #pvbar button{flex:none;min-height:36px;padding:0 14px;border:0;border-radius:10px;background:#fff;color:#12233D;font:inherit;font-weight:700;cursor:pointer}
 body.previewing #view{padding-bottom:84px}
+/* Tout mon planning */
+.fullplan{margin-top:12px;border:1px solid var(--line);border-radius:18px;background:var(--surface);box-shadow:var(--shadow);overflow:hidden}
+.fullplan>summary{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:14px 16px;font-weight:700;font-size:15.5px;cursor:pointer;list-style:none}
+.fullplan>summary::-webkit-details-marker{display:none}
+.fullplan>summary span{display:flex;align-items:center;gap:8px}
+.fullplan>summary svg{width:20px;height:20px;color:var(--accent);transition:transform .2s}
+.fullplan[open]>summary>svg{transform:rotate(180deg)}
+.fullplan>.tabs{margin:0 12px 12px}
+.fullplan>.plist,.fullplan>.pl-list,.fullplan>.empty{margin:0 12px 12px}
+.pl-list{display:grid;gap:12px}
+.pl-subj{border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.pl-h{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--surface-2);font-weight:700;font-size:14.5px}
+.pl-h small{color:var(--muted);font-size:12px}
+.pl-row{display:flex;align-items:center;gap:10px;padding:9px 12px;border-top:1px solid var(--line);text-decoration:none;color:inherit;font-size:13.5px;line-height:1.3}
+.pl-k{flex:none;width:34px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:12.5px}
+.pl-b{flex:1;min-width:0}.pl-b small{color:var(--muted)}
+.pl-s{flex:none;font-size:12px;font-weight:700;text-align:right;max-width:44%}
+.pl-s.ok{color:var(--ok)}.pl-s.ok svg{width:18px;height:18px}
+.pl-s.todo{color:#fff;background:var(--accent);padding:4px 9px;border-radius:999px}
+.pl-s.wait{color:var(--muted)}
+.pl-row.ok .pl-k{background:var(--ok-soft);color:var(--ok)}
 </style>
 </head>
 <body>
@@ -669,7 +690,7 @@ body.previewing #view{padding-bottom:84px}
    les matières et les listes d'étudiants sont gérés dans l'appli (espace Gestion,
    espace enseignant) et enregistrés sur le serveur : ce bloc ne sert qu'à la mise en service.
    ===================================================================== */
-const APP_VERSION = "2026.10.15-1";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.15-2";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   API_URL: "https://khollapp.cemonprive.workers.dev/",
@@ -1498,7 +1519,7 @@ async function renderMe(force){
         <span class="nk-grid"><span><small>${/^Mme/.test(next.examiner) ? "Khôlleuse" : "Khôlleur"}</small>${esc(next.examiner)}</span><span><small>Salle</small>${esc(next.room)}</span></span>
         <span class="nk-more">Voir mon inscription ${ICON.chev}</span>
       </a>` : `<div class="empty">Aucune khôlle à venir.<br><small>Inscrivez-vous depuis vos matières, ci-dessous.</small></div>`}
-      ${rest.length ? `<p class="kicker" style="margin-top:20px">Ensuite</p><div class="plist">${restHTML}</div>` : ""}
+      ${fullPlanHTML(me, years, restHTML, now)}
       <p class="kicker" style="margin-top:22px">Mes matières</p>
       <div class="sgrid">
         ${subjects.map(m => {
@@ -1519,6 +1540,7 @@ async function renderMe(force){
       ${alertsCardHTML()}
       ${footHTML(`<a class="linkbtn" href="#/moi/code">${ICON.key} Changer mon code</a><button class="linkbtn" id="logout" type="button" style="border:0;background:none;cursor:pointer">${ICON.out} Se déconnecter de ce téléphone</button><br>`)}`;
     const ac = $("#alertsCard"); if (ac) ac.onclick = openAlerts;
+    bindFullPlan(paint);
     $("#logout").onclick = () => studentLogout("Déconnecté.");
     paintResBadge();
     loadMyDocs().then(paintResBadge).catch(() => {});
@@ -2712,7 +2734,8 @@ async function renderTeacherDocs(force){
   let html = adminStrip(c) + `
     <div class="alert info">${ICON.info}<span>Les documents déposés ici apparaissent dans <b>Mes ressources</b> des étudiants des classes choisies.${r.filesEnabled ? "" : "<br><small>Dépôt de fichiers pas encore activé : déposez pour l'instant des liens (Google Drive, YouTube, site…).</small>"}</span></div>
     <button class="btn primary" id="addDoc" style="width:100%">${ICON.upload} Déposer un document</button>`;
-  if (!r.docs.length) html += `<div class="empty" style="margin-top:16px">Aucun document déposé pour le moment.</div>`;
+  html += builtinResHTML(c.subject);
+  if (!r.docs.length && !builtinResHTML(c.subject)) html += `<div class="empty" style="margin-top:16px">Aucun document déposé pour le moment.</div>`;
   DOC_NATURES.forEach(([k, label]) => {
     const l = r.docs.filter(d => d.nature === k);
     if (!l.length) return;
@@ -3200,6 +3223,47 @@ function previewBanner(){
   el.innerHTML = `<span>👁 Vue étudiant : <b>${esc(me.name)}</b> · consultation seule</span><button type="button" id="pvExit">Quitter</button>`;
   el.querySelector("#pvExit").onclick = exitPreview;
 }
+
+
+/* ---------- Ma page : planning complet (repliable), chronologique ou par matière ---------- */
+const PLAN_KEY = "khollapp-plan";
+const planPref = () => { try { return JSON.parse(localStorage.getItem(PLAN_KEY) || "{}"); } catch(e){ return {}; } };
+const setPlanPref = (o) => { try { localStorage.setItem(PLAN_KEY, JSON.stringify(Object.assign(planPref(), o))); } catch(e){} };
+function planBySubject(me, years, now){
+  return years.filter(y => inRoster(y, me.name)).sort((a, b) => CONFIG.YEARS[a].subjectLabel.localeCompare(CONFIG.YEARS[b].subjectLabel, "fr", { sensitivity: "base" })).map(y => {
+    const Y = CONFIG.YEARS[y], m = subjectMeta(subjectOfYear(y));
+    const qs = khollesFor(y).filter(q => !khollePast(q, now));
+    const mine = allBookings(y).filter(b => b.student === me.name);
+    const rows = qs.map(q => {
+      const b = mine.find(x => Number(x.q) === q.n), s = b && SLOT_INDEX[b.slotId];
+      const dates = esc(fmtDates(q.days.map(x => x.date)));
+      if (s) return `<a class="pl-row ok" href="#/${y}/k/${q.n}"><span class="pl-k">K${q.n}</span><span class="pl-b"><b>${esc(fmtDay(s.date))} · ${esc(s.label)}</b><br><small>${esc(s.examiner)} · salle ${esc(s.room)}</small></span><span class="pl-s ok">${ICON.check}</span></a>`;
+      const st = slotStatus(q.slots[0], now), open = q.slots.some(x => slotStatus(x, now) === "open");
+      const label = open ? "À réserver" : st === "notyet" ? openShort(q.slots[0]) : "—";
+      return `<a class="pl-row ${open ? "todo" : "wait"}" href="#/${y}/k/${q.n}"><span class="pl-k">K${q.n}</span><span class="pl-b"><b>${dates}</b><br><small>Pas encore ${acc("inscrit", me.gender)}</small></span><span class="pl-s ${open ? "todo" : "wait"}">${esc(label)}</span></a>`;
+    }).join("");
+    const nIn = qs.filter(q => mine.some(x => Number(x.q) === q.n)).length;
+    return `<div class="pl-subj"><div class="pl-h"><span>${esc(m.emoji || "")} ${esc(Y.subjectLabel)}</span><small>${nIn}/${qs.length} ${qs.length > 1 ? "inscriptions" : "inscription"}</small></div>${rows || `<div class="pl-row wait"><span class="pl-b"><small>Plus de khôlle à venir.</small></span></div>`}</div>`;
+  }).join("");
+}
+function fullPlanHTML(me, years, restHTML, now){
+  const pref = planPref(), tab = pref.tab || "chrono";
+  return `<details class="fullplan" id="fullPlan"${pref.open ? " open" : ""}>
+    <summary><span>${ICON.cal} Tout mon planning</span>${ICON.down}</summary>
+    <div class="tabs" role="tablist"><button class="tab${tab === "chrono" ? " on" : ""}" data-pt="chrono" type="button">Par date</button><button class="tab${tab === "subj" ? " on" : ""}" data-pt="subj" type="button">Par matière</button></div>
+    ${tab === "chrono" ? (restHTML ? `<div class="plist">${restHTML}</div>` : `<div class="empty">Aucune autre khôlle à venir.<br><small>Consultez l'onglet « Par matière » pour vos inscriptions à faire.</small></div>`) : `<div class="pl-list">${planBySubject(me, years, now)}</div>`}
+  </details>`;
+}
+function bindFullPlan(paint){
+  const d = $("#fullPlan"); if (!d) return;
+  d.addEventListener("toggle", () => setPlanPref({ open: d.open }));
+  $$("[data-pt]").forEach(b => b.onclick = () => { setPlanPref({ tab: b.dataset.pt, open: true }); paint(); });
+}
+
+/* ---------- Documents : ressources intégrées (anglais, méthodo) ---------- */
+const builtinResHTML = (subject) => subject !== "anglais" ? "" : `<p class="kicker" style="margin-top:20px">Méthodo · ressources déjà en ligne</p><div class="group dgroup">${Object.entries(RESSOURCES).map(([k, r]) => `
+  <a class="drow" href="#/ressources/${k}"><span class="dico met">${ICON[r.icon]}</span>
+    <span class="dbody"><b>${esc(r.title)}</b><br><small>${esc(r.sub)}${Array.isArray(r.items) ? " · " + plural(r.items.length, "# document", "# documents") : ""} · HEC 1, HEC 2 · intégrées à l'appli</small></span>${ICON.chev}</a>`).join("")}</div>`;
 
 /* ---------- Feuilles d'action ---------- */
 let lastFocus = null;
