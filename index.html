@@ -690,7 +690,7 @@ body.previewing #view{padding-bottom:84px}
    les matières et les listes d'étudiants sont gérés dans l'appli (espace Gestion,
    espace enseignant) et enregistrés sur le serveur : ce bloc ne sert qu'à la mise en service.
    ===================================================================== */
-const APP_VERSION = "2026.10.15-3";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.15-4";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   API_URL: "https://khollapp.cemonprive.workers.dev/",
@@ -3558,7 +3558,7 @@ function profActions(c){
   return `
     <p class="kicker" style="margin-top:22px">Actions</p>
     <div class="agrid">
-      <a class="acell" href="#/prof/seances">${ICON.sessions}<b>${c.isResp ? "Séances" : "Mes séances"}</b><small>Ajouter, modifier, retirer</small></a>
+      <a class="acell" href="#/prof/seances">${ICON.sessions}<b>Séances</b><small>Ajouter, modifier, changer de salle</small></a>
       <a class="acell" href="#/prof/annulations">${ICON.ban}<b>Annuler une séance</b><small>${nCancel ? plural(nCancel, "# annulée à venir", "# annulées à venir") : "Aucune en cours"}</small></a>
       <a class="acell" href="#/prof/notes">${ICON.pen}<b>Notes</b><small id="noteCount">${(() => { const n = toGradeCount(c); return n ? `<span class="newpill" style="margin:0">${plural(n, "# séance à noter", "# séances à noter")}</span>` : "Saisir et consulter"; })()}</small></a>
       <a class="acell" href="#/prof/etudiants">${ICON.users}<b>Étudiants</b><small>Liste et inscriptions</small></a>
@@ -3638,15 +3638,15 @@ async function renderSeances(force){
   if (!state.sYear || !years.includes(state.sYear)) state.sYear = state.tYear || years[0];
   const year = state.sYear;
   setAccent(year || "1"); if (c.admin) document.body.classList.add("admin-mode");
-  setTeacherBar(c, c.isResp ? "Séances" : "Mes séances");
+  setTeacherBar(c, "Séances");
   if (!year){ $("#view").innerHTML = adminStrip(c) + '<div class="empty">Aucun planning pour cette matière.</div>'; bindAdminStrip(); return; }
   await Promise.allSettled([loadBookings(year, force)]);
   const Y = CONFIG.YEARS[year], today = iso(new Date());
   const visible = Y.sessions.filter(s => !(s.until && s.until < today) && !(s.date && s.date < today));
   const mineFirst = visible.filter(s => s.examiner === c.name).concat(visible.filter(s => s.examiner !== c.name));
   const canEdit = (s) => c.isResp || s.examiner === c.name;
-  const shown = c.isResp ? mineFirst : mineFirst.filter(canEdit);
-  const row = (s) => `<div class="srow2"><div class="sinfo">${c.isResp ? `<span class="sx">${esc(s.examiner)}</span>` : ""}${sessionText(s)}</div>${canEdit(s) ? `<div class="sacts"><button class="sbtn" data-edit="${esc(s.id)}">Modifier</button><button class="sbtn cancel" data-del="${esc(s.id)}">Retirer</button></div>` : ""}</div>`;
+  const shown = mineFirst;   // toutes les séances : la salle est modifiable par tous
+  const row = (s) => `<div class="srow2"><div class="sinfo">${c.isResp || s.examiner !== c.name ? `<span class="sx">${esc(s.examiner)}</span>` : ""}${sessionText(s)}</div><div class="sacts">${canEdit(s) ? `<button class="sbtn" data-edit="${esc(s.id)}">Modifier</button><button class="sbtn cancel" data-del="${esc(s.id)}">Retirer</button>` : `<button class="sbtn" data-room="${esc(s.id)}">Salle</button>`}</div></div>`;
   const rec = shown.filter(s => !s.date), pon = shown.filter(s => s.date);
   $("#view").innerHTML = adminStrip(c) + yearTabs(years, year) + `
     <p class="kicker">Séances régulières</p>
@@ -3654,11 +3654,12 @@ async function renderSeances(force){
     <p class="kicker" style="margin-top:18px">Séances ponctuelles</p>
     <div class="group">${pon.map(row).join("") || '<div class="srow2"><span class="muted">Aucune séance ponctuelle.</span></div>'}</div>
     <div class="actions"><button class="btn primary" id="addS">${ICON.plus} Ajouter une séance</button></div>
-    <p class="hint">Chaque ajout, modification ou retrait est inscrit au journal. Les étudiants concernés par un retrait sont désinscrits et le voient dans leur planning.</p>`;
+    <p class="hint">La salle de n'importe quelle séance peut être modifiée par tous les enseignants de la matière (bouton « Salle »). Chaque ajout, modification ou retrait est inscrit au journal. Les étudiants concernés par un retrait sont désinscrits et le voient dans leur planning.</p>`;
   bindAdminStrip();
   $$(".tab[data-y]").forEach(t => t.onclick = () => { state.sYear = t.dataset.y; renderSeances(); });
   $("#addS").onclick = () => openAddSession(c, year);
   $$("[data-edit]").forEach(b => b.onclick = () => openEditSession(c, year, Y.sessions.find(s => s.id === b.dataset.edit)));
+  $$("[data-room]").forEach(b => b.onclick = () => openEditSession(c, year, Y.sessions.find(s => s.id === b.dataset.room), true));
   $$("[data-del]").forEach(b => b.onclick = () => openRemoveSession(c, year, Y.sessions.find(s => s.id === b.dataset.del)));
 }
 async function sessionCall(payload, ok){
@@ -3739,16 +3740,16 @@ function openAddSession(c, year){
 function sessionBookings(year, s){
   return allBookings(year).filter(b => { const x = SLOT_INDEX[b.slotId]; return x && x.sess === s.id && x.startsAt > new Date(); });
 }
-function openEditSession(c, year, s){
+function openEditSession(c, year, s, roomOnly){
   if (!s) return;
   openSheet(`
-    <h4 id="sheetTitle">Modifier la séance</h4>
-    <div class="meta">${sessionText(s)}</div>
-    <div class="two"><div><label class="lbl" for="sCount">Créneaux</label>${stepper("sCount", s.count, 1, 12)}</div>
+    <h4 id="sheetTitle">${roomOnly ? "Changer la salle" : "Modifier la séance"}</h4>
+    <div class="meta">${roomOnly ? `<b>${esc(s.examiner)}</b><br>` : ""}${sessionText(s)}</div>
+    <div class="two" ${roomOnly ? 'style="display:none"' : ""}><div><label class="lbl" for="sCount">Créneaux</label>${stepper("sCount", s.count, 1, 12)}</div>
     <div><label class="lbl" for="sCap">Places par créneau</label>${stepper("sCap", Number(s.cap) || 1, 1, 6)}</div></div>
     <label class="lbl" for="sRoom">Salle</label>
     <input class="field" id="sRoom" type="text" value="${esc(s.room)}" maxlength="20" autocomplete="off">
-    <p class="hint">Un changement de salle s'applique aussi aux étudiants déjà inscrits. Pour changer le jour ou l'heure : retirez la séance puis ajoutez-en une nouvelle.</p>
+    <p class="hint">Un changement de salle s'applique aussi aux étudiants déjà inscrits.${roomOnly ? "" : ` Pour changer le jour ou l'heure : retirez la séance puis ajoutez-en une nouvelle.`}</p>
     <div class="msg" id="msg"></div>
     <div class="actions"><button class="btn primary" id="go">Enregistrer</button><button class="btn ghost" id="close">Annuler</button></div>`);
   $("#close").onclick = closeSheet; bindSteppers();
@@ -3756,6 +3757,7 @@ function openEditSession(c, year, s){
     const b = $("#go"); b.disabled = true;
     const room = $("#sRoom").value.trim().toUpperCase(), count = Number($("#sCount").value), cap = Number($("#sCap").value);
     if (!room){ $("#msg").innerHTML = errBox("Indiquez la salle."); b.disabled = false; return; }
+    if (roomOnly && room === String(s.room).toUpperCase()){ closeSheet(); return; }
     if (room !== String(s.room).toUpperCase()){
       if (count !== Number(s.count) || cap !== (Number(s.cap) || 1)){ $("#msg").innerHTML = errBox("Changez d'abord la salle seule, puis le nombre de créneaux ou de places."); b.disabled = false; return; }
       const r0 = await sessionCall({ action: "updateSession", year, id: s.id, count, cap, room }, "Salle modifiée.");
@@ -3765,6 +3767,7 @@ function openEditSession(c, year, s){
     const r = await sessionCall({ action: "updateSession", year, id: s.id, count, cap }, "Séance modifiée.");
     if (r) renderSeances(); else b.disabled = false;
   };
+  if (roomOnly) setTimeout(() => { const i = $("#sRoom"); i && i.select(); }, 50);
 }
 function openRemoveSession(c, year, s){
   if (!s) return;
