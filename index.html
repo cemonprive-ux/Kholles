@@ -463,6 +463,11 @@ textarea.field.area{width:100%;min-height:220px;padding:12px 14px;border-radius:
 .fc-bar i{display:block;height:100%;background:linear-gradient(90deg,#05B8F5,#1461E0)}
 /* Espace enseignant */
 .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.hgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin:4px 0 6px}
+.hchip{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:52px;padding:5px 2px;border-radius:12px;border:1.5px dashed var(--line);background:var(--surface);color:var(--muted);font:inherit;cursor:pointer}
+.hchip b{font-size:15px}.hchip small{font-size:11px;font-weight:600;min-height:13px}
+.hchip.on{border:1.5px solid var(--accent);background:var(--accent);color:#fff}
+.hchip.lost{border:1.5px solid var(--err);background:var(--err-soft, #FDECEC);color:var(--err)}
 .chip{min-height:38px;padding:6px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);font-weight:700;font-size:13.5px;color:var(--ink-2);cursor:pointer}
 .chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
 .chip.light{background:#fff;color:#12233D;border-color:#fff}
@@ -614,11 +619,14 @@ a.btn{text-decoration:none;justify-content:center}
 .gtable td.avg{font-weight:700;color:var(--accent)}
 .trow small.st{flex:none;text-align:right;font-size:12.5px;max-width:58%}
 /* À réviser */
-.ghead .topic{flex:1;min-width:0;font-size:13px;line-height:1.35;padding:4px 9px;border-radius:9px;background:rgba(255,255,255,.18)}
+.ghead{flex-wrap:wrap}
+.ghead .topic{order:9;flex:1 1 100%;min-width:0;font-size:13.5px;line-height:1.35;padding:4px 9px;border-radius:9px;background:rgba(255,255,255,.18)}
 .ghead .topic b{font-weight:700}
 .topicbtn{display:inline-flex;align-items:center;gap:5px;min-height:32px;padding:0 9px;border:1.5px solid rgba(255,255,255,.7);border-radius:9px;background:transparent;color:#fff;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer;flex:none}
 .topicbtn svg{width:15px;height:15px}
-.ghead .topicbtn + .room, .ghead .topic + .room{margin-left:0}
+.ghead .topicbtn + .room{margin-left:0}
+.ghead .topic + .room{margin-left:auto}
+.ghead .topic + .topicbtn{margin-left:auto}
 .ghead .who + .topicbtn{margin-left:auto}
 .topicline{margin:-4px 0 12px;padding:9px 12px;border-radius:12px;background:var(--accent-soft);color:var(--ink);font-size:14px}
 .nk-topic{display:block;margin-top:6px;padding:8px 12px;border-radius:12px;background:rgba(255,255,255,.18);font-size:14px;line-height:1.35}
@@ -692,7 +700,7 @@ body.previewing #view{padding-bottom:84px}
    les matières et les listes d'étudiants sont gérés dans l'appli (espace Gestion,
    espace enseignant) et enregistrés sur le serveur : ce bloc ne sert qu'à la mise en service.
    ===================================================================== */
-const APP_VERSION = "2026.10.16-2";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.16-4";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   API_URL: "https://khollapp.cemonprive.workers.dev/",
@@ -891,9 +899,13 @@ function sessionsFor(year, date, n, half, explicit){
   return Y.sessions.filter(s => !s.date && Number(s.weekday) === date.getDay() && (!s.week || !half || s.week === half)
     && (!s.from || k >= s.from) && (!s.until || k <= s.until)).concat(ponct);
 }
+// Horaires supprimés d'une séance (s.off = [{ m, from }]) ; durée et pas des créneaux
+const isOffC = (s, min, dISO) => Array.isArray(s.off) && s.off.some(o => Number(o.m) === Number(min) && String(dISO) >= String(o.from || ""));
+const sesDurC = (s) => Number(s.dur) || CONFIG.SLOT_MINUTES;
+const sesStepC = (s) => Number(s.dur) ? (Number(s.step) || Number(s.dur)) : CONFIG.STEP_MINUTES;
 function slotsForDate(year, d, n, half, explicit){
   const dISO = iso(d), wk = iso(mondayOf(d));
-  return sessionsFor(year, d, n, half, explicit).flatMap(s => Array.from({ length: Number(s.count) }, (_, i) => {
+  return sessionsFor(year, d, n, half, explicit).flatMap(s => Array.from({ length: Number(s.count) }, (_, i) => i).filter(i => !isOffC(s, toMin(s.start) + i * sesStepC(s), dISO)).map(i => {
     const dur = Number(s.dur) || CONFIG.SLOT_MINUTES, step = Number(s.dur) ? (Number(s.step) || dur) : CONFIG.STEP_MINUTES;
     const st = toMin(s.start) + i*step, en = st + dur;
     return {
@@ -3636,11 +3648,13 @@ function openTeacherSlot(s){
 /* ---------- Séances (ajouter, modifier, retirer) ---------- */
 const WD = ["", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"];
 function sessionText(s){
-  const d0 = Number(s.dur) || CONFIG.SLOT_MINUTES, end = toMin(s.start) + (Number(s.count) - 1) * (Number(s.dur) ? (Number(s.step) || d0) : CONFIG.STEP_MINUTES) + d0;
-  const hours = fmtTime(toMin(s.start)) + " – " + fmtTime(end);
-  return s.date
-    ? `<b>${esc(fmtDay(parseISO(s.date)))} · ${hours}</b><br><span>${plural(s.count, "# créneau", "# créneaux")} · ${plural(Number(s.cap) || 1, "# place", "# places")} · salle ${esc(s.room)} · Khôlle ${s.q}</span>`
-    : `<b>${cap(WD[s.weekday])} · ${hours}</b><br><span>${plural(s.count, "# créneau", "# créneaux")} · ${plural(Number(s.cap) || 1, "# place", "# places")} · salle ${esc(s.room)}${s.week ? " · semaine " + s.week : ""}</span>${s.from || s.until ? `<br><small>${s.from ? "à partir du " + esc(fmtDate(parseISO(s.from))) : ""}${s.from && s.until ? " · " : ""}${s.until ? "jusqu'au " + esc(fmtDate(parseISO(s.until))) : ""}</small>` : ""}`;
+  const d0 = sesDurC(s), stp = sesStepC(s), ref = s.date || iso(new Date());
+  const mins = Array.from({ length: Number(s.count) }, (_, i) => toMin(s.start) + i * stp).filter(m => !isOffC(s, m, ref));
+  const hours = mins.length ? fmtTime(mins[0]) + " – " + fmtTime(mins[mins.length - 1] + d0) : "—";
+  const n = mins.length, holes = n < Number(s.count) ? `<br><small>Horaires : ${mins.map(fmtTime).join(", ")}</small>` : "";
+  return (s.date
+    ? `<b>${esc(fmtDay(parseISO(s.date)))} · ${hours}</b><br><span>${plural(n, "# créneau", "# créneaux")} · ${plural(Number(s.cap) || 1, "# place", "# places")} · salle ${esc(s.room)} · Khôlle ${s.q}</span>`
+    : `<b>${cap(WD[s.weekday])} · ${hours}</b><br><span>${plural(n, "# créneau", "# créneaux")} · ${plural(Number(s.cap) || 1, "# place", "# places")} · salle ${esc(s.room)}${s.week ? " · semaine " + s.week : ""}</span>${s.from || s.until ? `<br><small>${s.from ? "à partir du " + esc(fmtDate(parseISO(s.from))) : ""}${s.from && s.until ? " · " : ""}${s.until ? "jusqu'au " + esc(fmtDate(parseISO(s.until))) : ""}</small>` : ""}`) + holes;
 }
 async function renderSeances(force){
   const c = TCTX(), years = subjectYears(c.subject);
@@ -3759,30 +3773,62 @@ function sessionBookings(year, s){
 }
 function openEditSession(c, year, s, roomOnly){
   if (!s) return;
+  const today = iso(new Date()), st0 = toMin(s.start), dur = sesDurC(s), step = sesStepC(s), end0 = st0 + (Number(s.count) - 1) * step;
+  // Grille proposée : les horaires de la séance, plus 3 avant et 3 après (entre 7h et 22h)
+  const grid = []; for (let m = st0 - 3 * step; m <= end0 + 3 * step; m += step) if (m >= 7 * 60 && m + dur <= 22 * 60) grid.push(m);
+  const activeNow = (m) => m >= st0 && m <= end0 && !isOffC(s, m, today);
+  const bk = sessionBookings(year, s), byMin = {};
+  bk.forEach(b => { const x = SLOT_INDEX[b.slotId]; if (x) (byMin[x.start] ||= []).push(b); });
+  const sel = new Set(grid.filter(activeNow));
   openSheet(`
     <h4 id="sheetTitle">${roomOnly ? "Changer la salle" : "Modifier la séance"}</h4>
     <div class="meta">${roomOnly ? `<b>${esc(s.examiner)}</b><br>` : ""}${sessionText(s)}</div>
-    <div class="two" ${roomOnly ? 'style="display:none"' : ""}><div><label class="lbl" for="sCount">Créneaux</label>${stepper("sCount", s.count, 1, 12)}</div>
-    <div><label class="lbl" for="sCap">Places par créneau</label>${stepper("sCap", Number(s.cap) || 1, 1, 6)}</div></div>
+    ${roomOnly ? "" : `<label class="lbl">Horaires <small class="muted">(créneaux de ${dur} min)</small></label>
+    <div class="hgrid" id="hgrid">${grid.map(m => `<button type="button" class="hchip" data-m="${m}"><b>${fmtTime(m)}</b><small></small></button>`).join("")}</div>
+    <p class="hint">Touchez un horaire pour le supprimer ou l'ajouter. Les étudiants inscrits sur un horaire supprimé sont désinscrits et prévenus : ils peuvent se réinscrire ailleurs.</p>
+    <div id="relWarn"></div>
+    <label class="lbl" for="sCap">Places par créneau</label>${stepper("sCap", Number(s.cap) || 1, 1, 6)}`}
     <label class="lbl" for="sRoom">Salle</label>
     <input class="field" id="sRoom" type="text" value="${esc(s.room)}" maxlength="20" autocomplete="off">
-    <p class="hint">Un changement de salle s'applique aussi aux étudiants déjà inscrits.${roomOnly ? "" : ` Pour changer le jour ou l'heure : retirez la séance puis ajoutez-en une nouvelle.`}</p>
+    <p class="hint">Un changement de salle s'applique aussi aux étudiants déjà inscrits.${roomOnly ? "" : ` Pour changer le jour ou la durée : retirez la séance puis ajoutez-en une nouvelle.`}</p>
     <div class="msg" id="msg"></div>
     <div class="actions"><button class="btn primary" id="go">Enregistrer</button><button class="btn ghost" id="close">Annuler</button></div>`);
   $("#close").onclick = closeSheet; bindSteppers();
+  const removedWithStudents = () => [...Object.keys(byMin)].map(Number).filter(m => !sel.has(m)).flatMap(m => byMin[m]);
+  const paint = () => {
+    $$(".hchip").forEach(ch => {
+      const m = Number(ch.dataset.m), on = sel.has(m), n = (byMin[m] || []).length, was = activeNow(m);
+      ch.classList.toggle("on", on); ch.classList.toggle("lost", !on && n > 0);
+      ch.querySelector("small").textContent = on ? (n ? plural(n, "# inscrit", "# inscrits") : was ? "" : "ajouté") : (n ? plural(n, "# à libérer", "# à libérer") : was ? "supprimé" : "+");
+    });
+    const rel = removedWithStudents();
+    $("#relWarn").innerHTML = rel.length ? `<div class="alert err">${ICON.warn}<span><b>${plural(rel.length, "# inscription sera libérée", "# inscriptions seront libérées")}</b> :<ul class="clist">${rel.map(b => `<li>${esc(b.student)} · ${esc(describeSlot(b.slotId))}</li>`).join("")}</ul></span></div>` : "";
+  };
+  if (!roomOnly){ $$(".hchip").forEach(ch => ch.onclick = () => { const m = Number(ch.dataset.m); sel.has(m) ? sel.delete(m) : sel.add(m); paint(); }); paint(); }
   $("#go").onclick = async () => {
     const b = $("#go"); b.disabled = true;
-    const room = $("#sRoom").value.trim().toUpperCase(), count = Number($("#sCount").value), cap = Number($("#sCap").value);
+    const room = $("#sRoom").value.trim().toUpperCase();
     if (!room){ $("#msg").innerHTML = errBox("Indiquez la salle."); b.disabled = false; return; }
-    if (roomOnly && room === String(s.room).toUpperCase()){ closeSheet(); return; }
-    if (room !== String(s.room).toUpperCase()){
-      if (count !== Number(s.count) || cap !== (Number(s.cap) || 1)){ $("#msg").innerHTML = errBox("Changez d'abord la salle seule, puis le nombre de créneaux ou de places."); b.disabled = false; return; }
-      const r0 = await sessionCall({ action: "updateSession", year, id: s.id, count, cap, room }, "Salle modifiée.");
+    if (roomOnly){
+      if (room === String(s.room).toUpperCase()){ closeSheet(); return; }
+      const r0 = await sessionCall({ action: "updateSession", year, id: s.id, count: Number(s.count), cap: Number(s.cap) || 1, room }, "Salle modifiée.");
       if (r0){ await loadBookings(year, true).catch(() => {}); renderSeances(); } else b.disabled = false;
       return;
     }
-    const r = await sessionCall({ action: "updateSession", year, id: s.id, count, cap }, "Séance modifiée.");
-    if (r) renderSeances(); else b.disabled = false;
+    const cap = Number($("#sCap").value), slots = [...sel].sort((x, y) => x - y);
+    const same = slots.length === grid.filter(activeNow).length && slots.every(activeNow);
+    if (room !== String(s.room).toUpperCase()){
+      if (!same || cap !== (Number(s.cap) || 1)){ $("#msg").innerHTML = errBox("Changez d'abord la salle seule, puis les horaires ou les places."); b.disabled = false; return; }
+      const r0 = await sessionCall({ action: "updateSession", year, id: s.id, count: Number(s.count), cap, room }, "Salle modifiée.");
+      if (r0){ await loadBookings(year, true).catch(() => {}); renderSeances(); } else b.disabled = false;
+      return;
+    }
+    if (!slots.length){ $("#msg").innerHTML = errBox("Gardez au moins un horaire, ou retirez la séance."); b.disabled = false; return; }
+    if (same && cap === (Number(s.cap) || 1)){ closeSheet(); return; }
+    const rel = removedWithStudents();
+    if (rel.length && b.dataset.sure !== "1"){ b.dataset.sure = "1"; b.textContent = `Confirmer : libérer ${plural(rel.length, "# inscription", "# inscriptions")}`; b.classList.add("danger-fill"); b.disabled = false; return; }
+    const r = await sessionCall({ action: "updateSession", year, id: s.id, cap, slots }, rel.length ? `Séance modifiée · ${plural(rel.length, "# inscription libérée", "# inscriptions libérées")}.` : "Séance modifiée.");
+    if (r){ await loadBookings(year, true).catch(() => {}); renderSeances(); } else { b.disabled = false; }
   };
   if (roomOnly) setTimeout(() => { const i = $("#sRoom"); i && i.select(); }, 50);
 }
