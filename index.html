@@ -700,7 +700,7 @@ body.previewing #view{padding-bottom:84px}
    les matières et les listes d'étudiants sont gérés dans l'appli (espace Gestion,
    espace enseignant) et enregistrés sur le serveur : ce bloc ne sert qu'à la mise en service.
    ===================================================================== */
-const APP_VERSION = "2026.10.16-4";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.16-5";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   API_URL: "https://khollapp.cemonprive.workers.dev/",
@@ -847,6 +847,7 @@ const subjEmoji = (key) => subjectMeta(key).emoji || "";
 const exName = (year, name) => { const e = subjEmoji(subjectOfYear(year)); return name + (e ? " " + e : ""); };
 const subjectYears = (subject) => Object.keys(CONFIG.YEARS).filter(y => subjectOfYear(y) === subject).sort((a, b) => promoOf(a).localeCompare(promoOf(b)));
 // Liste restreinte d'une matière (ex. allemand) : null = toute la classe
+const LV2_KEYS = ["allemand", "espagnol", "italien", "arabe"];
 const rosterOf = (year) => { const r = CONFIG.YEARS[year] && CONFIG.YEARS[year].roster; return Array.isArray(r) && r.length ? r : null; };
 const inRoster = (year, name) => { const r = rosterOf(year); return !r || r.includes(name); };
 const promoYears = (promo) => Object.keys(CONFIG.YEARS).filter(y => promoOf(y) === promo && (subjectMeta(subjectOfYear(y)).open));
@@ -1525,7 +1526,10 @@ async function renderMe(force){
         ${ICON.chev}</a>`;
     });
     const subjects = CONFIG.SUBJECTS.slice().sort((a, b) => a.label.localeCompare(b.label, "fr", { sensitivity: "base" }))
-      .filter(m => { const y = m.years && m.years[me.promo]; return !y || inRoster(y, me.name); });
+      .filter(m => { const y = m.years && m.years[me.promo];
+        // Matière à liste (LV2) sans planning dans cette classe : masquée (pas de tuile « Bientôt »)
+        if (!y) return !LV2_KEYS.includes(m.key) && !Object.keys(CONFIG.YEARS).some(k => subjectOfYear(k) === m.key && rosterOf(k));
+        return inRoster(y, me.name); });
     const mine = (y) => list.filter(s => s.year === y).length;
     $("#view").innerHTML = cancelBanner(years) + swapBanner(me, years, true) + `
       <p class="kicker">Ma prochaine khôlle</p>
