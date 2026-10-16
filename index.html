@@ -628,9 +628,11 @@ a.btn{text-decoration:none;justify-content:center}
 /* Remplissage des créneaux à plusieurs places */
 .slot .seats i{background:var(--ok)}
 .slot .seats i.on,.slot .seats i.me,.slot.taken.multi .seats i.on{background:var(--err)}
-.slot.multi .dot.f-empty,.slot .dot.f-empty{background:var(--ok)}
-.slot.multi .dot.f-part,.slot .dot.f-part{background:#F59E0B}
-.slot.multi .dot.f-full,.slot .dot.f-full{background:var(--err)}
+.slot .dot.f-empty,.slot .dot.f-part{display:none}
+.slot .dot.f-empty{background-image:url(data:image/png;base64,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)}
+.slot .dot.f-part{background-image:url(data:image/png;base64,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)}
+.slot .dot.f-full{width:auto;height:auto;border-radius:0;background:none;font-size:14px;line-height:1}
+.slot .dot.f-full::before{content:"\274C"}
 .slot.cancelled .seats i,.slot.locked.cancelled .dot{background:var(--line)}
 /* Aperçu administrateur */
 #pvbar{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:60;display:flex;align-items:center;gap:10px;padding:10px 12px 10px 16px;border-radius:16px;background:#12233D;color:#fff;font-size:13.5px;box-shadow:0 10px 28px rgba(0,0,0,.3)}
@@ -690,7 +692,7 @@ body.previewing #view{padding-bottom:84px}
    les matières et les listes d'étudiants sont gérés dans l'appli (espace Gestion,
    espace enseignant) et enregistrés sur le serveur : ce bloc ne sert qu'à la mise en service.
    ===================================================================== */
-const APP_VERSION = "2026.10.15-4";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.16-2";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   API_URL: "https://khollapp.cemonprive.workers.dev/",
@@ -1094,7 +1096,7 @@ Object.assign(ICON, {
   upload: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M4 15v3a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-3"/></svg>',
   sessions: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4.5" width="18" height="16" rx="3"/><path d="M3 9.5h18M8 2.5v4M16 2.5v4M12 13v5M9.5 15.5h5"/></svg>'
 });
-const LISERE = `<svg class="lisere" viewBox="0 0 1200 140" preserveAspectRatio="xMidYMax meet" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path vector-effect="non-scaling-stroke" d="M4 128 H112 V116 L126 106 L140 116 V128 H150 V112 H176 V120 H190 V104 L206 98 H220 V64 L230 14 L240 64 V92 L251 82 L262 92 V64 L272 18 L282 64 V98 H294 L310 106 V118 H322 V128 H360 C410 128 432 112 468 110 C504 108 526 122 560 122 C598 122 640 72 688 55 Q694 53 700 55 C736 66 770 98 806 110 C834 118 856 112 884 104 C898 99 910 98 922 103 L932 98 L944 103 C962 110 978 104 996 100 C1016 96 1034 108 1060 118 C1092 126 1140 126 1196 126"/><path vector-effect="non-scaling-stroke" d="M694 54 V20"/><path vector-effect="non-scaling-stroke" d="M226 76 V88 M234 76 V88 M268 78 V90 M276 78 V90"/><circle vector-effect="non-scaling-stroke" cx="251" cy="104" r="5"/><path vector-effect="non-scaling-stroke" d="M245 128 V119 A6 6 0 0 1 257 119 V128"/><path vector-effect="non-scaling-stroke" d="M380 134 C520 130 700 128 860 132 C960 134 1060 136 1150 134"/></svg>`;
+const LISERE = `<svg class="lisere" viewBox="0 0 1200 140" preserveAspectRatio="xMidYMax meet" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path vector-effect="non-scaling-stroke" d="M4 128 H112 V116 L126 106 L140 116 V128 H150 V112 H176 V120 H190 V104 L206 98 H220 V64 L230 14 L240 64 V92 L251 82 L262 92 V64 L272 18 L282 64 V98 H294 L310 106 V118 H322 V128 H360 C410 128 432 112 468 110 C504 108 526 122 560 122 C598 122 640 72 688 55 Q694 53 700 55 C736 66 770 98 806 110 C834 118 856 112 884 104 C898 99 910 98 922 103 L932 98 L944 103 C962 110 978 104 996 100 C1016 96 1034 108 1060 118 C1092 126 1140 126 1196 126"/><path vector-effect="non-scaling-stroke" d="M694 54 V20"/><path vector-effect="non-scaling-stroke" d="M226 76 V88 M234 76 V88 M268 78 V90 M276 78 V90"/><circle vector-effect="non-scaling-stroke" cx="251" cy="104" r="5"/><path vector-effect="non-scaling-stroke" d="M245 128 V119 A6 6 0 0 1 257 119 V128"/></svg>`;
 
 /* ---------- Alertes : notifications des places libérées ---------- */
 const LATE_MSG = "Moins d'une heure avant la khôlle : la place ne peut plus être libérée dans Kholl'app. Prévenez directement votre khôlleur.";
@@ -1305,6 +1307,12 @@ async function draw(force){
   if (p0 === "p"){ location.replace(AUTH.student ? "#/moi" : "#/connexion/" + (CONFIG.PROMOS[sub] ? sub : "1")); return; }
   if (!p0 || !CONFIG.YEARS[p0]) return renderHome();
   const year = p0;
+  // Matières à liste (espagnol, allemand…) : visibles seulement des étudiants inscrits sur la liste
+  if (rosterOf(year)){
+    const me = AUTH.student;
+    if (!me || me.promo !== promoOf(year)){ location.replace(me ? "#/moi" : "#/connexion/" + promoOf(year)); return; }
+    if (!inRoster(year, me.name)){ toast(CONFIG.YEARS[year].subjectLabel + " : matière réservée aux étudiants de sa liste."); location.replace("#/moi"); return; }
+  }
   setAccent(year);
   const view = $("#view");
   const paint = () => (sub === "k" && n) ? renderQuinzaine(year, Number(n)) : renderList(year);
@@ -1515,7 +1523,7 @@ async function renderMe(force){
         <span class="nk-subj">${esc(CONFIG.YEARS[next.year].subjectLabel)} · Khôlle ${next.q}</span>
         <span class="nk-date">${esc(fmtDay(next.date))}</span>
         <span class="nk-time">${esc(next.label)}</span>
-        ${topicOf(next.year, next.sid) ? `<span class="nk-topic"><b>À réviser :</b> ${esc(topicOf(next.year, next.sid))}</span>` : ""}
+        ${topicOf(next.year, next.sid) ? `<span class="nk-topic"><b>${esc(topicLabel(next.year))} :</b> ${esc(topicOf(next.year, next.sid))}</span>` : ""}
         <span class="nk-grid"><span><small>${/^Mme/.test(next.examiner) ? "Khôlleuse" : "Khôlleur"}</small>${esc(next.examiner)}</span><span><small>Salle</small>${esc(next.room)}</span></span>
         <span class="nk-more">Voir mon inscription ${ICON.chev}</span>
       </a>` : `<div class="empty">Aucune khôlle à venir.<br><small>Inscrivez-vous depuis vos matières, ci-dessous.</small></div>`}
@@ -1656,7 +1664,7 @@ function slotRow(s, now, viewer){
   else if (s.cap === 1){ txt = t.length ? esc(t[0].student) : st === "past" ? "—" : st === "notyet" ? openShort(s) : "Libre"; cls += t.length ? "taken" : "free"; }
   else { txt = !free ? "Complet" : st === "notyet" ? openShort(s) : st === "past" ? "—" : plural(free, "# place libre", "# places libres") + ` sur ${s.cap}`; cls += free ? "free" : "taken"; }
   const names = s.cap > 1 && t.length ? `<span class="snames">${t.map(b => esc(b.student === viewer ? "Vous" : b.student)).join(" · ")}</span>` : "";
-  return `<button class="slot ${cls}${s.cap > 1 ? " multi" : ""}" data-id="${esc(s.id)}"><span class="time">${s.label}</span><span class="state">${s.cap > 1 ? seatsBar(s, viewer) : ""}<span>${txt}</span>${locked ? ICON.lock : `<span class="dot${s.cap > 1 ? " " + fillCls(s) : ""}" aria-hidden="true"></span>`}</span>${names}</button>`;
+  return `<button class="slot ${cls}${s.cap > 1 ? " multi" : ""}" data-id="${esc(s.id)}"><span class="time">${s.label}</span><span class="state">${s.cap > 1 ? seatsBar(s, viewer) : ""}<span>${txt}</span>${locked ? ICON.lock : s.cap > 1 && fillCls(s) === "f-full" ? '<span class="dot f-full" aria-hidden="true"></span>' : `<span class="dot${s.cap > 1 ? " " + fillCls(s) : ""}" aria-hidden="true"></span>`}</span>${names}</button>`;
 }
 function renderQuinzaine(year, n){
   const Y = CONFIG.YEARS[year], now = new Date(), me = AUTH.student;
@@ -3140,10 +3148,10 @@ async function renderClaimCode(){
 function openTopic(c, year, sid, q){
   const [, iso, room] = sid.split("|"), cur = topicOf(year, sid);
   openSheet(`
-    <h4 id="sheetTitle">${ICON.pen} À réviser</h4>
+    <h4 id="sheetTitle">${ICON.pen} ${esc(topicLabel(year))}</h4>
     <p class="meta"><b>${esc(CONFIG.YEARS[year].subjectLabel)} · Khôlle ${q} · ${esc(CONFIG.YEARS[year].short)}</b><br>${esc(fmtDay(parseISO(iso)))} · salle ${esc(room)}</p>
-    <label class="lbl" for="tTxt">Programme de la séance</label>
-    <textarea class="field area" id="tTxt" maxlength="200" style="min-height:110px" placeholder="Ex. : Chapitre 4 : le marché du travail">${esc(cur)}</textarea>
+    <label class="lbl" for="tTxt">${CONFIG.YEARS[year].topicLabel ? "Détails pour cette séance" : "Programme de la séance"}</label>
+    <textarea class="field area" id="tTxt" maxlength="200" style="min-height:110px" placeholder="${CONFIG.YEARS[year].topicLabel ? "Ex. : Dissertation, préparer le thème « le travail »" : "Ex. : Chapitre 4 : le marché du travail"}">${esc(cur)}</textarea>
     <p class="hint">Affiché aux étudiants à droite de votre nom, pour cette séance uniquement. Laissez vide pour effacer.</p>
     <div class="msg" id="msg"></div>
     <div class="actions"><button class="btn primary" id="go">Enregistrer</button><button class="btn ghost" id="close">Annuler</button></div>`);
@@ -3154,7 +3162,7 @@ function openTopic(c, year, sid, q){
     if (r.auth){ closeSheet(); return teacherExpired(); }
     if (!r.ok){ $("#msg").innerHTML = errBox(esc(r.error || "Erreur.")); b.disabled = false; return; }
     if (Array.isArray(r.bookings)) applyState(year, r);
-    closeSheet(); toast(txt ? "Programme enregistré." : "Programme effacé."); state.journal = null; renderProf();
+    closeSheet(); toast(txt ? "Enregistré." : "Effacé."); state.journal = null; renderProf();
   };
 }
 
@@ -3283,8 +3291,9 @@ $("#sheet").addEventListener("keydown", e => { if (e.key === "Escape") closeShee
 
 // « À réviser » : programme indiqué par le khôlleur, séance par séance (sid = année|date|salle)
 const topicOf = (year, sid) => ((state.topics || {})[year] || {})[sid] || "";
-const topicHTML = (year, sid) => { const t = topicOf(year, sid); return t ? `<span class="topic"><b>À réviser :</b> ${esc(t)}</span>` : ""; };
-const canTopic = (c, year, examiner) => !!c && ((CONFIG.YEARS[year] || {}).topicsFor || []).includes(examiner) && (c.admin || c.name === examiner);
+const topicLabel = (year) => (CONFIG.YEARS[year] || {}).topicLabel || "À réviser";
+const topicHTML = (year, sid) => { const t = topicOf(year, sid); return t ? `<span class="topic"><b>${esc(topicLabel(year))} :</b> ${esc(t)}</span>` : ""; };
+const canTopic = (c, year, examiner) => { const f = (CONFIG.YEARS[year] || {}).topicsFor || []; return !!c && (f.includes(examiner) || f.includes("*")) && (c.admin || c.name === examiner); };
 const slotMeta = (s) => `<p class="meta"><b>${esc(CONFIG.YEARS[s.year].subjectLabel)} · Khôlle ${s.q}</b><br>${fmtDay(s.date)} · ${s.label}<br>${esc(exName(s.year, s.examiner))} · salle <b>${esc(s.room)}</b>${s.cap > 1 ? `<br>${plural(s.cap, "# place", "# places")} · ${plural(takers(s).length, "# inscrit", "# inscrits")}` : ""}</p>${topicOf(s.year, s.sid) ? `<p class="topicline"><b>À réviser :</b> ${esc(topicOf(s.year, s.sid))}</p>` : ""}`;
 const nameSelect = (list, placeholder, id = "who") => `<div class="selectwrap"><select id="${id}"><option value="">${placeholder}</option>${list.map(x => `<option>${esc(x)}</option>`).join("")}</select>${ICON.down}</div>`;
 const payloadOf = (s, extra) => Object.assign({ year: s.year, q: s.q, slotId: s.id, app: location.origin + location.pathname }, extra);
@@ -3531,7 +3540,7 @@ async function renderProf(force){
       Object.values(groups).forEach(list => {
         const cx = cancelOf(list[0]);
         const ed = !cx && canTopic(c, year, list[0].examiner);
-        html += `<div class="group${cx ? " cancelled" : ""}"><div class="ghead"><span class="who">${esc(list[0].examiner)}</span>${cx ? '<span class="cbadge">Annulée</span>' : topicHTML(year, list[0].sid)}${ed ? `<button class="topicbtn" type="button" data-topic="${esc(list[0].sid)}" data-q="${list[0].q}" aria-label="À réviser">${ICON.pen}${topicOf(year, list[0].sid) ? "" : "<span>À réviser</span>"}</button>` : ""}<span class="room">${esc(list[0].room)}</span></div>`;
+        html += `<div class="group${cx ? " cancelled" : ""}"><div class="ghead"><span class="who">${esc(list[0].examiner)}</span>${cx ? '<span class="cbadge">Annulée</span>' : topicHTML(year, list[0].sid)}${ed ? `<button class="topicbtn" type="button" data-topic="${esc(list[0].sid)}" data-q="${list[0].q}" aria-label="${esc(topicLabel(year))}">${ICON.pen}${topicOf(year, list[0].sid) ? "" : `<span>${esc(topicLabel(year))}</span>`}</button>` : ""}<span class="room">${esc(list[0].room)}</span></div>`;
         list.forEach(s => {
           const t = takers(s), st = slotStatus(s, now);
           html += `<button class="slot tslot${t.length ? " taken" : " free"}${st === "past" ? " locked" : ""}" data-id="${esc(s.id)}"><span class="time">${s.label}</span><span class="state"><span>${t.length ? t.map(b => esc(b.student)).join(" · ") : cx ? "—" : "Libre"}</span>${s.cap > 1 ? seatsBar(s, "") + `<span class="dot ${cx ? "" : fillCls(s)}" aria-hidden="true"></span>` : ""}</span></button>`;
@@ -3704,6 +3713,9 @@ function openAddSession(c, year){
     <div><label class="lbl" for="sRoom">Salle</label><input class="field" id="sRoom" placeholder="C415" maxlength="12"></div></div>
     <div class="two"><div><label class="lbl" for="sCount">Créneaux</label>${stepper("sCount", 3, 1, 12)}</div>
     <div><label class="lbl" for="sCap">Places par créneau</label>${stepper("sCap", 1, 1, 6)}</div></div>
+    <div class="two"><div><label class="lbl" for="sDur">Durée d'un créneau (min)</label><input class="field" id="sDur" type="number" inputmode="numeric" min="5" max="240" step="1" value="${CONFIG.SLOT_MINUTES}"></div>
+    <div><label class="lbl" for="sStep">Un créneau toutes les (min)</label><input class="field" id="sStep" type="number" inputmode="numeric" min="5" max="240" step="1" value="${CONFIG.STEP_MINUTES}"></div></div>
+    <p class="hint">Durée libre. Mettez le même nombre dans les deux cases pour des créneaux qui s'enchaînent (ex. 30 et 30) ; un nombre plus petit à droite fait se chevaucher les créneaux (ex. 40 et 20 : préparation pendant l'interrogation précédente).</p>
     <div class="alert ok" id="preview" style="margin-top:12px"></div>
     <div class="msg" id="msg"></div>
     <div class="actions"><button class="btn primary" id="go">Ajouter</button><button class="btn ghost" id="close">Annuler</button></div>`);
@@ -3711,8 +3723,10 @@ function openAddSession(c, year){
   let type = "rec";
   const pv = () => {
     const cnt = Number($("#sCount").value) || 1, st = $("#sStart").value || "16:00";
-    const end = toMin(st) + (cnt - 1) * CONFIG.STEP_MINUTES + CONFIG.SLOT_MINUTES;
-    let txt = `${plural(cnt, "# créneau", "# créneaux")} de ${fmtTime(toMin(st))} à ${fmtTime(end)}`;
+    const du = Math.round(Number($("#sDur").value)) || CONFIG.SLOT_MINUTES, sp = Math.round(Number($("#sStep").value)) || du;
+    const end = toMin(st) + (cnt - 1) * sp + du;
+    const times = Array.from({ length: Math.min(cnt, 12) }, (_, i) => fmtTime(toMin(st) + i * sp)).join(", ");
+    let txt = `${plural(cnt, "# créneau", "# créneaux")} de ${du} min, de ${fmtTime(toMin(st))} à ${fmtTime(end)} (début : ${times})`;
     if (type === "rec"){
       const wd = Number($("#sDay").value), from = Number($("#sFrom").value), wk = $("#sWeek").value;
       const n = (Y.kholles || []).reduce((a, l, i) => {
@@ -3726,11 +3740,14 @@ function openAddSession(c, year){
   };
   $$(".tab[data-type]").forEach(t => t.onclick = () => { type = t.dataset.type; $$(".tab[data-type]").forEach(x => x.classList.toggle("on", x === t)); $("#recF").hidden = type !== "rec"; $("#oneF").hidden = type === "rec"; pv(); });
   ["#sDay", "#sWeek", "#sFrom", "#sStart"].forEach(id => { const e = $(id); if (e) e.onchange = pv; });
+  ["#sDur", "#sStep", "#sStart"].forEach(id => { const e = $(id); if (e) e.oninput = pv; });
   $("#sDate").onchange = () => { const d = $("#sDate").value; const k = allQ.find(k => d >= k.first && d <= k.last) || allQ.find(k => d < k.first); if (k) $("#sQ").value = k.n; };
   bindSteppers(pv); pv();
   $("#go").onclick = async () => {
     const b = $("#go"); b.disabled = true; b.textContent = "Enregistrement…";
-    const session = { start: $("#sStart").value, count: Number($("#sCount").value), cap: Number($("#sCap").value), room: $("#sRoom").value, examiner: $("#sEx") ? $("#sEx").value : "" };
+    const du = Math.round(Number($("#sDur").value)), sp = Math.round(Number($("#sStep").value));
+    if (!(du >= 5 && du <= 240) || !(sp >= 5 && sp <= 240)){ $("#msg").innerHTML = errBox("Durée et intervalle : entre 5 et 240 minutes."); b.disabled = false; b.textContent = "Ajouter"; return; }
+    const session = { dur: du, step: sp, start: $("#sStart").value, count: Number($("#sCount").value), cap: Number($("#sCap").value), room: $("#sRoom").value, examiner: $("#sEx") ? $("#sEx").value : "" };
     if (type === "rec"){ const k = allQ.find(k => k.n === Number($("#sFrom").value)); Object.assign(session, { weekday: Number($("#sDay").value), week: $("#sWeek").value, from: k ? [...(Y.kholles[k.n - (Y.firstNumber || 1)])].sort()[0] : "" }); }
     else Object.assign(session, { date: $("#sDate").value, q: Number($("#sQ").value) });
     const r = await sessionCall({ action: "addSession", year, session }, "Séance ajoutée.");
