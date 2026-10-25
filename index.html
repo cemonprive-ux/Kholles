@@ -435,7 +435,7 @@ textarea.field.area{width:100%;min-height:220px;padding:12px 14px;border-radius:
 .pdate b{font-size:20px}
 .pbody{flex:1;min-width:0;font-size:13.5px;color:var(--ink-2)}
 .pbody b{font-size:15px;color:var(--ink)}
-.sgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.sgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px 10px}
 .scell{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 6px;border:1px solid var(--line);border-radius:16px;background:var(--surface);text-align:center;text-decoration:none;color:inherit;box-shadow:var(--shadow)}
 .scell.off{background:var(--surface-2);box-shadow:none;color:var(--muted)}
 .scell.off .se{opacity:.55}
@@ -443,6 +443,12 @@ textarea.field.area{width:100%;min-height:220px;padding:12px 14px;border-radius:
 .sl{font-size:13px;font-weight:700}
 .ss{font-size:11.5px;color:var(--accent);font-weight:700}
 .ss.ok{color:var(--ok)}
+.scell{position:relative}
+.scell.todo{border:1.5px solid #F59E0B;background:var(--warn-soft)}
+.ss.warn{color:var(--warn)}
+.skipbar .btn.sm{margin-top:8px;min-height:38px;padding:6px 12px;font-size:13.5px;width:auto}
+.skipbar .linkbtn{display:inline;padding:0;border:0;background:none;color:var(--accent);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}
+.sbadge{position:absolute;top:-9px;left:50%;transform:translateX(-50%);padding:2px 9px;border-radius:999px;background:#F59E0B;color:#fff;font-size:11px;font-weight:700;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.12)}
 .scell.off .ss{color:var(--muted);font-weight:600}
 .pill.mine{background:var(--ok);color:#fff}
 /* Créneaux à plusieurs places */
@@ -700,7 +706,7 @@ body.previewing #view{padding-bottom:84px}
    les matières et les listes d'étudiants sont gérés dans l'appli (espace Gestion,
    espace enseignant) et enregistrés sur le serveur : ce bloc ne sert qu'à la mise en service.
    ===================================================================== */
-const APP_VERSION = "2026.10.16-5";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.25-2";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   API_URL: "https://khollapp.cemonprive.workers.dev/",
@@ -970,6 +976,32 @@ function slotStatus(s, now = new Date()){
   if (now < winStart(s)) return "notyet";
   if (now < winEnd(s) && !(state.opened[s.year] || {})[s.q]) return "notyet";
   return "open";
+}
+// Rappel « À réserver » : khôlle ouverte où l'étudiant n'est pas inscrit, en tenant compte de la fréquence de la matière.
+// Fréquence = effectif de la liste ÷ places moyennes par khôlle : si 21 étudiants pour 12 places, chacun passe une khôlle sur deux.
+function kholleEvery(year){
+  const ks = khollesFor(year).filter(k => k.slots.length), n = (CONFIG.YEARS[year].students || []).length;
+  if (!ks.length || !n) return 1;
+  const cap = ks.reduce((a, k) => a + k.slots.reduce((x, s) => x + s.cap, 0), 0) / ks.length;
+  return Math.max(1, Math.round(n / Math.max(1, cap)));   // 18 élèves / 17 places → 1 ; 21 / 12 → 2
+}
+// Rappels masqués par l'étudiant (« Je n'ai pas besoin de m'inscrire à cette khôlle »), sur cet appareil
+const SKIP = {
+  all(){ return store.get("khollapp-skip") || {}; },
+  has(name, year, q){ return !!((this.all()[name] || {})[year + "|" + q]); },
+  set(name, year, q, on){ const a = this.all(), m = a[name] || {}; if (on) m[year + "|" + q] = Date.now(); else delete m[year + "|" + q]; a[name] = m; store.set("khollapp-skip", a); }
+};
+function toBookFor(year, name, now = new Date(), ignoreSkip = false){
+  const mineQ = new Set(allBookings(year).filter(b => b.student === name).map(b => Number(b.q))), every = kholleEvery(year);
+  const near = (n) => { for (let i = 1; i < every; i++) if (mineQ.has(n - i) || mineQ.has(n + i)) return true; return false; };
+  // Khôlle en cours : la première qui a encore des créneaux à venir. Si elle est complète, on passe à la suivante.
+  for (const k of khollesFor(year).filter(k => k.slots.some(s => s.startsAt > now))) {
+    if (mineQ.has(k.n) || near(k.n)) return null;            // inscrit (ou inscrit dans la même période) : pas de rappel
+    const mine = k.slots.filter(s => s.startsAt > now && (!s.only || s.only.includes(name)));
+    if (mine.some(s => slotStatus(s, now) === "open" && takers(s).length < s.cap)) return (!ignoreSkip && SKIP.has(name, year, k.n)) ? null : k;
+    if (mine.some(s => slotStatus(s, now) === "notyet")) return null;   // pas encore ouverte
+  }
+  return null;
 }
 function windowKholles(year, now = new Date()){ return khollesFor(year).filter(k => k.slots.length && inWindow(k.slots[0], now)); }
 const openLabel = (s) => fmtDate(s.opensAt) + " entre " + hourWin(s.openHour ?? CONFIG.OPEN_FROM_HOUR);
@@ -1549,7 +1581,8 @@ async function renderMe(force){
         ${subjects.map(m => {
           const y = m.years && m.years[me.promo];
           if (!y) return `<span class="scell off"><span class="se">${esc(m.emoji)}</span><span class="sl">${esc(m.label)}</span><span class="ss">Bientôt</span></span>`;
-          const k = mine(y);
+          const k = mine(y), todo = toBookFor(y, me.name, now);
+          if (todo) return `<a class="scell todo" href="#/${y}/k/${todo.n}"><span class="sbadge">À réserver</span><span class="se">${esc(m.emoji)}</span><span class="sl">${esc(m.label)}</span><span class="ss warn">Khôlle ${todo.n} ouverte</span></a>`;
           return `<a class="scell" href="#/${y}"><span class="se">${esc(m.emoji)}</span><span class="sl">${esc(m.label)}</span><span class="ss${k ? " ok" : ""}">${k ? plural(k, "# khôlle à venir", "# khôlles à venir") : "Réserver"}</span></a>`;
         }).join("")}
       </div>
@@ -1692,6 +1725,12 @@ function renderQuinzaine(year, n){
   const multi = q.slots.some(s => s.cap > 1);
   let html = cancelBanner(year, n) + (viewer ? swapBanner(me, [year]) : "");
   if (viewer){ const ms = mySwap(year, n, viewer); if (ms) html += `<div class="alert swapc">${ICON.swap}<span>Votre demande d'échange est en cours (${plural(ms.wants.length, "# créneau proposé", "# créneaux proposés")}).</span></div>`; }
+  if (viewer){
+    const due = toBookFor(year, viewer, now, true);
+    if (due && due.n === n) html += SKIP.has(viewer, year, n)
+      ? `<div class="alert info skipbar">${ICON.info}<span>Rappel « À réserver » masqué pour cette khôlle. <button class="linkbtn" id="skipOff" type="button">Réactiver le rappel</button></span></div>`
+      : `<div class="alert warn skipbar">${ICON.warn}<span><b>Vous n'êtes pas encore inscrit(e) à cette khôlle.</b> Choisissez un créneau ci-dessous.<br><button class="btn outline sm" id="skipOn" type="button">Je n'ai pas besoin de m'inscrire à cette khôlle</button></span></div>`;
+  }
   if (multi){
     const tot = q.slots.filter(s => slotStatus(s, now) !== "cancelled").reduce((a, s) => a + s.cap, 0), used = q.slots.filter(s => slotStatus(s, now) !== "cancelled").reduce((a, s) => a + takers(s).length, 0);
     html += `<div class="fillcard"><div class="fc-top"><span>Places restantes</span><b>${tot - used} sur ${tot}</b></div><div class="fc-bar"><i style="width:${tot ? Math.round(used / tot * 100) : 0}%"></i></div></div>`;
@@ -1714,6 +1753,9 @@ function renderQuinzaine(year, n){
   });
   $("#view").innerHTML = html + footHTML();
   bindSwapButtons();
+  const sOn = $("#skipOn"), sOff = $("#skipOff");
+  if (sOn) sOn.onclick = () => { SKIP.set(viewer, year, n, true); toast("Rappel masqué pour la Khôlle " + n + "."); renderQuinzaine(year, n); };
+  if (sOff) sOff.onclick = () => { SKIP.set(viewer, year, n, false); toast("Rappel réactivé."); renderQuinzaine(year, n); };
   $$(".slot").forEach(el => el.addEventListener("click", () => {
     const s = SLOT_INDEX[el.dataset.id]; if (!s) return;
     const st = slotStatus(s), t = takers(s);
