@@ -716,7 +716,7 @@ body.previewing #view{padding-bottom:84px}
    les matières et les listes d'étudiants sont gérés dans l'appli (espace Gestion,
    espace enseignant) et enregistrés sur le serveur : ce bloc ne sert qu'à la mise en service.
    ===================================================================== */
-const APP_VERSION = "2026.10.26-1";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.26-2";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   API_URL: "https://khollapp.cemonprive.workers.dev/",
@@ -3297,7 +3297,45 @@ function openViewAs(){
   };
   paint();
 }
+function openViewAsTeacher(){
+  const subs = CONFIG.SUBJECTS.filter(m => m.open && (state.adm.teachers || []).some(t => t.subject === m.key));
+  let subject = (subs[0] || {}).key || "";
+  const paint = () => {
+    const list = (state.adm.teachers || []).filter(t => t.subject === subject);
+    openSheet(`
+      <h4 id="sheetTitle">${ICON.lock} Vue enseignant</h4>
+      <p class="meta">Voyez l'appli exactement comme l'enseignant choisi : son espace, ses séances, ses étudiants, ses documents. <b>Consultation seule</b> : aucune annulation ni modification n'est possible.</p>
+      <label class="lbl">Matière</label>
+      <div class="chips">${subs.map(m => `<button class="chip${m.key === subject ? " on" : ""}" data-vs="${esc(m.key)}" type="button">${esc((m.emoji ? m.emoji + " " : "") + m.label)}</button>`).join("")}</div>
+      <label class="lbl" for="whoT">Enseignant</label>
+      <div class="selectwrap"><select id="whoT"><option value="">Choisissez un enseignant…</option>${list.map(t => `<option value="${t.id}">${esc(t.name)}${t.role === "resp" ? " · responsable" : ""}</option>`).join("")}</select>${ICON.down}</div>
+      <div class="msg" id="msg"></div>
+      <div class="actions"><button class="btn primary" id="go" disabled>Ouvrir la vue enseignant</button><button class="btn ghost" id="close">Annuler</button></div>`);
+    $("#close").onclick = closeSheet;
+    document.querySelectorAll("#sheet [data-vs]").forEach(b => b.onclick = () => { subject = b.dataset.vs; paint(); });
+    $("#whoT").onchange = () => { $("#go").disabled = !$("#whoT").value; };
+    $("#go").onclick = async () => {
+      const b = $("#go"); b.disabled = true;
+      let r; try { r = await aCall({ action: "adminViewAsTeacher", id: Number($("#whoT").value) }); } catch(e){ r = { ok: false, error: "Connexion impossible." }; }
+      if (r.auth){ closeSheet(); return adminExpired(); }
+      if (!r.ok){ $("#msg").innerHTML = errBox(esc(r.error || "Erreur.")); b.disabled = false; return; }
+      try { sessionStorage.setItem("khollapp-prev-teacher", JSON.stringify(AUTH.teacher || null)); sessionStorage.removeItem("khollapp-tsub"); } catch(e){}
+      AUTH.teacher = Object.assign({ token: r.token, preview: true }, r.profile);
+      resetTeacherState(); closeSheet(); location.hash = "#/prof";
+    };
+  };
+  if (!subs.length) return toast("Aucun enseignant à afficher.");
+  paint();
+}
+function resetTeacherState(){ setAct(""); state.tYear = null; state.tEx = null; state.journal = null; state.archive = null; state.grades = null; state.tdocs = null; state.tQ = {}; }
+function exitTeacherPreview(){
+  let prev = null; try { prev = JSON.parse(sessionStorage.getItem("khollapp-prev-teacher") || "null"); sessionStorage.removeItem("khollapp-prev-teacher"); sessionStorage.removeItem("khollapp-tsub"); } catch(e){}
+  AUTH.teacher = prev && !prev.preview ? prev : null;
+  resetTeacherState();
+  location.hash = "#/gestion";
+}
 function exitPreview(){
+  if (AUTH.teacher && AUTH.teacher.preview && !(AUTH.student && AUTH.student.preview)) return exitTeacherPreview();
   let prev = null; try { prev = JSON.parse(sessionStorage.getItem("khollapp-prev-student") || "null"); sessionStorage.removeItem("khollapp-prev-student"); } catch(e){}
   AUTH.student = prev && !prev.preview ? prev : null;
   state.docs = null;
@@ -3305,11 +3343,12 @@ function exitPreview(){
 }
 function previewBanner(){
   let el = document.getElementById("pvbar");
-  const me = AUTH.student;
-  if (!me || !me.preview){ if (el) el.remove(); document.body.classList.remove("previewing"); return; }
+  const st = AUTH.student, te = AUTH.teacher;
+  const me = st && st.preview ? st : te && te.preview ? te : null, who = me === te ? "enseignant" : "étudiant";
+  if (!me){ if (el) el.remove(); document.body.classList.remove("previewing"); return; }
   if (!el){ el = document.createElement("div"); el.id = "pvbar"; document.body.appendChild(el); }
   document.body.classList.add("previewing");
-  el.innerHTML = `<span>👁 Vue étudiant : <b>${esc(me.name)}</b> · consultation seule</span><button type="button" id="pvExit">Quitter</button>`;
+  el.innerHTML = `<span>👁 Vue ${who} : <b>${esc(me.name)}</b> · consultation seule</span><button type="button" id="pvExit">Quitter</button>`;
   el.querySelector("#pvExit").onclick = exitPreview;
 }
 
@@ -3512,6 +3551,7 @@ function openBooked(s){
 /* ====================================================================== */
 const tCall = (payload) => { const c = TCTX(); return API.post(Object.assign({ token: c.token, subject: c.subject }, payload)); };
 function teacherExpired(){
+  if (AUTH.teacher && AUTH.teacher.preview) return exitTeacherPreview();
   const c = TCTX();
   if (c && c.admin){ AUTH.admin = null; setAct(""); location.hash = "#/gestion"; }
   else { AUTH.teacher = null; location.hash = "#/prof"; }
@@ -3679,7 +3719,7 @@ function bindProfActions(c){
   bindAdminStrip();
   loadGrades(c).then(() => { const el = $("#noteCount"), n = toGradeCount(c); if (el) el.innerHTML = n ? `<span class="newpill" style="margin:0">${plural(n, "# séance à noter", "# séances à noter")}</span>` : "Saisir et consulter"; }).catch(() => {});
   const pa = $("#profAlerts"); if (pa) pa.onclick = openTeacherAlerts;
-  const lo = $("#logout"); if (lo) lo.onclick = () => { AUTH.teacher = null; state.journal = null; state.archive = null; location.hash = "#/"; toast("Déconnecté."); };
+  const lo = $("#logout"); if (lo) lo.onclick = () => { if (AUTH.teacher && AUTH.teacher.preview) return exitTeacherPreview(); AUTH.teacher = null; state.journal = null; state.archive = null; location.hash = "#/"; toast("Déconnecté."); };
   const q2 = $("#quitAct2"); if (q2) q2.onclick = () => setAct("");
 }
 const exportUrl = (what) => { const c = TCTX(); return CONFIG.API_URL + "?action=export&what=" + what + "&token=" + encodeURIComponent(c ? c.token : "") +  (c ? "&subject=" + encodeURIComponent(c.subject) : ""); };
@@ -4261,12 +4301,14 @@ async function renderGestionRoute(sub, force){
       <a class="card gcard" href="#/gestion/matieres"><span class="num">${ICON.gear}</span><span><span class="t">Matières</span><br><span class="d">${plural(open.length, "# ouverte", "# ouvertes")} sur ${CONFIG.SUBJECTS.length}</span></span>${ICON.chev}</a>
       <a class="card gcard" href="#/gestion/vacances"><span class="num">${ICON.sun}</span><span><span class="t">Vacances et jours fériés</span><br><span class="d">${plural(CONFIG.CLOSED.length, "# période", "# périodes")}</span></span>${ICON.chev}</a>
       <button class="card gcard" id="viewAs" type="button"><span class="num">${ICON.users}</span><span><span class="t">Vue étudiant</span><br><span class="d">Voir l'appli comme un étudiant (consultation seule)</span></span>${ICON.chev}</button>
+      <button class="card gcard" id="viewAsT" type="button"><span class="num">${ICON.lock}</span><span><span class="t">Vue enseignant</span><br><span class="d">Voir l'appli comme un enseignant (consultation seule)</span></span>${ICON.chev}</button>
       <a class="card gcard" href="#/gestion/journal"><span class="num">${ICON.list}</span><span><span class="t">Journal général</span><br><span class="d">Toutes les matières</span></span>${ICON.chev}</a>
       ${locked.map(s => `<button class="card gcard warnc" data-unlock="${s.id}"><span class="num">${ICON.warn}</span><span><span class="t">Compte ${acc("bloqué", s.gender)}</span><br><span class="d">${esc(s.name)} · trop d'essais</span></span><span class="sbtn cancel">Débloquer</span></button>`).join("")}
     </div>
     <div class="foot"><button class="linkbtn" id="alogout" style="border:0;background:none;cursor:pointer">${ICON.out} Quitter la Gestion</button></div>`;
   $$("[data-act]").forEach(b => b.onclick = () => { setAct(b.dataset.act); state.tYear = null; state.tEx = null; state.journal = null; location.hash = "#/prof"; });
   const va = $("#viewAs"); if (va) va.onclick = openViewAs;
+  const vt = $("#viewAsT"); if (vt) vt.onclick = openViewAsTeacher;
   $$("[data-unlock]").forEach(b => b.onclick = async () => { const r = await aCall({ action: "updateStudent", id: Number(b.dataset.unlock), unlock: true, gender: (adm.students.find(s => s.id === Number(b.dataset.unlock)) || {}).gender }); if (r.ok){ toast("Compte débloqué."); renderGestionRoute("", true); } });
   $("#alogout").onclick = () => { AUTH.admin = null; state.adm = null; location.hash = "#/"; toast("Gestion fermée."); };
 }
