@@ -410,6 +410,11 @@ details.vscript[open]>summary>svg:last-child{transform:rotate(180deg)}
 .lisere{display:block;width:100%;height:auto}
 @media (prefers-color-scheme: dark){.lisere-wrap{color:#3A4456}}
 .linkbtn.gest{font-size:12px;min-height:32px;gap:6px;margin-top:2px}.linkbtn.gest svg{width:15px;height:15px;color:#8A94A3}
+.nobtn{display:flex;align-items:center;gap:10px;width:100%;min-height:46px;padding:10px 14px;margin:0 0 12px;border:1.5px solid var(--accent);border-radius:14px;background:var(--accent-soft);color:var(--accent);font:inherit;font-weight:700;font-size:14.5px;text-align:left;cursor:pointer}
+.nobtn svg{width:20px;height:20px;flex:none}.nobtn span{flex:1}
+.nobtn b{min-width:26px;padding:2px 9px;border-radius:999px;background:var(--accent);color:#fff;font-size:13px;text-align:center}
+.nobtn.done{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}.nobtn.done b{background:var(--ok)}
+.nocount{margin:0 0 8px;font-size:13px;font-weight:700;color:var(--err)}
 .linkbtn.faint{color:var(--muted);font-size:13px;min-height:36px}
 .card.tch .num{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
 .card.tch .num svg{width:26px;height:26px}
@@ -717,7 +722,7 @@ body.previewing #view{padding-bottom:84px}
    les matières et les listes d'étudiants sont gérés dans l'appli (espace Gestion,
    espace enseignant) et enregistrés sur le serveur : ce bloc ne sert qu'à la mise en service.
    ===================================================================== */
-const APP_VERSION = "2026.10.26-3";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.26-4";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   API_URL: "https://khollapp.cemonprive.workers.dev/",
@@ -3657,7 +3662,8 @@ async function renderProf(force){
         <span><b>Khôlle ${q.n}</b><br><small>${esc(fmtDates(q.days.map(x => x.date)))}</small></span>
         <button class="iconbtn2" id="qNext" ${idx < qs.length - 1 ? "" : "disabled"} aria-label="Khôlle suivante">${ICON.chev}</button>
       </div>
-      <div class="stats"><span><b>${used}/${seats}</b>inscrits</span><span><b class="ok">${seats - used}</b>${seats - used > 1 ? "places libres" : "place libre"}</span><span><b class="${nCx ? "err" : ""}">${nCx}</b>${nCx > 1 ? "annulées" : "annulée"}</span></div>`;
+      <div class="stats"><span><b>${used}/${seats}</b>inscrits</span><span><b class="ok">${seats - used}</b>${seats - used > 1 ? "places libres" : "place libre"}</span><span><b class="${nCx ? "err" : ""}">${nCx}</b>${nCx > 1 ? "annulées" : "annulée"}</span></div>`
+      + (c.subject === "anglais" ? (() => { const nn = unregistered(year, q.n).length; return `<button class="nobtn${nn ? "" : " done"}" id="whoNot" type="button">${ICON.users}<span>Qui n'est pas encore inscrit ?</span><b>${nn}</b></button>`; })() : "");
     const qOpen = q.slots.some(s => slotStatus(s, now) === "open" || slotStatus(s, now) === "past");
     if (c.isResp && !qOpen && !khollePast(q, now)) html += `<div class="openbar"><span>${ICON.lock} Réservations : ${esc(openShort(q.slots[0]))}</span><button class="sbtn" id="openNow" type="button">Ouvrir maintenant</button></div>`;
     q.days.forEach((day, i) => {
@@ -3687,10 +3693,38 @@ async function renderProf(force){
   const pv = $("#qPrev"), nx = $("#qNext");
   if (pv) pv.onclick = () => { const i = qs.findIndex(x => x.n === qn); state.tQ[year] = qs[i - 1].n; renderProf(); };
   const on = $("#openNow"); if (on) on.onclick = () => openNowSheet(c, year, qn);
+  const wn = $("#whoNot"); if (wn) wn.onclick = () => openNotRegistered(year, qn);
   if (nx) nx.onclick = () => { const i = qs.findIndex(x => x.n === qn); state.tQ[year] = qs[i + 1].n; renderProf(); };
   $$(".tslot").forEach(el => el.onclick = () => { const s = SLOT_INDEX[el.dataset.id]; if (s) openTeacherSlot(s); });
   $$("[data-topic]").forEach(b => b.onclick = () => openTopic(c, year, b.dataset.topic, Number(b.dataset.q)));
   bindProfActions(c);
+}
+// Étudiants de la liste de la matière sans inscription à la khôlle n
+function unregistered(year, n){
+  const Y = CONFIG.YEARS[year], done = new Set(allBookings(year).filter(b => Number(b.q) === n).map(b => b.student));
+  return promoStudents(Y.promo).filter(nm => inRoster(year, nm) && !done.has(nm));
+}
+function openNotRegistered(year, n){
+  const qs = khollesFor(year), idx = Math.max(0, qs.findIndex(x => x.n === n)), q = qs[idx];
+  if (!q) return;
+  const Y = CONFIG.YEARS[year], list = unregistered(year, q.n), total = promoStudents(Y.promo).filter(nm => inRoster(year, nm)).length;
+  openSheet(`
+    <h4 id="sheetTitle">${ICON.users} Qui n'est pas encore inscrit ?</h4>
+    <p class="meta">${esc(subjectMeta(subjectOfYear(year)).label)} · ${esc(Y.label)}</p>
+    <div class="qnav">
+      <button class="iconbtn2" id="nqPrev" type="button" ${idx ? "" : "disabled"} aria-label="Khôlle précédente">${ICON.chev}</button>
+      <span><b>Khôlle ${q.n}</b><br><small>${esc(fmtDates(q.days.map(x => x.date)))}</small></span>
+      <button class="iconbtn2" id="nqNext" type="button" ${idx < qs.length - 1 ? "" : "disabled"} aria-label="Khôlle suivante">${ICON.chev}</button>
+    </div>
+    ${list.length
+      ? `<p class="nocount">${plural(list.length, "# étudiant sans inscription", "# étudiants sans inscription")}</p><div class="group">${list.map(nm => `<div class="trow"><span>${esc(nm)}</span></div>`).join("")}</div>`
+      : `<div class="alert info">${ICON.info}<span>Tous les étudiants sont inscrits (${total}/${total}).</span></div>`}
+    <div class="actions"><button class="btn ghost" id="close" type="button">Fermer</button></div>`);
+  $("#close").onclick = closeSheet;
+  const go = (i) => () => { state.tQ[year] = qs[i].n; openNotRegistered(year, qs[i].n); const v = location.hash; if (v === "#/prof") renderProf(); };
+  const pv = $("#nqPrev"), nx = $("#nqNext");
+  if (pv && idx) pv.onclick = go(idx - 1);
+  if (nx && idx < qs.length - 1) nx.onclick = go(idx + 1);
 }
 function profActions(c){
   const nCancel = upcomingCancels(subjectYears(c.subject)).length, a = PUSH.get("khollapp-alerts-prof");
