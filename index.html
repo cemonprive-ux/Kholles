@@ -722,7 +722,7 @@ body.previewing #view{padding-bottom:84px}
    les matières et les listes d'étudiants sont gérés dans l'appli (espace Gestion,
    espace enseignant) et enregistrés sur le serveur : ce bloc ne sert qu'à la mise en service.
    ===================================================================== */
-const APP_VERSION = "2026.10.26-5";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.26-6";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   API_URL: "https://khollapp.cemonprive.workers.dev/",
@@ -3663,7 +3663,7 @@ async function renderProf(force){
         <button class="iconbtn2" id="qNext" ${idx < qs.length - 1 ? "" : "disabled"} aria-label="Khôlle suivante">${ICON.chev}</button>
       </div>
       <div class="stats"><span><b>${used}/${seats}</b>inscrits</span><span><b class="ok">${seats - used}</b>${seats - used > 1 ? "places libres" : "place libre"}</span><span><b class="${nCx ? "err" : ""}">${nCx}</b>${nCx > 1 ? "annulées" : "annulée"}</span></div>`
-      + (c.subject === "anglais" ? (() => { const nn = unregistered(year, q.n).length; return `<button class="nobtn${nn ? "" : " done"}" id="whoNot" type="button">${ICON.users}<span>Qui n'est pas encore inscrit ?</span><b>${nn}</b></button>`; })() : "");
+      + (NOTREG_SUBJECTS.includes(c.subject) ? (() => { const nn = unregistered(year, q.n).length; return `<button class="nobtn${nn ? "" : " done"}" id="whoNot" type="button">${ICON.users}<span>Qui n'est pas encore inscrit ?</span><b>${nn}</b></button>`; })() : "");
     const qOpen = q.slots.some(s => slotStatus(s, now) === "open" || slotStatus(s, now) === "past");
     if (c.isResp && !qOpen && !khollePast(q, now)) html += `<div class="openbar"><span>${ICON.lock} Réservations : ${esc(openShort(q.slots[0]))}</span><button class="sbtn" id="openNow" type="button">Ouvrir maintenant</button></div>`;
     q.days.forEach((day, i) => {
@@ -3699,6 +3699,7 @@ async function renderProf(force){
   $$("[data-topic]").forEach(b => b.onclick = () => openTopic(c, year, b.dataset.topic, Number(b.dataset.q)));
   bindProfActions(c);
 }
+const NOTREG_SUBJECTS = ["anglais", "espagnol"];   // matières où « Qui n'est pas encore inscrit ? » est proposé
 // Étudiants de la liste de la matière sans inscription à la khôlle n
 function unregistered(year, n){
   const Y = CONFIG.YEARS[year], done = new Set(allBookings(year).filter(b => Number(b.q) === n).map(b => b.student));
