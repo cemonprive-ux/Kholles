@@ -489,7 +489,7 @@ textarea.field.area{width:100%;min-height:220px;padding:12px 14px;border-radius:
 .iconbtn2{width:44px;height:44px;border:0;border-radius:10px;background:var(--surface-2);color:var(--ink-2);display:grid;place-items:center;cursor:pointer}
 .iconbtn2:disabled{opacity:.35;cursor:default}
 .iconbtn2 svg{width:20px;height:20px}
-#qPrev svg{transform:rotate(180deg)}
+#qPrev svg,#nqPrev svg{transform:rotate(180deg)}
 .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
 .stats>span{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 6px;text-align:center;font-size:12px;color:var(--muted);font-weight:700}
 .stats b{display:block;font-size:22px;color:var(--accent)}
@@ -722,7 +722,7 @@ body.previewing #view{padding-bottom:84px}
    les matières et les listes d'étudiants sont gérés dans l'appli (espace Gestion,
    espace enseignant) et enregistrés sur le serveur : ce bloc ne sert qu'à la mise en service.
    ===================================================================== */
-const APP_VERSION = "2026.10.26-4";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.26-5";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   API_URL: "https://khollapp.cemonprive.workers.dev/",
