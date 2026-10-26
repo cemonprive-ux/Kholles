@@ -409,6 +409,7 @@ details.vscript[open]>summary>svg:last-child{transform:rotate(180deg)}
 .lisere-wrap{margin:8px -4px 0;color:#B9B3CF}
 .lisere{display:block;width:100%;height:auto}
 @media (prefers-color-scheme: dark){.lisere-wrap{color:#3A4456}}
+.linkbtn.gest{font-size:12px;min-height:32px;gap:6px;margin-top:2px}.linkbtn.gest svg{width:15px;height:15px;color:#8A94A3}
 .linkbtn.faint{color:var(--muted);font-size:13px;min-height:36px}
 .card.tch .num{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
 .card.tch .num svg{width:26px;height:26px}
@@ -716,7 +717,7 @@ body.previewing #view{padding-bottom:84px}
    les matières et les listes d'étudiants sont gérés dans l'appli (espace Gestion,
    espace enseignant) et enregistrés sur le serveur : ce bloc ne sert qu'à la mise en service.
    ===================================================================== */
-const APP_VERSION = "2026.10.26-2";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.26-3";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   API_URL: "https://khollapp.cemonprive.workers.dev/",
@@ -1145,6 +1146,7 @@ Object.assign(ICON, {
   users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2 .7 3 2.8 3 6"/></svg>',
   plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
   out: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>',
+  cog: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
   gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
   swap: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h14l-4-4M20 16H6l4 4"/></svg>',
   link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3.2-3.2a4.5 4.5 0 0 0-6.4-6.4L12 5.6"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3.2 3.2a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2"/></svg>',
@@ -1409,11 +1411,12 @@ const heroHTML = (tag1, tag2) => `
       <p class="tag1">${tag1}</p>
       <p class="tag2">${tag2}</p>
     </div>`;
-const footHTML = (extra = "") => `
+const footHTML = (extra = "", afterCredit = "") => `
     <div class="foot">
       ${extra}
       <a class="linkbtn" href="guide-etudiants.html">${ICON.info} Mode d'emploi</a>
       <p class="credit">🚀 Powered by Maxens Blanchet</p>
+      ${afterCredit}
       <p class="credit" style="opacity:.6;font-size:11px">Version ${APP_VERSION}</p>
     </div>`;
 const alertsCardHTML = () => { const a = PUSH.get("khollapp-alerts"), me = AUTH.student, on = a && me && a.student === me.name; return `
@@ -1447,7 +1450,7 @@ function renderHome(){
         ${ICON.chev}
       </a>
     </div>
-    ${footHTML(`<a class="linkbtn faint" href="#/gestion">Gestion</a>`)}
+    ${footHTML("", `<a class="linkbtn gest" href="#/gestion">${ICON.cog} Gestion</a>`)}
     <div class="lisere-wrap">${LISERE}</div>`;
 }
 
