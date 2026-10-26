@@ -674,6 +674,16 @@ body.previewing #view{padding-bottom:84px}
 .pl-s.todo{color:#fff;background:var(--accent);padding:4px 9px;border-radius:999px}
 .pl-s.wait{color:var(--muted)}
 .pl-row.ok .pl-k{background:var(--ok-soft);color:var(--ok)}
+/* Tout mon planning : une rubrique repliable par semaine */
+.wk{border:1px solid var(--line);border-radius:16px;background:var(--surface-2);overflow:hidden}
+.wk>summary{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;list-style:none;font-weight:700;font-size:14.5px;background:var(--surface)}
+.wk>summary::-webkit-details-marker{display:none}
+.wk .wl{flex:1;min-width:0}.wk .wl small{display:block;color:var(--muted);font-weight:600;font-size:12px}
+.wk .wtag{flex:none;font-size:11px;font-weight:700;color:#fff;background:var(--accent);padding:3px 8px;border-radius:999px}
+.wk>summary>svg{width:18px;height:18px;color:var(--accent);flex:none;transition:transform .2s}
+.wk[open]>summary>svg{transform:rotate(180deg)}
+.wk[open]>summary{border-bottom:1px solid var(--line)}
+.wk-b{display:grid;gap:8px;padding:10px}
 </style>
 </head>
 <body>
@@ -706,7 +716,7 @@ body.previewing #view{padding-bottom:84px}
    les matières et les listes d'étudiants sont gérés dans l'appli (espace Gestion,
    espace enseignant) et enregistrés sur le serveur : ce bloc ne sert qu'à la mise en service.
    ===================================================================== */
-const APP_VERSION = "2026.10.25-2";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.26-1";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   API_URL: "https://khollapp.cemonprive.workers.dev/",
@@ -1540,6 +1550,7 @@ function countdown(s, now = new Date()){
   return "Dans " + days + " jours";
 }
 async function renderMe(force){
+  if (!force){ planWk = {}; planWasOpen = false; }   // « Tout mon planning » repart de l'état par défaut
   const me = AUTH.student;
   if (!me){ location.replace("#/"); return; }
   checkStudent();
@@ -1548,15 +1559,27 @@ async function renderMe(force){
   const years = promoYears(me.promo);
   const paint = () => {
     const now = new Date(), list = myUpcoming(me, now), next = list[0], rest = list.slice(1);
-    let restHTML = "";
+    // « Tout mon planning » : une rubrique repliable par semaine (lundi → dimanche), semaine en cours dépliée par défaut
+    const weeks = [];
     rest.forEach((s, i) => {
       const prev = i === 0 ? next : rest[i - 1];
-      restHTML += bandHTML(closedBetween(prev.dateISO, s.dateISO));
-      restHTML += `<a class="prow" href="#/${s.year}/k/${s.q}">
+      const mon = mondayOf(s.date), key = iso(mon);
+      let w = weeks[weeks.length - 1];
+      if (!w || w.key !== key){ w = { key, mon, n: 0, html: "" }; weeks.push(w); }
+      w.n++;
+      w.html += bandHTML(closedBetween(prev.dateISO, s.dateISO));
+      w.html += `<a class="prow" href="#/${s.year}/k/${s.q}">
         <span class="pdate"><span>${JOURS[s.date.getDay()].slice(0, 3)}.</span><b>${s.date.getDate()}</b><span>${MOIS_C[s.date.getMonth()]}</span></span>
         <span class="pbody"><b>${esc(subjEmoji(subjectOfYear(s.year)))} ${esc(CONFIG.YEARS[s.year].subjectLabel)} · Khôlle ${s.q}</b><br><span>${esc(s.label)} · ${esc(exName(s.year, s.examiner))} · ${esc(s.room)}</span></span>
         ${ICON.chev}</a>`;
     });
+    const curWeek = iso(mondayOf(now));
+    const restHTML = weeks.map(w => {
+      const open = w.key in planWk ? planWk[w.key] : w.key === curWeek;
+      return `<details class="wk" data-wk="${w.key}"${open ? " open" : ""}>
+        <summary><span class="wl">Semaine du ${esc(fmtRange(w.key, iso(addDays(w.mon, 6))).replace(" – ", " au "))}<small>${plural(w.n, "# khôlle", "# khôlles")}</small></span>${w.key === curWeek ? '<span class="wtag">En cours</span>' : ""}${ICON.down}</summary>
+        <div class="wk-b">${w.html}</div></details>`;
+    }).join("");
     const subjects = CONFIG.SUBJECTS.slice().sort((a, b) => a.label.localeCompare(b.label, "fr", { sensitivity: "base" }))
       .filter(m => { const y = m.years && m.years[me.promo];
         // Matière à liste (LV2) sans planning dans cette classe : masquée (pas de tuile « Bientôt »)
@@ -3293,6 +3316,7 @@ function previewBanner(){
 
 /* ---------- Ma page : planning complet (repliable), chronologique ou par matière ---------- */
 const PLAN_KEY = "khollapp-plan";
+let planWk = {}, planWasOpen = false;   // état des semaines (en mémoire) : par défaut = semaine en cours dépliée, les autres repliées
 const planPref = () => { try { return JSON.parse(localStorage.getItem(PLAN_KEY) || "{}"); } catch(e){ return {}; } };
 const setPlanPref = (o) => { try { localStorage.setItem(PLAN_KEY, JSON.stringify(Object.assign(planPref(), o))); } catch(e){} };
 function planBySubject(me, years, now){
@@ -3322,7 +3346,12 @@ function fullPlanHTML(me, years, restHTML, now){
 }
 function bindFullPlan(paint){
   const d = $("#fullPlan"); if (!d) return;
-  d.addEventListener("toggle", () => setPlanPref({ open: d.open }));
+  d.addEventListener("toggle", () => {
+    setPlanPref({ open: d.open });
+    if (d.open && !planWasOpen) planWk = {};   // à chaque ouverture de « Tout mon planning » : retour à l'état par défaut
+    planWasOpen = d.open;
+  });
+  $$("details.wk").forEach(w => w.addEventListener("toggle", () => { planWk[w.dataset.wk] = w.open; }));
   $$("[data-pt]").forEach(b => b.onclick = () => { setPlanPref({ tab: b.dataset.pt, open: true }); paint(); });
 }
 
