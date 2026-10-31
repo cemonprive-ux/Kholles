@@ -409,12 +409,6 @@ details.vscript[open]>summary>svg:last-child{transform:rotate(180deg)}
 .lisere-wrap{margin:8px -4px 0;color:#B9B3CF}
 .lisere{display:block;width:100%;height:auto}
 @media (prefers-color-scheme: dark){.lisere-wrap{color:#3A4456}}
-.linkbtn.gest{font-size:12px;min-height:32px;gap:6px;margin-top:2px}.linkbtn.gest svg{width:15px;height:15px;color:#8A94A3}
-.nobtn{display:flex;align-items:center;gap:10px;width:100%;min-height:46px;padding:10px 14px;margin:0 0 12px;border:1.5px solid var(--accent);border-radius:14px;background:var(--accent-soft);color:var(--accent);font:inherit;font-weight:700;font-size:14.5px;text-align:left;cursor:pointer}
-.nobtn svg{width:20px;height:20px;flex:none}.nobtn span{flex:1}
-.nobtn b{min-width:26px;padding:2px 9px;border-radius:999px;background:var(--accent);color:#fff;font-size:13px;text-align:center}
-.nobtn.done{border-color:var(--ok);background:var(--ok-soft);color:var(--ok)}.nobtn.done b{background:var(--ok)}
-.nocount{margin:0 0 8px;font-size:13px;font-weight:700;color:var(--err)}
 .linkbtn.faint{color:var(--muted);font-size:13px;min-height:36px}
 .card.tch .num{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line)}
 .card.tch .num svg{width:26px;height:26px}
@@ -489,7 +483,7 @@ textarea.field.area{width:100%;min-height:220px;padding:12px 14px;border-radius:
 .iconbtn2{width:44px;height:44px;border:0;border-radius:10px;background:var(--surface-2);color:var(--ink-2);display:grid;place-items:center;cursor:pointer}
 .iconbtn2:disabled{opacity:.35;cursor:default}
 .iconbtn2 svg{width:20px;height:20px}
-#qPrev svg,#nqPrev svg{transform:rotate(180deg)}
+#qPrev svg{transform:rotate(180deg)}
 .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
 .stats>span{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 6px;text-align:center;font-size:12px;color:var(--muted);font-weight:700}
 .stats b{display:block;font-size:22px;color:var(--accent)}
@@ -680,16 +674,6 @@ body.previewing #view{padding-bottom:84px}
 .pl-s.todo{color:#fff;background:var(--accent);padding:4px 9px;border-radius:999px}
 .pl-s.wait{color:var(--muted)}
 .pl-row.ok .pl-k{background:var(--ok-soft);color:var(--ok)}
-/* Tout mon planning : une rubrique repliable par semaine */
-.wk{border:1px solid var(--line);border-radius:16px;background:var(--surface-2);overflow:hidden}
-.wk>summary{display:flex;align-items:center;gap:10px;padding:11px 14px;cursor:pointer;list-style:none;font-weight:700;font-size:14.5px;background:var(--surface)}
-.wk>summary::-webkit-details-marker{display:none}
-.wk .wl{flex:1;min-width:0}.wk .wl small{display:block;color:var(--muted);font-weight:600;font-size:12px}
-.wk .wtag{flex:none;font-size:11px;font-weight:700;color:#fff;background:var(--accent);padding:3px 8px;border-radius:999px}
-.wk>summary>svg{width:18px;height:18px;color:var(--accent);flex:none;transition:transform .2s}
-.wk[open]>summary>svg{transform:rotate(180deg)}
-.wk[open]>summary{border-bottom:1px solid var(--line)}
-.wk-b{display:grid;gap:8px;padding:10px}
 </style>
 </head>
 <body>
@@ -722,7 +706,7 @@ body.previewing #view{padding-bottom:84px}
    les matières et les listes d'étudiants sont gérés dans l'appli (espace Gestion,
    espace enseignant) et enregistrés sur le serveur : ce bloc ne sert qu'à la mise en service.
    ===================================================================== */
-const APP_VERSION = "2026.10.26-6";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.10.31-1";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   API_URL: "https://khollapp.cemonprive.workers.dev/",
@@ -919,8 +903,9 @@ function sessionsFor(year, date, n, half, explicit){
   if (Y.overrides && Object.prototype.hasOwnProperty.call(Y.overrides, k)) return Y.overrides[k];
   const ponct = Y.sessions.filter(s => s.date === k && Number(s.q) === n);
   if (!explicit.has(k) || closedReason(k)) return ponct;
+  const repl = new Set(ponct.filter(s => s.replaces).map(s => s.examiner));   // séance ponctuelle qui remplace la séance régulière ce jour-là
   return Y.sessions.filter(s => !s.date && Number(s.weekday) === date.getDay() && (!s.week || !half || s.week === half)
-    && (!s.from || k >= s.from) && (!s.until || k <= s.until)).concat(ponct);
+    && (!s.from || k >= s.from) && (!s.until || k <= s.until) && !repl.has(s.examiner)).concat(ponct);
 }
 // Horaires supprimés d'une séance (s.off = [{ m, from }]) ; durée et pas des créneaux
 const isOffC = (s, min, dISO) => Array.isArray(s.off) && s.off.some(o => Number(o.m) === Number(min) && String(dISO) >= String(o.from || ""));
@@ -1151,7 +1136,6 @@ Object.assign(ICON, {
   users: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6M16 4.5a3.5 3.5 0 0 1 0 7M18 14c2 .7 3 2.8 3 6"/></svg>',
   plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>',
   out: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>',
-  cog: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>',
   gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
   swap: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h14l-4-4M20 16H6l4 4"/></svg>',
   link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4.5 4.5 0 0 0 6.4 0l3.2-3.2a4.5 4.5 0 0 0-6.4-6.4L12 5.6"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-3.2 3.2a4.5 4.5 0 0 0 6.4 6.4l1.2-1.2"/></svg>',
@@ -1416,12 +1400,11 @@ const heroHTML = (tag1, tag2) => `
       <p class="tag1">${tag1}</p>
       <p class="tag2">${tag2}</p>
     </div>`;
-const footHTML = (extra = "", afterCredit = "") => `
+const footHTML = (extra = "") => `
     <div class="foot">
       ${extra}
       <a class="linkbtn" href="guide-etudiants.html">${ICON.info} Mode d'emploi</a>
       <p class="credit">🚀 Powered by Maxens Blanchet</p>
-      ${afterCredit}
       <p class="credit" style="opacity:.6;font-size:11px">Version ${APP_VERSION}</p>
     </div>`;
 const alertsCardHTML = () => { const a = PUSH.get("khollapp-alerts"), me = AUTH.student, on = a && me && a.student === me.name; return `
@@ -1455,7 +1438,7 @@ function renderHome(){
         ${ICON.chev}
       </a>
     </div>
-    ${footHTML("", `<a class="linkbtn gest" href="#/gestion">${ICON.cog} Gestion</a>`)}
+    ${footHTML(`<a class="linkbtn faint" href="#/gestion">Gestion</a>`)}
     <div class="lisere-wrap">${LISERE}</div>`;
 }
 
@@ -1558,7 +1541,6 @@ function countdown(s, now = new Date()){
   return "Dans " + days + " jours";
 }
 async function renderMe(force){
-  if (!force){ planWk = {}; planWasOpen = false; }   // « Tout mon planning » repart de l'état par défaut
   const me = AUTH.student;
   if (!me){ location.replace("#/"); return; }
   checkStudent();
@@ -1567,27 +1549,15 @@ async function renderMe(force){
   const years = promoYears(me.promo);
   const paint = () => {
     const now = new Date(), list = myUpcoming(me, now), next = list[0], rest = list.slice(1);
-    // « Tout mon planning » : une rubrique repliable par semaine (lundi → dimanche), semaine en cours dépliée par défaut
-    const weeks = [];
+    let restHTML = "";
     rest.forEach((s, i) => {
       const prev = i === 0 ? next : rest[i - 1];
-      const mon = mondayOf(s.date), key = iso(mon);
-      let w = weeks[weeks.length - 1];
-      if (!w || w.key !== key){ w = { key, mon, n: 0, html: "" }; weeks.push(w); }
-      w.n++;
-      w.html += bandHTML(closedBetween(prev.dateISO, s.dateISO));
-      w.html += `<a class="prow" href="#/${s.year}/k/${s.q}">
+      restHTML += bandHTML(closedBetween(prev.dateISO, s.dateISO));
+      restHTML += `<a class="prow" href="#/${s.year}/k/${s.q}">
         <span class="pdate"><span>${JOURS[s.date.getDay()].slice(0, 3)}.</span><b>${s.date.getDate()}</b><span>${MOIS_C[s.date.getMonth()]}</span></span>
         <span class="pbody"><b>${esc(subjEmoji(subjectOfYear(s.year)))} ${esc(CONFIG.YEARS[s.year].subjectLabel)} · Khôlle ${s.q}</b><br><span>${esc(s.label)} · ${esc(exName(s.year, s.examiner))} · ${esc(s.room)}</span></span>
         ${ICON.chev}</a>`;
     });
-    const curWeek = iso(mondayOf(now));
-    const restHTML = weeks.map(w => {
-      const open = w.key in planWk ? planWk[w.key] : w.key === curWeek;
-      return `<details class="wk" data-wk="${w.key}"${open ? " open" : ""}>
-        <summary><span class="wl">Semaine du ${esc(fmtRange(w.key, iso(addDays(w.mon, 6))).replace(" – ", " au "))}<small>${plural(w.n, "# khôlle", "# khôlles")}</small></span>${w.key === curWeek ? '<span class="wtag">En cours</span>' : ""}${ICON.down}</summary>
-        <div class="wk-b">${w.html}</div></details>`;
-    }).join("");
     const subjects = CONFIG.SUBJECTS.slice().sort((a, b) => a.label.localeCompare(b.label, "fr", { sensitivity: "base" }))
       .filter(m => { const y = m.years && m.years[me.promo];
         // Matière à liste (LV2) sans planning dans cette classe : masquée (pas de tuile « Bientôt »)
@@ -3305,45 +3275,7 @@ function openViewAs(){
   };
   paint();
 }
-function openViewAsTeacher(){
-  const subs = CONFIG.SUBJECTS.filter(m => m.open && (state.adm.teachers || []).some(t => t.subject === m.key));
-  let subject = (subs[0] || {}).key || "";
-  const paint = () => {
-    const list = (state.adm.teachers || []).filter(t => t.subject === subject);
-    openSheet(`
-      <h4 id="sheetTitle">${ICON.lock} Vue enseignant</h4>
-      <p class="meta">Voyez l'appli exactement comme l'enseignant choisi : son espace, ses séances, ses étudiants, ses documents. <b>Consultation seule</b> : aucune annulation ni modification n'est possible.</p>
-      <label class="lbl">Matière</label>
-      <div class="chips">${subs.map(m => `<button class="chip${m.key === subject ? " on" : ""}" data-vs="${esc(m.key)}" type="button">${esc((m.emoji ? m.emoji + " " : "") + m.label)}</button>`).join("")}</div>
-      <label class="lbl" for="whoT">Enseignant</label>
-      <div class="selectwrap"><select id="whoT"><option value="">Choisissez un enseignant…</option>${list.map(t => `<option value="${t.id}">${esc(t.name)}${t.role === "resp" ? " · responsable" : ""}</option>`).join("")}</select>${ICON.down}</div>
-      <div class="msg" id="msg"></div>
-      <div class="actions"><button class="btn primary" id="go" disabled>Ouvrir la vue enseignant</button><button class="btn ghost" id="close">Annuler</button></div>`);
-    $("#close").onclick = closeSheet;
-    document.querySelectorAll("#sheet [data-vs]").forEach(b => b.onclick = () => { subject = b.dataset.vs; paint(); });
-    $("#whoT").onchange = () => { $("#go").disabled = !$("#whoT").value; };
-    $("#go").onclick = async () => {
-      const b = $("#go"); b.disabled = true;
-      let r; try { r = await aCall({ action: "adminViewAsTeacher", id: Number($("#whoT").value) }); } catch(e){ r = { ok: false, error: "Connexion impossible." }; }
-      if (r.auth){ closeSheet(); return adminExpired(); }
-      if (!r.ok){ $("#msg").innerHTML = errBox(esc(r.error || "Erreur.")); b.disabled = false; return; }
-      try { sessionStorage.setItem("khollapp-prev-teacher", JSON.stringify(AUTH.teacher || null)); sessionStorage.removeItem("khollapp-tsub"); } catch(e){}
-      AUTH.teacher = Object.assign({ token: r.token, preview: true }, r.profile);
-      resetTeacherState(); closeSheet(); location.hash = "#/prof";
-    };
-  };
-  if (!subs.length) return toast("Aucun enseignant à afficher.");
-  paint();
-}
-function resetTeacherState(){ setAct(""); state.tYear = null; state.tEx = null; state.journal = null; state.archive = null; state.grades = null; state.tdocs = null; state.tQ = {}; }
-function exitTeacherPreview(){
-  let prev = null; try { prev = JSON.parse(sessionStorage.getItem("khollapp-prev-teacher") || "null"); sessionStorage.removeItem("khollapp-prev-teacher"); sessionStorage.removeItem("khollapp-tsub"); } catch(e){}
-  AUTH.teacher = prev && !prev.preview ? prev : null;
-  resetTeacherState();
-  location.hash = "#/gestion";
-}
 function exitPreview(){
-  if (AUTH.teacher && AUTH.teacher.preview && !(AUTH.student && AUTH.student.preview)) return exitTeacherPreview();
   let prev = null; try { prev = JSON.parse(sessionStorage.getItem("khollapp-prev-student") || "null"); sessionStorage.removeItem("khollapp-prev-student"); } catch(e){}
   AUTH.student = prev && !prev.preview ? prev : null;
   state.docs = null;
@@ -3351,19 +3283,17 @@ function exitPreview(){
 }
 function previewBanner(){
   let el = document.getElementById("pvbar");
-  const st = AUTH.student, te = AUTH.teacher;
-  const me = st && st.preview ? st : te && te.preview ? te : null, who = me === te ? "enseignant" : "étudiant";
-  if (!me){ if (el) el.remove(); document.body.classList.remove("previewing"); return; }
+  const me = AUTH.student;
+  if (!me || !me.preview){ if (el) el.remove(); document.body.classList.remove("previewing"); return; }
   if (!el){ el = document.createElement("div"); el.id = "pvbar"; document.body.appendChild(el); }
   document.body.classList.add("previewing");
-  el.innerHTML = `<span>👁 Vue ${who} : <b>${esc(me.name)}</b> · consultation seule</span><button type="button" id="pvExit">Quitter</button>`;
+  el.innerHTML = `<span>👁 Vue étudiant : <b>${esc(me.name)}</b> · consultation seule</span><button type="button" id="pvExit">Quitter</button>`;
   el.querySelector("#pvExit").onclick = exitPreview;
 }
 
 
 /* ---------- Ma page : planning complet (repliable), chronologique ou par matière ---------- */
 const PLAN_KEY = "khollapp-plan";
-let planWk = {}, planWasOpen = false;   // état des semaines (en mémoire) : par défaut = semaine en cours dépliée, les autres repliées
 const planPref = () => { try { return JSON.parse(localStorage.getItem(PLAN_KEY) || "{}"); } catch(e){ return {}; } };
 const setPlanPref = (o) => { try { localStorage.setItem(PLAN_KEY, JSON.stringify(Object.assign(planPref(), o))); } catch(e){} };
 function planBySubject(me, years, now){
@@ -3393,12 +3323,7 @@ function fullPlanHTML(me, years, restHTML, now){
 }
 function bindFullPlan(paint){
   const d = $("#fullPlan"); if (!d) return;
-  d.addEventListener("toggle", () => {
-    setPlanPref({ open: d.open });
-    if (d.open && !planWasOpen) planWk = {};   // à chaque ouverture de « Tout mon planning » : retour à l'état par défaut
-    planWasOpen = d.open;
-  });
-  $$("details.wk").forEach(w => w.addEventListener("toggle", () => { planWk[w.dataset.wk] = w.open; }));
+  d.addEventListener("toggle", () => setPlanPref({ open: d.open }));
   $$("[data-pt]").forEach(b => b.onclick = () => { setPlanPref({ tab: b.dataset.pt, open: true }); paint(); });
 }
 
@@ -3559,7 +3484,6 @@ function openBooked(s){
 /* ====================================================================== */
 const tCall = (payload) => { const c = TCTX(); return API.post(Object.assign({ token: c.token, subject: c.subject }, payload)); };
 function teacherExpired(){
-  if (AUTH.teacher && AUTH.teacher.preview) return exitTeacherPreview();
   const c = TCTX();
   if (c && c.admin){ AUTH.admin = null; setAct(""); location.hash = "#/gestion"; }
   else { AUTH.teacher = null; location.hash = "#/prof"; }
@@ -3662,8 +3586,7 @@ async function renderProf(force){
         <span><b>Khôlle ${q.n}</b><br><small>${esc(fmtDates(q.days.map(x => x.date)))}</small></span>
         <button class="iconbtn2" id="qNext" ${idx < qs.length - 1 ? "" : "disabled"} aria-label="Khôlle suivante">${ICON.chev}</button>
       </div>
-      <div class="stats"><span><b>${used}/${seats}</b>inscrits</span><span><b class="ok">${seats - used}</b>${seats - used > 1 ? "places libres" : "place libre"}</span><span><b class="${nCx ? "err" : ""}">${nCx}</b>${nCx > 1 ? "annulées" : "annulée"}</span></div>`
-      + (NOTREG_SUBJECTS.includes(c.subject) ? (() => { const nn = unregistered(year, q.n).length; return `<button class="nobtn${nn ? "" : " done"}" id="whoNot" type="button">${ICON.users}<span>Qui n'est pas encore inscrit ?</span><b>${nn}</b></button>`; })() : "");
+      <div class="stats"><span><b>${used}/${seats}</b>inscrits</span><span><b class="ok">${seats - used}</b>${seats - used > 1 ? "places libres" : "place libre"}</span><span><b class="${nCx ? "err" : ""}">${nCx}</b>${nCx > 1 ? "annulées" : "annulée"}</span></div>`;
     const qOpen = q.slots.some(s => slotStatus(s, now) === "open" || slotStatus(s, now) === "past");
     if (c.isResp && !qOpen && !khollePast(q, now)) html += `<div class="openbar"><span>${ICON.lock} Réservations : ${esc(openShort(q.slots[0]))}</span><button class="sbtn" id="openNow" type="button">Ouvrir maintenant</button></div>`;
     q.days.forEach((day, i) => {
@@ -3693,39 +3616,10 @@ async function renderProf(force){
   const pv = $("#qPrev"), nx = $("#qNext");
   if (pv) pv.onclick = () => { const i = qs.findIndex(x => x.n === qn); state.tQ[year] = qs[i - 1].n; renderProf(); };
   const on = $("#openNow"); if (on) on.onclick = () => openNowSheet(c, year, qn);
-  const wn = $("#whoNot"); if (wn) wn.onclick = () => openNotRegistered(year, qn);
   if (nx) nx.onclick = () => { const i = qs.findIndex(x => x.n === qn); state.tQ[year] = qs[i + 1].n; renderProf(); };
   $$(".tslot").forEach(el => el.onclick = () => { const s = SLOT_INDEX[el.dataset.id]; if (s) openTeacherSlot(s); });
   $$("[data-topic]").forEach(b => b.onclick = () => openTopic(c, year, b.dataset.topic, Number(b.dataset.q)));
   bindProfActions(c);
-}
-const NOTREG_SUBJECTS = ["anglais", "espagnol"];   // matières où « Qui n'est pas encore inscrit ? » est proposé
-// Étudiants de la liste de la matière sans inscription à la khôlle n
-function unregistered(year, n){
-  const Y = CONFIG.YEARS[year], done = new Set(allBookings(year).filter(b => Number(b.q) === n).map(b => b.student));
-  return promoStudents(Y.promo).filter(nm => inRoster(year, nm) && !done.has(nm));
-}
-function openNotRegistered(year, n){
-  const qs = khollesFor(year), idx = Math.max(0, qs.findIndex(x => x.n === n)), q = qs[idx];
-  if (!q) return;
-  const Y = CONFIG.YEARS[year], list = unregistered(year, q.n), total = promoStudents(Y.promo).filter(nm => inRoster(year, nm)).length;
-  openSheet(`
-    <h4 id="sheetTitle">${ICON.users} Qui n'est pas encore inscrit ?</h4>
-    <p class="meta">${esc(subjectMeta(subjectOfYear(year)).label)} · ${esc(Y.label)}</p>
-    <div class="qnav">
-      <button class="iconbtn2" id="nqPrev" type="button" ${idx ? "" : "disabled"} aria-label="Khôlle précédente">${ICON.chev}</button>
-      <span><b>Khôlle ${q.n}</b><br><small>${esc(fmtDates(q.days.map(x => x.date)))}</small></span>
-      <button class="iconbtn2" id="nqNext" type="button" ${idx < qs.length - 1 ? "" : "disabled"} aria-label="Khôlle suivante">${ICON.chev}</button>
-    </div>
-    ${list.length
-      ? `<p class="nocount">${plural(list.length, "# étudiant sans inscription", "# étudiants sans inscription")}</p><div class="group">${list.map(nm => `<div class="trow"><span>${esc(nm)}</span></div>`).join("")}</div>`
-      : `<div class="alert info">${ICON.info}<span>Tous les étudiants sont inscrits (${total}/${total}).</span></div>`}
-    <div class="actions"><button class="btn ghost" id="close" type="button">Fermer</button></div>`);
-  $("#close").onclick = closeSheet;
-  const go = (i) => () => { state.tQ[year] = qs[i].n; openNotRegistered(year, qs[i].n); const v = location.hash; if (v === "#/prof") renderProf(); };
-  const pv = $("#nqPrev"), nx = $("#nqNext");
-  if (pv && idx) pv.onclick = go(idx - 1);
-  if (nx && idx < qs.length - 1) nx.onclick = go(idx + 1);
 }
 function profActions(c){
   const nCancel = upcomingCancels(subjectYears(c.subject)).length, a = PUSH.get("khollapp-alerts-prof");
@@ -3757,7 +3651,7 @@ function bindProfActions(c){
   bindAdminStrip();
   loadGrades(c).then(() => { const el = $("#noteCount"), n = toGradeCount(c); if (el) el.innerHTML = n ? `<span class="newpill" style="margin:0">${plural(n, "# séance à noter", "# séances à noter")}</span>` : "Saisir et consulter"; }).catch(() => {});
   const pa = $("#profAlerts"); if (pa) pa.onclick = openTeacherAlerts;
-  const lo = $("#logout"); if (lo) lo.onclick = () => { if (AUTH.teacher && AUTH.teacher.preview) return exitTeacherPreview(); AUTH.teacher = null; state.journal = null; state.archive = null; location.hash = "#/"; toast("Déconnecté."); };
+  const lo = $("#logout"); if (lo) lo.onclick = () => { AUTH.teacher = null; state.journal = null; state.archive = null; location.hash = "#/"; toast("Déconnecté."); };
   const q2 = $("#quitAct2"); if (q2) q2.onclick = () => setAct("");
 }
 const exportUrl = (what) => { const c = TCTX(); return CONFIG.API_URL + "?action=export&what=" + what + "&token=" + encodeURIComponent(c ? c.token : "") +  (c ? "&subject=" + encodeURIComponent(c.subject) : ""); };
@@ -3806,7 +3700,7 @@ function sessionText(s){
   const hours = mins.length ? fmtTime(mins[0]) + " – " + fmtTime(mins[mins.length - 1] + d0) : "—";
   const n = mins.length, holes = n < Number(s.count) ? `<br><small>Horaires : ${mins.map(fmtTime).join(", ")}</small>` : "";
   return (s.date
-    ? `<b>${esc(fmtDay(parseISO(s.date)))} · ${hours}</b><br><span>${plural(n, "# créneau", "# créneaux")} · ${plural(Number(s.cap) || 1, "# place", "# places")} · salle ${esc(s.room)} · Khôlle ${s.q}</span>`
+    ? `<b>${esc(fmtDay(parseISO(s.date)))} · ${hours}</b><br><span>${plural(n, "# créneau", "# créneaux")} · ${plural(Number(s.cap) || 1, "# place", "# places")} · salle ${esc(s.room)} · Khôlle ${s.q}${s.replaces ? " · remplace la séance régulière" : ""}</span>`
     : `<b>${cap(WD[s.weekday])} · ${hours}</b><br><span>${plural(n, "# créneau", "# créneaux")} · ${plural(Number(s.cap) || 1, "# place", "# places")} · salle ${esc(s.room)}${s.week ? " · semaine " + s.week : ""}</span>${s.from || s.until ? `<br><small>${s.from ? "à partir du " + esc(fmtDate(parseISO(s.from))) : ""}${s.from && s.until ? " · " : ""}${s.until ? "jusqu'au " + esc(fmtDate(parseISO(s.until))) : ""}</small>` : ""}`) + holes;
 }
 async function renderSeances(force){
@@ -3875,6 +3769,8 @@ function openAddSession(c, year){
     <div id="oneF" hidden>
       <div class="two"><div><label class="lbl" for="sDate">Date</label><input class="field" id="sDate" type="date" min="${iso(now)}"></div>
       <div><label class="lbl" for="sQ">Khôlle</label><div class="selectwrap"><select id="sQ">${allQ.map(k => `<option value="${k.n}">Khôlle ${k.n}</option>`).join("")}</select>${ICON.down}</div></div></div>
+      <label class="check" style="margin-top:12px"><input type="checkbox" id="sRepl"> <span><b>Remplace ${c.isResp ? "la séance régulière du khôlleur" : "ma séance régulière"} ce jour-là</b><br><small class="muted">Pour changer ponctuellement l'horaire, la durée ou la salle : seule cette séance s'affiche ce jour-là.</small></span></label>
+      <div id="replWarn"></div>
     </div>
     <div class="two"><div><label class="lbl" for="sStart">Début</label><input class="field" id="sStart" type="time" value="16:00" step="300"></div>
     <div><label class="lbl" for="sRoom">Salle</label><input class="field" id="sRoom" placeholder="C415" maxlength="12"></div></div>
@@ -3908,7 +3804,16 @@ function openAddSession(c, year){
   $$(".tab[data-type]").forEach(t => t.onclick = () => { type = t.dataset.type; $$(".tab[data-type]").forEach(x => x.classList.toggle("on", x === t)); $("#recF").hidden = type !== "rec"; $("#oneF").hidden = type === "rec"; pv(); });
   ["#sDay", "#sWeek", "#sFrom", "#sStart"].forEach(id => { const e = $(id); if (e) e.onchange = pv; });
   ["#sDur", "#sStep", "#sStart"].forEach(id => { const e = $(id); if (e) e.oninput = pv; });
-  $("#sDate").onchange = () => { const d = $("#sDate").value; const k = allQ.find(k => d >= k.first && d <= k.last) || allQ.find(k => d < k.first); if (k) $("#sQ").value = k.n; };
+  const replWarn = () => {
+    const d = $("#sDate").value, ex = $("#sEx") ? $("#sEx").value : c.name, box = $("#replWarn");
+    if (!box) return;
+    const hit = $("#sRepl").checked && d ? allBookings(year).filter(b => { const x = SLOT_INDEX[b.slotId]; const ss = x && Y.sessions.find(z => z.id === x.sess); return x && x.dateISO === d && ss && !ss.date && ss.examiner === ex; }) : [];
+    box.innerHTML = hit.length ? `<div class="alert err">${ICON.warn}<span><b>${plural(hit.length, "# inscription sera libérée", "# inscriptions seront libérées")}</b> (séance régulière remplacée) :<ul class="clist">${hit.map(b => `<li>${esc(b.student)} · ${esc(describeSlot(b.slotId))}</li>`).join("")}</ul></span></div>` : "";
+  };
+  const syncQ = () => { const d = $("#sDate").value; const exact = (Y.kholles || []).findIndex(l => l.includes(d)); const k = exact >= 0 ? { n: (Y.firstNumber || 1) + exact } : (allQ.find(k => d >= k.first && d <= k.last) || allQ.find(k => d < k.first)); if (k) $("#sQ").value = k.n; replWarn(); };
+  $("#sDate").onchange = syncQ; $("#sDate").oninput = syncQ; $("#sDate").onblur = syncQ;
+  $("#sRepl").onchange = () => { replWarn(); loadBookings(year, true).then(replWarn).catch(() => {}); };
+  if ($("#sEx")) $("#sEx").addEventListener("change", replWarn);
   bindSteppers(pv); pv();
   $("#go").onclick = async () => {
     const b = $("#go"); b.disabled = true; b.textContent = "Enregistrement…";
@@ -3916,9 +3821,9 @@ function openAddSession(c, year){
     if (!(du >= 5 && du <= 240) || !(sp >= 5 && sp <= 240)){ $("#msg").innerHTML = errBox("Durée et intervalle : entre 5 et 240 minutes."); b.disabled = false; b.textContent = "Ajouter"; return; }
     const session = { dur: du, step: sp, start: $("#sStart").value, count: Number($("#sCount").value), cap: Number($("#sCap").value), room: $("#sRoom").value, examiner: $("#sEx") ? $("#sEx").value : "" };
     if (type === "rec"){ const k = allQ.find(k => k.n === Number($("#sFrom").value)); Object.assign(session, { weekday: Number($("#sDay").value), week: $("#sWeek").value, from: k ? [...(Y.kholles[k.n - (Y.firstNumber || 1)])].sort()[0] : "" }); }
-    else Object.assign(session, { date: $("#sDate").value, q: Number($("#sQ").value) });
+    else Object.assign(session, { date: $("#sDate").value, q: Number($("#sQ").value), replaces: $("#sRepl").checked });
     const r = await sessionCall({ action: "addSession", year, session }, "Séance ajoutée.");
-    if (r) renderSeances(); else { b.disabled = false; b.textContent = "Ajouter"; }
+    if (r) { await loadBookings(year, true).catch(() => {}); renderSeances(); } else { b.disabled = false; b.textContent = "Ajouter"; }
   };
 }
 function sessionBookings(year, s){
@@ -4339,14 +4244,12 @@ async function renderGestionRoute(sub, force){
       <a class="card gcard" href="#/gestion/matieres"><span class="num">${ICON.gear}</span><span><span class="t">Matières</span><br><span class="d">${plural(open.length, "# ouverte", "# ouvertes")} sur ${CONFIG.SUBJECTS.length}</span></span>${ICON.chev}</a>
       <a class="card gcard" href="#/gestion/vacances"><span class="num">${ICON.sun}</span><span><span class="t">Vacances et jours fériés</span><br><span class="d">${plural(CONFIG.CLOSED.length, "# période", "# périodes")}</span></span>${ICON.chev}</a>
       <button class="card gcard" id="viewAs" type="button"><span class="num">${ICON.users}</span><span><span class="t">Vue étudiant</span><br><span class="d">Voir l'appli comme un étudiant (consultation seule)</span></span>${ICON.chev}</button>
-      <button class="card gcard" id="viewAsT" type="button"><span class="num">${ICON.lock}</span><span><span class="t">Vue enseignant</span><br><span class="d">Voir l'appli comme un enseignant (consultation seule)</span></span>${ICON.chev}</button>
       <a class="card gcard" href="#/gestion/journal"><span class="num">${ICON.list}</span><span><span class="t">Journal général</span><br><span class="d">Toutes les matières</span></span>${ICON.chev}</a>
       ${locked.map(s => `<button class="card gcard warnc" data-unlock="${s.id}"><span class="num">${ICON.warn}</span><span><span class="t">Compte ${acc("bloqué", s.gender)}</span><br><span class="d">${esc(s.name)} · trop d'essais</span></span><span class="sbtn cancel">Débloquer</span></button>`).join("")}
     </div>
     <div class="foot"><button class="linkbtn" id="alogout" style="border:0;background:none;cursor:pointer">${ICON.out} Quitter la Gestion</button></div>`;
   $$("[data-act]").forEach(b => b.onclick = () => { setAct(b.dataset.act); state.tYear = null; state.tEx = null; state.journal = null; location.hash = "#/prof"; });
   const va = $("#viewAs"); if (va) va.onclick = openViewAs;
-  const vt = $("#viewAsT"); if (vt) vt.onclick = openViewAsTeacher;
   $$("[data-unlock]").forEach(b => b.onclick = async () => { const r = await aCall({ action: "updateStudent", id: Number(b.dataset.unlock), unlock: true, gender: (adm.students.find(s => s.id === Number(b.dataset.unlock)) || {}).gender }); if (r.ok){ toast("Compte débloqué."); renderGestionRoute("", true); } });
   $("#alogout").onclick = () => { AUTH.admin = null; state.adm = null; location.hash = "#/"; toast("Gestion fermée."); };
 }
