@@ -349,6 +349,10 @@ details.vscript[open]>summary>svg:last-child{transform:rotate(180deg)}
 .pill.cancel{background:var(--err-soft);color:var(--err)}
 .alert.cancel{background:var(--err-soft);color:var(--err);border:1.5px solid var(--err)}
 .alert.cancel a{color:inherit;font-weight:600}
+.alert.freed{background:var(--ok-soft);color:var(--ok);border:1.5px solid var(--ok)}
+.alert.freed .dotg{font-size:16px;line-height:1.3;flex:none}
+.alert.freed .btn.sm{margin-top:8px;min-height:38px;padding:6px 14px;font-size:14px;width:auto}
+.slot.hlfree{box-shadow:inset 0 0 0 2px var(--ok);background:var(--ok-soft)}
 .clist{margin:6px 0;padding-left:18px}
 .clist li{margin:3px 0}
 .clist .why{display:block;font-size:13px;opacity:.9}
@@ -713,7 +717,7 @@ body.previewing #view{padding-bottom:84px}
    les matières et les listes d'étudiants sont gérés dans l'appli (espace Gestion,
    espace enseignant) et enregistrés sur le serveur : ce bloc ne sert qu'à la mise en service.
    ===================================================================== */
-const APP_VERSION = "2026.10.31-4";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.11.03-1";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   API_URL: "https://khollapp.cemonprive.workers.dev/",
@@ -1656,7 +1660,7 @@ function cancelBanner(years, n){
     const why = c.reason ? `<span class="why">Motif : ${esc(c.reason)}</span>` : "";
     return n != null ? `<li>${label}${why}</li>` : `<li><a href="#/${c.year}/k/${esc(c.q)}">${label}</a>${why}</li>`;
   };
-  return `<div class="alert cancel" role="alert">${ICON.warn}<span><b>${list.length > 1 ? "Séances de khôlle annulées" : "Séance de khôlle annulée"}</b>
+  return `<div class="alert cancel" role="alert">${ICON.warn}<span><b>🔴 ${list.length > 1 ? "SÉANCES ANNULÉES : elles n'auront pas lieu" : "SÉANCE ANNULÉE : elle n'aura pas lieu"}</b>
     <ul class="clist">${list.map(item).join("")}</ul>
     ${n != null ? "Les inscriptions de ces séances ont été libérées : choisissez un autre créneau de la khôlle." : ""}</span></div>`;
 }
@@ -1744,6 +1748,13 @@ function renderQuinzaine(year, n){
     const tot = q.slots.filter(s => slotStatus(s, now) !== "cancelled").reduce((a, s) => a + s.cap, 0), used = q.slots.filter(s => slotStatus(s, now) !== "cancelled").reduce((a, s) => a + takers(s).length, 0);
     html += `<div class="fillcard"><div class="fc-top"><span>Places restantes</span><b>${tot - used} sur ${tot}</b></div><div class="fc-bar"><i style="width:${tot ? Math.round(used / tot * 100) : 0}%"></i></div></div>`;
   }
+  const pp = parts(), libre = pp[3] === "libre" && pp[4] ? SLOT_INDEX[decodeURIComponent(pp[4])] : null;
+  if (libre && libre.q === n){
+    const free = freeSeats(libre) && slotStatus(libre, now) === "open";
+    html += free
+      ? `<div class="alert freed" role="status"><span class="dotg" aria-hidden="true">🟢</span><span><b>Place disponible</b> : ${esc(fmtDay(libre.date).toLowerCase())}, ${esc(libre.label)}, ${esc(exName(year, libre.examiner))}, salle ${esc(libre.room)}.<br><b>La séance a bien lieu</b> : un camarade a simplement libéré son créneau.<br><button class="btn primary sm" id="takeFreed" type="button">Réserver ce créneau</button></span></div>`
+      : `<div class="alert info">${ICON.info}<span>Cette place a déjà été reprise. <b>La séance a bien lieu</b> ; d'autres créneaux sont peut-être libres ci-dessous.</span></div>`;
+  }
   html += khollePast(q, now)
     ? `<div class="alert info">${ICON.lock}<span><b>Khôlle terminée.</b> Le planning est figé : consultation uniquement.</span></div>`
     : `<div class="rule">${ICON.info}<span><b>Une seule inscription par étudiant</b> pour la Khôlle ${n}${q.days.length > 1 ? `, sur l'une des ${q.days.length} dates ci-dessous` : ""}. Les réservations de toute la khôlle ${openRuleText(year)}.</span></div>`;
@@ -1762,6 +1773,11 @@ function renderQuinzaine(year, n){
   });
   $("#view").innerHTML = html + footHTML();
   bindSwapButtons();
+  if (libre && libre.q === n){
+    const row = document.querySelector(`.slot[data-id="${CSS.escape(libre.id)}"]`);
+    if (row) row.classList.add("hlfree");
+    const tb = $("#takeFreed"); if (tb && row) tb.onclick = () => row.click();
+  }
   const sOn = $("#skipOn"), sOff = $("#skipOff");
   if (sOn) sOn.onclick = () => { SKIP.set(viewer, year, n, true); toast("Rappel masqué pour la Khôlle " + n + "."); renderQuinzaine(year, n); };
   if (sOff) sOff.onclick = () => { SKIP.set(viewer, year, n, false); toast("Rappel réactivé."); renderQuinzaine(year, n); };
