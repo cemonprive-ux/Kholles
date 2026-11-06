@@ -717,7 +717,7 @@ body.previewing #view{padding-bottom:84px}
    les matières et les listes d'étudiants sont gérés dans l'appli (espace Gestion,
    espace enseignant) et enregistrés sur le serveur : ce bloc ne sert qu'à la mise en service.
    ===================================================================== */
-const APP_VERSION = "2026.11.03-1";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.11.06-1";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   API_URL: "https://khollapp.cemonprive.workers.dev/",
@@ -1207,6 +1207,7 @@ function alertsBlocker(){
 const permMsg = (e) => e && e.perm ? "Notifications non autorisées : les alertes ne peuvent pas être activées." : "Activation impossible (" + esc(e && e.message || "erreur") + "). Réessayez.";
 
 const NOTIF = [
+  ["recap", "Résumé du matin", "À 7h30, vos khôlles du jour : horaire, salle, khôlleur"],
   ["open", "Ouverture des réservations", "Quand les inscriptions d'une khôlle de votre classe ouvrent"],
   ["freed", "Places libérées", "Quand un étudiant de votre classe libère sa place"],
   ["cancel", "Séance annulée", "Si votre séance est annulée ou si un professeur vous désinscrit"],
@@ -1251,35 +1252,59 @@ function openAlerts(){
   };
 }
 
+const TNOTIF = [
+  ["recap", "Résumé du matin", "À 7h30, vos séances du jour : inscrits et créneaux libres"],
+  ["dayabs", "⚠️ Désinscription le jour J", "Un étudiant se désinscrit le jour même de la khôlle"],
+  ["abs", "Désinscription avant le jour J", "Un étudiant libère sa place les jours précédents"],
+  ["moved", "Changement de créneau", "Un étudiant quitte votre créneau pour un autre"],
+  ["swap", "Échanges", "Deux étudiants échangent leurs créneaux"],
+  ["taken", "Inscription le jour J", "Un étudiant s'inscrit le jour même sur l'un de vos créneaux"]
+];
 function openTeacherAlerts(){
   const c = TCTX(), cur = PUSH.get("khollapp-alerts-prof"), block = alertsBlocker();
   const examiners = [...new Set(subjectYears(c.subject).flatMap(y => CONFIG.YEARS[y].sessions.map(x => x.examiner)))].sort();
   const fixed = c.name;
   openSheet(`
-    <h4 id="sheetTitle">${ICON.bell} Alertes d'absence</h4>
-    <p class="meta">Recevez une notification sur ce téléphone dès qu'un étudiant se déclare absent à l'une de vos séances.</p>
+    <h4 id="sheetTitle">${ICON.bell} Mes alertes</h4>
+    <p class="meta">Des notifications sur ce téléphone, même Kholl'app fermée. Toutes sont actives : coupez celles que vous ne voulez pas.</p>
     ${cur ? `<div class="alert ok">${ICON.check}<span>Alertes activées sur cet appareil pour <b>${esc(exName(subjectYears(c.subject)[0] || "1", cur.examiner))}</b>.</span></div>` : ""}
-    ${block || `
+    <div class="ntogs${cur ? "" : " off"}" id="tnt">${TNOTIF.map(([k, t, d]) => `<label class="ntog"><span><b>${t}</b><br><small>${d}</small></span><input type="checkbox" role="switch" data-n="${k}" checked disabled></label>`).join("")}</div>
+    ${cur ? `<p class="hint">Vos choix valent pour tous vos appareils.</p>` : ""}
+    ${cur ? "" : block || `
       ${fixed ? `<p class="meta">Pour : <b>${esc(fixed)}</b></p>` : `<label class="lbl" for="who">Vous êtes</label>${nameSelect(examiners, "Sélectionnez votre nom…")}`}
       <div class="msg" id="msg"></div>
-      <div class="actions"><button class="btn primary" id="on" ${fixed ? "" : "disabled"}>${cur ? "Mettre à jour" : "Activer les alertes"}</button></div>`}
+      <div class="actions"><button class="btn primary" id="on" ${fixed ? "" : "disabled"}>Activer les alertes</button></div>`}
     <div class="actions">
-      ${cur ? `<button class="btn outline danger" id="off">Désactiver les alertes</button>` : ""}
+      ${cur ? `<button class="btn outline danger" id="off">Désactiver sur cet appareil</button>` : ""}
       <button class="btn ghost" id="close">Fermer</button>
     </div>`);
   $("#close").onclick = closeSheet;
   const off = $("#off");
-  if (off) off.onclick = async () => { off.disabled = true; await PUSH.disable(); PUSH.set("khollapp-alerts-prof", null); closeSheet(); toast("Alertes désactivées."); route(); };
+  if (off) off.onclick = async () => { off.disabled = true; await PUSH.disable(); PUSH.set("khollapp-alerts-prof", null); closeSheet(); toast("Alertes désactivées sur cet appareil."); route(); };
+  if (cur){
+    const ex = cur.examiner, boxes = [...document.querySelectorAll("#tnt [data-n]")];
+    API.post({ action: "getTeacherNotif", token: c.token, examiner: ex }).then(r => {
+      if (!r || !r.ok) return;
+      boxes.forEach(b => { b.checked = !r.off.includes(b.dataset.n); b.disabled = false; });
+    }).catch(() => {});
+    boxes.forEach(box => box.onchange = async () => {
+      const offs = boxes.filter(x => !x.checked).map(x => x.dataset.n);
+      let r; try { r = await API.post({ action: "setTeacherNotif", token: c.token, examiner: ex, off: offs }); } catch(e){ r = { ok: false }; }
+      if (!r.ok){ box.checked = !box.checked; return toast(r.error || "Enregistrement impossible. Réessayez."); }
+      toast(box.checked ? "Alerte activée." : "Alerte coupée.");
+    });
+    return;
+  }
   if (block) return;
   const w = $("#who"), on = $("#on");
-  if (w){ if (cur) w.value = cur.examiner; on.disabled = !w.value; w.onchange = () => { on.disabled = !w.value; }; }
+  if (w){ on.disabled = !w.value; w.onchange = () => { on.disabled = !w.value; }; }
   on.onclick = async () => {
     const examiner = fixed || w.value;
     on.disabled = true; on.textContent = "Activation…";
     try {
       await PUSH.enable({ action: "subscribeTeacher", token: c.token, examiner });
       PUSH.set("khollapp-alerts-prof", { examiner });
-      closeSheet(); toast("Alertes activées."); route();
+      toast("Alertes activées."); openTeacherAlerts(); route();
     } catch(e){ $("#msg").innerHTML = errBox(permMsg(e)); on.disabled = false; on.textContent = "Activer les alertes"; }
   };
 }
@@ -3659,7 +3684,7 @@ function profActions(c){
       <a class="acell" href="#/prof/documents">${ICON.upload}<b>Documents</b><small>Déposer pour les étudiants</small></a>
       <a class="acell" href="#/prof/journal">${ICON.list}<b>Journal</b><small>Inscriptions et modifications</small></a>
       ${c.isResp ? `<a class="acell" href="#/prof/calendrier">${ICON.cal}<b>Calendrier des khôlles</b><small>Dates de chaque khôlle</small></a>` : ""}
-      ${c.admin ? "" : `<button class="acell" id="profAlerts" type="button">${ICON.bell}<b>Alertes d'absence</b><small>${a ? "Activées" : "Non activées"}</small></button>`}
+      ${c.admin ? "" : `<button class="acell" id="profAlerts" type="button">${ICON.bell}<b>Mes alertes</b><small>${a ? "Activées · à régler" : "Non activées"}</small></button>`}
       <a class="acell" href="guide-enseignants.html">${ICON.info}<b>Guide enseignant</b><small>Mode d'emploi illustré</small></a>
     </div>
     <p class="kicker" style="margin-top:22px">Exporter pour Excel</p>
