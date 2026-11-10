@@ -720,7 +720,7 @@ body.reader main{padding:0}
    les matières et les listes d'étudiants sont gérés dans l'appli (espace Gestion,
    espace enseignant) et enregistrés sur le serveur : ce bloc ne sert qu'à la mise en service.
    ===================================================================== */
-const APP_VERSION = "2026.11.10-2";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.11.10-3";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   API_URL: "https://khollapp.cemonprive.workers.dev/",
@@ -3431,7 +3431,7 @@ $("#sheet").addEventListener("keydown", e => { if (e.key === "Escape") closeShee
 const topicOf = (year, sid) => ((state.topics || {})[year] || {})[sid] || "";
 const topicLabel = (year) => (CONFIG.YEARS[year] || {}).topicLabel || "À réviser";
 const topicHTML = (year, sid) => { const t = topicOf(year, sid); return t ? `<span class="topic"><b>${esc(topicLabel(year))} :</b> ${esc(t)}</span>` : ""; };
-const canTopic = (c, year, examiner) => { const f = (CONFIG.YEARS[year] || {}).topicsFor || []; return !!c && (f.includes(examiner) || f.includes("*")) && (c.admin || c.name === examiner); };
+const canTopic = (c, year, examiner) => { const f = (CONFIG.YEARS[year] || {}).topicsFor || []; return !!c && (f.includes(examiner) || f.includes("*")); };
 const slotMeta = (s) => `<p class="meta"><b>${esc(CONFIG.YEARS[s.year].subjectLabel)} · Khôlle ${s.q}</b><br>${fmtDay(s.date)} · ${s.label}<br>${esc(exName(s.year, s.examiner))} · salle <b>${esc(s.room)}</b>${s.cap > 1 ? `<br>${plural(s.cap, "# place", "# places")} · ${plural(takers(s).length, "# inscrit", "# inscrits")}` : ""}</p>${topicOf(s.year, s.sid) ? `<p class="topicline"><b>À réviser :</b> ${esc(topicOf(s.year, s.sid))}</p>` : ""}`;
 const nameSelect = (list, placeholder, id = "who") => `<div class="selectwrap"><select id="${id}"><option value="">${placeholder}</option>${list.map(x => `<option>${esc(x)}</option>`).join("")}</select>${ICON.down}</div>`;
 const payloadOf = (s, extra) => Object.assign({ year: s.year, q: s.q, slotId: s.id, app: location.origin + location.pathname }, extra);
@@ -3678,7 +3678,7 @@ async function renderProf(force){
       Object.values(groups).forEach(list => {
         const cx = cancelOf(list[0]);
         const ed = !cx && canTopic(c, year, list[0].examiner);
-        const dayEd = !cx && (c.isResp || c.admin || list[0].examiner === c.name) && list.some(x => x.startsAt > now);
+        const dayEd = !cx && list.some(x => x.startsAt > now);
         html += `<div class="group${cx ? " cancelled" : ""}"><div class="ghead"><span class="who">${esc(list[0].examiner)}</span>${dayEd ? `<button class="daybtn" type="button" data-day="${esc(list[0].sess)}|${list[0].dateISO}" aria-label="Modifier cette date" title="Modifier cette date">${ICON.cal}</button>` : ""}${cx ? '<span class="cbadge">Annulée</span>' : topicHTML(year, list[0].sid)}${ed ? `<button class="topicbtn" type="button" data-topic="${esc(list[0].sid)}" data-q="${list[0].q}" aria-label="${esc(topicLabel(year))}">${ICON.pen}${topicOf(year, list[0].sid) ? "" : `<span>${esc(topicLabel(year))}</span>`}</button>` : ""}<span class="room">${esc(list[0].room)}</span></div>`;
         list.forEach(s => {
           const t = takers(s), st = slotStatus(s, now);
@@ -3795,9 +3795,8 @@ async function renderSeances(force){
   const Y = CONFIG.YEARS[year], today = iso(new Date());
   const visible = Y.sessions.filter(s => !(s.until && s.until < today) && !(s.date && s.date < today));
   const mineFirst = visible.filter(s => s.examiner === c.name).concat(visible.filter(s => s.examiner !== c.name));
-  const canEdit = (s) => c.isResp || s.examiner === c.name;
-  const shown = mineFirst;   // toutes les séances : la salle est modifiable par tous
-  const row = (s) => `<div class="srow2"><div class="sinfo">${c.isResp || s.examiner !== c.name ? `<span class="sx">${esc(s.examiner)}</span>` : ""}${sessionText(s)}</div><div class="sacts">${canEdit(s) ? `<button class="sbtn" data-edit="${esc(s.id)}">Modifier</button><button class="sbtn cancel" data-del="${esc(s.id)}">Retirer</button>` : `<button class="sbtn" data-room="${esc(s.id)}">Salle</button>`}</div></div>`;
+  const shown = mineFirst;   // toutes les séances de la matière : modifiables par tous les enseignants de la matière
+  const row = (s) => `<div class="srow2"><div class="sinfo"><span class="sx">${esc(s.examiner)}${s.examiner === c.name ? " (moi)" : ""}</span>${sessionText(s)}</div><div class="sacts"><button class="sbtn" data-edit="${esc(s.id)}">Modifier</button><button class="sbtn cancel" data-del="${esc(s.id)}">Retirer</button></div></div>`;
   const rec = shown.filter(s => !s.date), pon = shown.filter(s => s.date);
   $("#view").innerHTML = adminStrip(c) + yearTabs(years, year) + `
     <p class="kicker">Séances régulières</p>
@@ -3805,7 +3804,7 @@ async function renderSeances(force){
     <p class="kicker" style="margin-top:18px">Séances ponctuelles</p>
     <div class="group">${pon.map(row).join("") || '<div class="srow2"><span class="muted">Aucune séance ponctuelle.</span></div>'}</div>
     <div class="actions"><button class="btn primary" id="addS">${ICON.plus} Ajouter une séance</button></div>
-    <p class="hint">La salle de n'importe quelle séance peut être modifiée par tous les enseignants de la matière (bouton « Salle »). Chaque ajout, modification ou retrait est inscrit au journal. Les étudiants concernés par un retrait sont désinscrits et le voient dans leur planning.</p>`;
+    <p class="hint">Toutes les séances de la matière, dans les deux classes, peuvent être ajoutées, modifiées ou retirées par chacun de ses enseignants. Chaque ajout, modification ou retrait est inscrit au journal. Les étudiants concernés par un retrait sont désinscrits et le voient dans leur planning.</p>`;
   bindAdminStrip();
   $$(".tab[data-y]").forEach(t => t.onclick = () => { state.sYear = t.dataset.y; renderSeances(); });
   $("#addS").onclick = () => openAddSession(c, year);
@@ -3849,18 +3848,18 @@ function openAddSession(c, year, pre){
     <h4 id="sheetTitle">${pre ? "Modifier le " + esc(fmtDay(parseISO(pre.date)).toLowerCase()) : "Ajouter une séance"}</h4>
     ${pre ? `<p class="meta">${esc(pre.examiner)} · uniquement ce jour-là. Les autres dates de la séance ne changent pas.</p>` : ""}
     <div class="tabs" style="margin-top:12px${pre ? ";display:none" : ""}"><button class="tab on" data-type="rec">Régulière</button><button class="tab" data-type="one">Une seule date</button></div>
-    ${c.isResp ? `<label class="lbl" for="sEx">Khôlleur</label>${nameSelect(examiners, "Choisir…", "sEx")}` : ""}
+    <label class="lbl" for="sEx">Khôlleur</label>${nameSelect(examiners, "Choisir…", "sEx")}
     <div id="recF">
       <div class="two"><div><label class="lbl" for="sDay">Jour</label><div class="selectwrap"><select id="sDay">${days.map(d => `<option value="${d}">${cap(WD[d])}</option>`).join("")}</select>${ICON.down}</div></div>
       <div><label class="lbl" for="sWeek">Semaines</label><div class="selectwrap"><select id="sWeek"><option value="">Toutes</option><option value="A">Semaine A</option><option value="B">Semaine B</option></select>${ICON.down}</div></div></div>
       <label class="lbl" for="sFrom">À partir de</label>
-      <div class="selectwrap"><select id="sFrom">${allQ.map(k => `<option value="${k.n}" ${k.n === nextQ ? "selected" : ""}>Khôlle ${k.n} (${esc(fmtShort(parseISO(k.first)))})</option>`).join("")}</select>${ICON.down}</div>
+      <div class="selectwrap"><select id="sFrom"><option value="">Dès maintenant</option>${allQ.map(k => `<option value="${k.n}" ${k.n === nextQ ? "selected" : ""}>Khôlle ${k.n} (${esc(fmtShort(parseISO(k.first)))})</option>`).join("")}</select>${ICON.down}</div>
       <p class="hint">Les jours proposés sont ceux du calendrier des khôlles. Pour un autre jour, demandez au responsable de la matière d'ajouter les dates.</p>
     </div>
     <div id="oneF" hidden>
       <div class="two"><div><label class="lbl" for="sDate">Date</label><input class="field" id="sDate" type="date" min="${iso(now)}"></div>
-      <div><label class="lbl" for="sQ">Khôlle</label><div class="selectwrap"><select id="sQ">${allQ.map(k => `<option value="${k.n}">Khôlle ${k.n}</option>`).join("")}</select>${ICON.down}</div></div></div>
-      <label class="check" style="margin-top:12px"><input type="checkbox" id="sRepl"> <span><b>Remplace ${c.isResp ? "la séance régulière du khôlleur" : "ma séance régulière"} ce jour-là</b><br><small class="muted">Pour changer ponctuellement l'horaire, la durée ou la salle : seule cette séance s'affiche ce jour-là.</small></span></label>
+      <div><label class="lbl" for="sQ">Khôlle <small class="muted">(facultatif)</small></label><div class="selectwrap"><select id="sQ"><option value="">Automatique</option>${allQ.map(k => `<option value="${k.n}">Khôlle ${k.n}</option>`).join("")}</select>${ICON.down}</div></div></div>
+      <label class="check" style="margin-top:12px"><input type="checkbox" id="sRepl"> <span><b>Remplace la séance régulière du khôlleur ce jour-là</b><br><small class="muted">Pour changer ponctuellement l'horaire, la durée ou la salle : seule cette séance s'affiche ce jour-là.</small></span></label>
       <div id="replWarn"></div>
     </div>
     <div class="two"><div><label class="lbl" for="sStart">Début</label><input class="field" id="sStart" type="time" value="16:00" step="300"></div>
@@ -3906,6 +3905,7 @@ function openAddSession(c, year, pre){
   $("#sRepl").onchange = () => { replWarn(); loadBookings(year, true).then(replWarn).catch(() => {}); };
   if ($("#sEx")) $("#sEx").addEventListener("change", replWarn);
   bindSteppers(pv); pv();
+  if ($("#sEx") && c.name && !pre) $("#sEx").value = c.name;
   if (pre){
     // « Modifier cette date » : séance d'une seule date qui remplace la séance régulière, préremplie
     $('.tab[data-type="one"]').click();
@@ -3921,8 +3921,9 @@ function openAddSession(c, year, pre){
     const du = Math.round(Number($("#sDur").value)), sp = Math.round(Number($("#sStep").value));
     if (!(du >= 5 && du <= 240) || !(sp >= 5 && sp <= 240)){ $("#msg").innerHTML = errBox("Durée et intervalle : entre 5 et 240 minutes."); b.disabled = false; b.textContent = "Ajouter"; return; }
     const session = { dur: du, step: sp, start: $("#sStart").value, count: Number($("#sCount").value), cap: Number($("#sCap").value), room: $("#sRoom").value, examiner: $("#sEx") ? $("#sEx").value : "" };
-    if (type === "rec"){ const k = allQ.find(k => k.n === Number($("#sFrom").value)); Object.assign(session, { weekday: Number($("#sDay").value), week: $("#sWeek").value, from: k ? [...(Y.kholles[k.n - (Y.firstNumber || 1)])].sort()[0] : "" }); }
-    else Object.assign(session, { date: $("#sDate").value, q: Number($("#sQ").value), replaces: $("#sRepl").checked });
+    if (!session.examiner){ $("#msg").innerHTML = errBox("Choisissez le khôlleur."); b.disabled = false; b.textContent = "Ajouter"; return; }
+    if (type === "rec"){ const k = allQ.find(k => k.n === Number($("#sFrom").value)); Object.assign(session, { weekday: Number($("#sDay").value), week: $("#sWeek").value, from: k ? [...(Y.kholles[k.n - (Y.firstNumber || 1)])].sort()[0] : iso(new Date()) }); }
+    else Object.assign(session, { date: $("#sDate").value, q: Number($("#sQ").value) || 0, replaces: $("#sRepl").checked });
     const r = await sessionCall({ action: "addSession", year, session }, "Séance ajoutée.");
     if (r) { await loadBookings(year, true).catch(() => {}); ((pre && pre.after) || renderSeances)(); } else { b.disabled = false; b.textContent = "Ajouter"; }
   };
