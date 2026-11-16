@@ -462,7 +462,8 @@ textarea.field.area{width:100%;min-height:220px;padding:12px 14px;border-radius:
 .slot.mine{background:var(--ok-soft)}
 .slot.mine .state{color:var(--ok);font-weight:700}
 .slot.mine .dot{background:var(--ok)}
-.slot.multi{flex-wrap:wrap}
+.slot.multi,.slot.hasch{flex-wrap:wrap}
+.slot .choiceline{flex-basis:100%;margin-top:-2px}
 .snames{flex-basis:100%;font-size:12.5px;color:var(--muted);margin-top:-2px}
 .seats{display:inline-flex;gap:3px}
 .seats i{width:14px;height:8px;border-radius:3px;background:var(--line)}
@@ -483,9 +484,10 @@ textarea.field.area{width:100%;min-height:220px;padding:12px 14px;border-radius:
 .hchip.lost{border:1.5px solid var(--err);background:var(--err-soft, #FDECEC);color:var(--err)}
 .chip{min-height:38px;padding:6px 14px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);font-weight:700;font-size:13.5px;color:var(--ink-2);cursor:pointer}
 .chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
-.chchips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 4px}
-.chchips .chip{padding:6px 8px;font-size:13px}
-.choicetag{display:inline-block;font-size:11.5px;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:1px 8px;margin-left:4px;vertical-align:1px}
+.chfield{width:100%;min-height:64px;resize:vertical;line-height:1.4}
+.chcount{float:right;font-size:12px;color:var(--muted);font-weight:600}
+.choicetag{display:inline-block;max-width:100%;font-size:11.5px;font-weight:700;color:var(--accent);background:var(--accent-soft);border-radius:8px;padding:1px 8px;margin-left:4px;vertical-align:1px;white-space:normal;text-align:left;line-height:1.35}
+.choiceline{display:block;margin:3px 0 0;font-size:12.5px;color:var(--ink-2);font-weight:600}
 .chip.light{background:#fff;color:#12233D;border-color:#fff}
 .qnav{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:6px;margin-bottom:12px}
 .qnav>span{flex:1;text-align:center;line-height:1.3}
@@ -723,7 +725,7 @@ body.reader main{padding:0}
    les matières et les listes d'étudiants sont gérés dans l'appli (espace Gestion,
    espace enseignant) et enregistrés sur le serveur : ce bloc ne sert qu'à la mise en service.
    ===================================================================== */
-const APP_VERSION = "2026.11.10-4";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
+const APP_VERSION = "2026.11.16-1";   // ← à augmenter à chaque mise en ligne (format AAAA.MM.JJ-n)
 
 const CONFIG = {
   API_URL: "https://khollapp.cemonprive.workers.dev/",
@@ -1759,11 +1761,11 @@ function slotRow(s, now, viewer){
   const free = freeSeats(s);
   let txt, cls = locked ? "locked " : "";
   if (st === "cancelled"){ txt = "Annulé"; cls += "cancelled"; }
-  else if (mine){ const g = (AUTH.student || {}).gender; txt = (s.cap > 1 ? acc("Inscrit", g) + (free ? " · " + plural(free, "# place libre", "# places libres") : " · complet") : "Vous") + (s.cap > 1 ? "" : choiceTag(t.find(b => b.student === viewer))); cls += "mine"; }
-  else if (s.cap === 1){ txt = t.length ? esc(t[0].student) + choiceTag(t[0]) : st === "past" ? "—" : st === "notyet" ? openShort(s) : "Libre"; cls += t.length ? "taken" : "free"; }
+  else if (mine){ const g = (AUTH.student || {}).gender; txt = (s.cap > 1 ? acc("Inscrit", g) + (free ? " · " + plural(free, "# place libre", "# places libres") : " · complet") : "Vous") ; cls += "mine"; }
+  else if (s.cap === 1){ txt = t.length ? esc(t[0].student) : st === "past" ? "—" : st === "notyet" ? openShort(s) : "Libre"; cls += t.length ? "taken" : "free"; }
   else { txt = !free ? "Complet" : st === "notyet" ? openShort(s) : st === "past" ? "—" : plural(free, "# place libre", "# places libres") + ` sur ${s.cap}`; cls += free ? "free" : "taken"; }
-  const names = s.cap > 1 && t.length ? `<span class="snames">${t.map(b => esc(b.student === viewer ? "Vous" : b.student) + choiceTag(b)).join(" · ")}</span>` : "";
-  return `<button class="slot ${cls}${s.cap > 1 ? " multi" : ""}" data-id="${esc(s.id)}"><span class="time">${s.label}</span><span class="state">${s.cap > 1 ? seatsBar(s, viewer) : ""}<span>${txt}</span>${locked ? ICON.lock : s.cap > 1 && fillCls(s) === "f-full" ? '<span class="dot f-full" aria-hidden="true"></span>' : `<span class="dot${s.cap > 1 ? " " + fillCls(s) : ""}" aria-hidden="true"></span>`}</span>${names}</button>`;
+  const names = s.cap > 1 && t.length ? `<span class="snames">${t.map(b => esc(b.student === viewer ? "Vous" : b.student) + (b.choice ? ` <span class="choiceline" style="display:inline">· ${esc(b.choice)}</span>` : "")).join("<br>")}</span>` : (s.cap === 1 && t[0] && t[0].choice ? `<span class="choiceline">${CHOICE_LABEL} : ${esc(t[0].choice)}</span>` : "");
+  return `<button class="slot ${cls}${s.cap > 1 ? " multi" : ""}${s.cap === 1 && t[0] && t[0].choice ? " hasch" : ""}" data-id="${esc(s.id)}"><span class="time">${s.label}</span><span class="state">${s.cap > 1 ? seatsBar(s, viewer) : ""}<span>${txt}</span>${locked ? ICON.lock : s.cap > 1 && fillCls(s) === "f-full" ? '<span class="dot f-full" aria-hidden="true"></span>' : `<span class="dot${s.cap > 1 ? " " + fillCls(s) : ""}" aria-hidden="true"></span>`}</span>${names}</button>`;
 }
 function renderQuinzaine(year, n){
   const Y = CONFIG.YEARS[year], now = new Date(), me = AUTH.student;
@@ -3437,12 +3439,12 @@ const topicHTML = (year, sid) => { const t = topicOf(year, sid); return t ? `<sp
 const canTopic = (c, year, examiner) => { const f = (CONFIG.YEARS[year] || {}).topicsFor || []; return !!c && (f.includes(examiner) || f.includes("*")); };
 const slotMeta = (s) => `<p class="meta"><b>${esc(CONFIG.YEARS[s.year].subjectLabel)} · Khôlle ${s.q}</b><br>${fmtDay(s.date)} · ${s.label}<br>${esc(exName(s.year, s.examiner))} · salle <b>${esc(s.room)}</b>${s.cap > 1 ? `<br>${plural(s.cap, "# place", "# places")} · ${plural(takers(s).length, "# inscrit", "# inscrits")}` : ""}</p>${topicOf(s.year, s.sid) ? `<p class="topicline"><b>À réviser :</b> ${esc(topicOf(s.year, s.sid))}</p>` : ""}`;
 const nameSelect = (list, placeholder, id = "who") => `<div class="selectwrap"><select id="${id}"><option value="">${placeholder}</option>${list.map(x => `<option>${esc(x)}</option>`).join("")}</select>${ICON.down}</div>`;
-// Exercice choisi à la réservation (culture générale) : obligatoire, modifiable jusqu'à la veille
-const CHOICES = { culture: ["Problématisation", "Synthèse", "Résumé"] };
-const choicesOf = (year) => CHOICES[subjectOfYear(year)] || null;
+// « Format de l'exercice » (culture générale) : texte libre obligatoire à la réservation, modifiable jusqu'à la veille
+const CHOICE_SUBJECTS = ["culture"], CHOICE_LABEL = "Format de l'exercice", CHOICE_MAX = 150;
+const choicesOf = (year) => CHOICE_SUBJECTS.includes(subjectOfYear(year));
 const choiceTag = (b) => b && b.choice ? `<span class="choicetag">${esc(b.choice)}</span>` : "";
-const choiceChips = (year, cur) => `<label class="lbl">Exercice choisi</label><div class="chchips" id="chch">${choicesOf(year).map(c => `<button type="button" class="chip${c === cur ? " on" : ""}" data-ch="${esc(c)}">${esc(c)}</button>`).join("")}</div>`;
-const bindChoice = (onPick) => { let v = ($("#chch .chip.on") || {}).dataset ? $("#chch .chip.on").dataset.ch : ""; $$("#chch .chip").forEach(b => b.onclick = () => { $$("#chch .chip").forEach(x => x.classList.toggle("on", x === b)); v = b.dataset.ch; onPick(v); }); return () => v; };
+const choiceChips = (year, cur) => `<label class="lbl" for="chtxt">${CHOICE_LABEL} <span class="chcount" id="chcount">${(cur || "").length}/${CHOICE_MAX}</span></label><textarea class="field chfield" id="chtxt" maxlength="${CHOICE_MAX}" rows="2" placeholder="Ex. : synthèse de deux documents sur le travail">${esc(cur || "")}</textarea>`;
+const bindChoice = (onInput) => { const t = $("#chtxt"); if (!t) return () => ""; const val = () => t.value.replace(/\s+/g, " ").trim(); t.oninput = () => { $("#chcount").textContent = t.value.length + "/" + CHOICE_MAX; onInput(val()); }; return val; };
 const payloadOf = (s, extra) => Object.assign({ year: s.year, q: s.q, slotId: s.id, app: location.origin + location.pathname }, extra);
 const ownBooking = (s, name) => allBookings(s.year).find(x => Number(x.q) === s.q && x.student === name && x.slotId !== s.id) || null;
 
@@ -3485,7 +3487,7 @@ function openBook(s){
     ${slotMeta(s)}
     <p class="meta">Pour : <b>${esc(me.name)}</b></p>
     ${info}
-    ${choicesOf(s.year) && !block ? choiceChips(s.year, own && own.choice) + `<p class="hint">Obligatoire. Modifiable jusqu'à la veille de la khôlle.</p>` : ""}
+    ${choicesOf(s.year) && !block ? choiceChips(s.year, own && own.choice) + `<p class="hint">Obligatoire (${CHOICE_MAX} caractères au maximum). Modifiable jusqu'à la veille de la khôlle.</p>` : ""}
     <div class="msg" id="msg">${block ? errBox(block) : ""}</div>
     <div class="actions">
       <button class="btn primary" id="confirm" ${block ? "disabled" : ""}>${mode === "move" ? "Déplacer mon inscription ici" : "Confirmer l'inscription"}</button>
@@ -3493,7 +3495,7 @@ function openBook(s){
     </div>`);
   $("#close").onclick = closeSheet;
   const btn = $("#confirm");
-  const getCh = choicesOf(s.year) && !block ? bindChoice(() => { btn.disabled = false; }) : () => "";
+  const getCh = choicesOf(s.year) && !block ? bindChoice((v) => { btn.disabled = !v; }) : () => "";
   if (choicesOf(s.year) && !block && !getCh()) btn.disabled = true;
   btn.onclick = () => submit(btn, mode === "move" ? "Déplacement…" : "Enregistrement…", payloadOf(s, Object.assign({ action: mode }, choicesOf(s.year) ? { choice: getCh() } : {})), mode === "move" ? "Inscription déplacée." : "Inscription enregistrée.", () => openBooked(s));
 }
@@ -3506,8 +3508,8 @@ function openMine(s){
     ${slotMeta(s)}
     ${(() => { const ch = choicesOf(s.year); if (!ch) return ""; const mine = takers(s).find(b => b.student === me.name) || {};
       return !past && iso(s.date) > iso(new Date())
-        ? choiceChips(s.year, mine.choice) + `<p class="hint">Modifiable jusqu'à la veille de la khôlle.</p><div class="msg" id="chmsg"></div>`
-        : `<p class="meta">Exercice choisi : <b>${esc(mine.choice || "non renseigné")}</b></p>`; })()}
+        ? choiceChips(s.year, mine.choice) + `<p class="hint">Modifiable jusqu'à la veille de la khôlle.</p><div class="msg" id="chmsg"></div><div class="actions"><button class="btn outline" id="chsave" disabled>Enregistrer le format</button></div>`
+        : `<p class="meta">${CHOICE_LABEL} : <b>${esc(mine.choice || "non renseigné")}</b></p>`; })()}
     ${calButtons()}
     ${past ? "" : `<p class="hint" style="margin-top:14px">Pour <b>changer de créneau</b>, fermez cette fenêtre et touchez un créneau libre de cette khôlle : votre inscription y sera déplacée.</p>`}
     ${past ? "" : late
@@ -3526,12 +3528,18 @@ function openMine(s){
   $("#close").onclick = closeSheet;
   const box = $("#me"), free = $("#free");
   if (box){ box.onchange = () => { free.disabled = !box.checked; }; free.onclick = () => submit(free, "Enregistrement…", payloadOf(s, { action: "absent" }), "Absence enregistrée : votre place est libérée."); }
-  if ($("#chch")) bindChoice(async (v) => {
-    let r; try { r = await API.post(payloadOf(s, { action: "setChoice", choice: v, token: me.token })); } catch(e){ r = { ok: false, error: "Connexion impossible. Réessayez." }; }
-    if (r.auth){ closeSheet(); return studentLogout(r.error); }
-    if (Array.isArray(r.bookings)) applyState(s.year, r);
-    if (r.ok){ toast("Exercice enregistré : " + v + "."); draw(); } else $("#chmsg").innerHTML = errBox(esc(r.error || "Refusé."));
-  });
+  if ($("#chtxt")){
+    const mine0 = (takers(s).find(b => b.student === me.name) || {}).choice || "", sv = $("#chsave");
+    const getV = bindChoice((v) => { sv.disabled = !v || v === mine0; });
+    sv.onclick = async () => {
+      const v = getV(); sv.disabled = true; sv.textContent = "Enregistrement…";
+      let r; try { r = await API.post(payloadOf(s, { action: "setChoice", choice: v, token: me.token })); } catch(e){ r = { ok: false, error: "Connexion impossible. Réessayez." }; }
+      if (r.auth){ closeSheet(); return studentLogout(r.error); }
+      if (Array.isArray(r.bookings)) applyState(s.year, r);
+      if (r.ok){ closeSheet(); toast("Format de l'exercice enregistré."); draw(); }
+      else { $("#chmsg").innerHTML = errBox(esc(r.error || "Refusé.")); sv.disabled = false; sv.textContent = "Enregistrer le format"; }
+    };
+  }
   const sa = $("#swapAsk") || $("#swapEdit"); if (sa) sa.onclick = () => openSwapRequest(s);
   const sd = $("#swapDel"); if (sd) sd.onclick = () => swapCall(sd, "Retrait…", { action: "swapCancel", year: s.year, q: s.q }, "Demande d'échange retirée.");
   bindCal(s, me.name);
@@ -3571,7 +3579,7 @@ function openBooked(s){
   openSheet(`
     <div class="okmark">${ICON.check}</div>
     <h4 id="sheetTitle" style="text-align:center">Inscription enregistrée</h4>
-    <p class="meta" style="text-align:center"><b>${esc(me.name)}</b><br>${esc(CONFIG.YEARS[s.year].subjectLabel)} · Khôlle ${s.q} · ${fmtDay(s.date)} · ${s.label}<br>${esc(exName(s.year, s.examiner))} · salle <b>${esc(s.room)}</b>${(() => { const b = takers(s).find(x => x.student === me.name); return b && b.choice ? `<br>Exercice : <b>${esc(b.choice)}</b>` : ""; })()}</p>
+    <p class="meta" style="text-align:center"><b>${esc(me.name)}</b><br>${esc(CONFIG.YEARS[s.year].subjectLabel)} · Khôlle ${s.q} · ${fmtDay(s.date)} · ${s.label}<br>${esc(exName(s.year, s.examiner))} · salle <b>${esc(s.room)}</b>${(() => { const b = takers(s).find(x => x.student === me.name); return b && b.choice ? `<br>${CHOICE_LABEL} : <b>${esc(b.choice)}</b>` : ""; })()}</p>
     ${calButtons()}
     ${on ? "" : `<button class="btn outline" id="wantAlerts" style="width:100%;margin-top:14px">${ICON.bell} Être ${acc("prévenu", me.gender)} si une place se libère</button>`}
     <div class="actions"><button class="btn ghost" id="close">Fermer</button></div>`);
@@ -3770,11 +3778,11 @@ function openTeacherSlot(s){
     ${slotMeta(s)}
     ${cx ? `<div class="alert err">${ICON.warn}<span>Séance annulée${cx.reason ? " · " + esc(cx.reason) : ""}.</span></div>` : ""}
     <p class="lbl">${t.length ? plural(t.length, "Inscrit", "Inscrits") : "Aucun inscrit"}</p>
-    <div class="group" style="box-shadow:none">${t.map(b => `<div class="trow"><span>${esc(b.student)}${choiceTag(b)}</span>${canChange ? `<button class="sbtn cancel" data-un="${esc(b.student)}">Désinscrire</button>` : ""}</div>`).join("") || '<div class="trow"><span class="muted">—</span></div>'}</div>
+    <div class="group" style="box-shadow:none">${t.map(b => `<div class="trow"><span>${esc(b.student)}${b.choice ? `<span class="choiceline">${CHOICE_LABEL} : ${esc(b.choice)}</span>` : ""}</span>${canChange ? `<button class="sbtn cancel" data-un="${esc(b.student)}">Désinscrire</button>` : ""}</div>`).join("") || '<div class="trow"><span class="muted">—</span></div>'}</div>
     ${canChange && freeSeats(s) ? `
       <label class="lbl" for="who" style="margin-top:14px">Inscrire un étudiant</label>
       ${nameSelect(candidates, "Choisir un étudiant…")}
-      ${choicesOf(s.year) ? `<div class="selectwrap" style="margin-top:8px"><select id="tch"><option value="">Exercice (facultatif)…</option>${choicesOf(s.year).map(c => `<option>${esc(c)}</option>`).join("")}</select>${ICON.down}</div>` : ""}
+      ${choicesOf(s.year) ? `<input class="field" id="tch" maxlength="${CHOICE_MAX}" placeholder="${CHOICE_LABEL} (facultatif)" style="margin-top:8px">` : ""}
       <p class="hint">Inscription immédiate, même avant l'ouverture des réservations. L'opération est notée au journal.</p>` : ""}
     <div class="msg" id="msg"></div>
     ${st === "past" && t.length && !cx ? `<div class="actions"><a class="btn primary" href="#/prof/notes/${encodeURIComponent(s.sid)}">${ICON.pen} ${canGrade(TCTX(), s.examiner) ? "Saisir les notes" : "Voir les notes"}</a></div>` : ""}
